@@ -78,7 +78,8 @@ class ClientConnect extends Thread {
 	public void send(String msg){
 		try {
 			DataOutputStream os = new DataOutputStream(socket.getOutputStream());
-			os.writeBytes(msg);
+			os.writeChars(msg);
+			//os.writeBytes(msg);
 			System.out.println("Message sent\n");
 		} catch (IOException e) {
 			System.out.println("Client clientConnect send\n");
