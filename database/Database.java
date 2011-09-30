@@ -11,7 +11,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * Class that takes care of all database operations.
+ * Class that takes care of all database file operations.
  * 
  * The Database object keeps record of its database tables. It communicates with
  * the file I/O to write or read files as needed. There should only be one
@@ -24,7 +24,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class Database {
 
-	private String databaseFolder = "db"; // hardcode this for now
+	private String databaseFolder;
 
 	private ArrayList<DatabaseTable> tables;
 
@@ -33,7 +33,12 @@ public class Database {
 	private final Lock read = readWriteLock.readLock();
 	private final Lock write = readWriteLock.writeLock();
 
-	public Database() {
+	/**
+	 * Populates the database with its tables from the stored folders/files.
+	 */
+	public Database(String databaseFolder) {
+		this.databaseFolder = databaseFolder;
+		
 		tables = new ArrayList<DatabaseTable>();
 
 		// Find all table folders and create table objects based off of them
@@ -42,6 +47,7 @@ public class Database {
 		for (File f : fileList) {
 			if (f.isDirectory()) {
 				DatabaseTable table = new DatabaseTable(this, f.getName());
+				
 				// Keep record of the table in the database
 				this.tables.add(table);
 			}
@@ -53,15 +59,37 @@ public class Database {
 	}
 
 	/**
-	 * Writes an item to its table
+	 * Writes an item to its table at the file level.
 	 * 
 	 * @param item
 	 *            The item to insert into it's associated table.
-	 * @return
+	 * @return Whether the operation succeeded.
 	 */
 	public boolean insertIntoTable(DatabaseItem item) {
 		write.lock();
 		try {
+			// The item has its own file in its table's folder
+			File file = new File(this.databaseFolder + "/"
+					+ item.getTable().getName() + "/" + item.getId());
+
+			try {
+				BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+
+				try {
+					// Each value is written to its own line
+					String output = "";
+					for (String value : item.getValues()) {
+						output += value;
+						output += "\n";
+					}
+					writer.write(output);
+				} finally {
+					writer.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+				return false;
+			}
 
 		} finally {
 			write.unlock();
@@ -70,22 +98,112 @@ public class Database {
 	}
 
 	/**
-	 * Removes an item from its table
+	 * Removes an item from its table at the file level.
 	 * 
 	 * @param item
-	 *            Item to be removed.
-	 * @return
+	 *            Item to be removed from its table.
+	 * @return Whether the operation succeeded.
 	 */
 	public boolean removeFromTable(DatabaseItem item) {
 		write.lock();
 		try {
-
+			File file = new File(this.databaseFolder + "/"
+					+ item.getTable().getName() + "/" + item.getId());
+			return file.delete();
 		} finally {
 			write.unlock();
+		}
+	}
+
+	/**
+	 * Updates an item in a table at the file level.
+	 * 
+	 * @param item
+	 *            Item to be updated in its table.
+	 * @return Whether the operation succeeded.
+	 */
+	public boolean updateItem(DatabaseItem item) {
+		if (this.removeFromTable(item) && this.insertIntoTable(item)) {
+			return true;
 		}
 		return false;
 	}
 
+	public ArrayList<DatabaseItem> getTableItems(DatabaseTable table)
+	{
+		ArrayList<DatabaseItem> result = new ArrayList<DatabaseItem>();
+		
+		read.lock();
+		try {
+			File tableFolder = new File(this.databaseFolder + "/" + table.getName());
+			File[] itemFileList = tableFolder.listFiles();
+			for (File f : itemFileList)
+			{
+				System.out.println(f.getName());
+				if (f.isFile() && !f.getName().equals("schema"))
+				{
+					
+					int id = Integer.parseInt(f.getName());
+					DatabaseItem item = new DatabaseItem(table, id, this.readItem(table, id));
+					result.add(item);
+				}
+			}
+		}
+		finally {
+			read.unlock();
+		}
+		return result;
+	}
+	
+	/**
+	 * Read an item's values given the object
+	 * @param item The item we want the values from.
+	 * @return An ArrayList of the values.
+	 */
+	public ArrayList<String> readItem(DatabaseItem item)
+	{
+		return this.readItem(item.getTable(), item.getId());
+	}
+	
+	/**
+	 * Read an item's values given the table and its id.
+	 * @param table
+	 * @param itemId
+	 * @return
+	 */
+	public ArrayList<String> readItem(DatabaseTable table, int itemId)
+	{
+		ArrayList<String> result = new ArrayList<String>();
+		
+		read.lock();
+		try {
+			File itemFile = new File(this.databaseFolder + "/" + table.getName()
+					+ "/" + itemId);
+
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(itemFile));
+				try {
+					// Each line in the item file is a defined value
+					String line = null;
+
+					while ((line = reader.readLine()) != null) {
+						// Add more values as we go
+						result.add(line);
+					}
+				} finally {
+					reader.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+		} finally {
+			read.unlock();
+		}
+		return result;
+	}
+	
+	
 	/**
 	 * Read a table's schema
 	 */
@@ -94,11 +212,11 @@ public class Database {
 
 		read.lock();
 		try {
-			File file = new File(this.databaseFolder + "/" + tableName
+			File schemaFile = new File(this.databaseFolder + "/" + tableName
 					+ "/schema");
 
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader(file));
+				BufferedReader reader = new BufferedReader(new FileReader(schemaFile));
 				try {
 					// Each line in the schema file is a defined column
 					String line = null;
