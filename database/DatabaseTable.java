@@ -1,8 +1,11 @@
 package database;
 import java.util.ArrayList;
 
-
-
+/**
+ * Represents each table in a database
+ * @author Cameron
+ *
+ */
 public class DatabaseTable {
 	private ArrayList<String> schema;
 	private ArrayList<String> items;
