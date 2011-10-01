@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -38,7 +39,7 @@ public class Database {
 	 */
 	public Database(String databaseFolder) {
 		this.databaseFolder = databaseFolder;
-		
+
 		tables = new ArrayList<DatabaseTable>();
 
 		// Find all table folders and create table objects based off of them
@@ -47,15 +48,37 @@ public class Database {
 		for (File f : fileList) {
 			if (f.isDirectory()) {
 				DatabaseTable table = new DatabaseTable(this, f.getName());
-				
+
 				// Keep record of the table in the database
 				this.tables.add(table);
 			}
 		}
 	}
+	
+	/**
+	 * Get a list of tables in the Database.
+	 * @return
+	 */
+	public ArrayList<DatabaseTable> getTables()
+	{
+		return new ArrayList<DatabaseTable>(this.tables);
+	}
+	
+	public DatabaseTable createTable(String tableName, ArrayList<String> schema) {
+		write.lock();
+		try {
+			File tableFile = new File(this.databaseFolder + "/" + tableName);
+			if (!tableFile.mkdir()) {
+				// Couldn't create table folder!
+				return null;
+			}
+		} finally {
+			write.unlock();
+		}
 
-	public boolean createTable(String tableName, ArrayList<String> schema) {
-		return false;
+		// Add the schema BEFORE we create the table
+		this.writeSchema(tableName, schema);
+		return new DatabaseTable(this, tableName);
 	}
 
 	/**
@@ -129,59 +152,67 @@ public class Database {
 		return false;
 	}
 
-	public ArrayList<DatabaseItem> getTableItems(DatabaseTable table)
-	{
+	/**
+	 * Gets an ArrayList of the items in the specified table.
+	 * 
+	 * @param table
+	 *            The table to get all items from.
+	 * @return The ArrayList of items.
+	 */
+	public ArrayList<DatabaseItem> getTableItems(DatabaseTable table) {
 		ArrayList<DatabaseItem> result = new ArrayList<DatabaseItem>();
-		
+
 		read.lock();
 		try {
-			File tableFolder = new File(this.databaseFolder + "/" + table.getName());
+			File tableFolder = new File(this.databaseFolder + "/"
+					+ table.getName());
 			File[] itemFileList = tableFolder.listFiles();
-			for (File f : itemFileList)
-			{
+
+			for (File f : itemFileList) {
 				System.out.println(f.getName());
-				if (f.isFile() && !f.getName().equals("schema"))
-				{
-					
+				if (f.isFile() && !f.getName().equals("schema")) {
+
 					int id = Integer.parseInt(f.getName());
-					DatabaseItem item = new DatabaseItem(table, id, this.readItem(table, id));
+					DatabaseItem item = new DatabaseItem(table, id,
+							this.readItem(table, id));
 					result.add(item);
 				}
 			}
-		}
-		finally {
+		} finally {
 			read.unlock();
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Read an item's values given the object
-	 * @param item The item we want the values from.
+	 * 
+	 * @param item
+	 *            The item we want the values from.
 	 * @return An ArrayList of the values.
 	 */
-	public ArrayList<String> readItem(DatabaseItem item)
-	{
+	public ArrayList<String> readItem(DatabaseItem item) {
 		return this.readItem(item.getTable(), item.getId());
 	}
-	
+
 	/**
 	 * Read an item's values given the table and its id.
+	 * 
 	 * @param table
 	 * @param itemId
 	 * @return
 	 */
-	public ArrayList<String> readItem(DatabaseTable table, int itemId)
-	{
+	public ArrayList<String> readItem(DatabaseTable table, int itemId) {
 		ArrayList<String> result = new ArrayList<String>();
-		
+
 		read.lock();
 		try {
-			File itemFile = new File(this.databaseFolder + "/" + table.getName()
-					+ "/" + itemId);
+			File itemFile = new File(this.databaseFolder + "/"
+					+ table.getName() + "/" + itemId);
 
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader(itemFile));
+				BufferedReader reader = new BufferedReader(new FileReader(
+						itemFile));
 				try {
 					// Each line in the item file is a defined value
 					String line = null;
@@ -202,10 +233,9 @@ public class Database {
 		}
 		return result;
 	}
-	
-	
+
 	/**
-	 * Read a table's schema
+	 * Read a table's schema to file.
 	 */
 	public ArrayList<String> readSchema(String tableName) {
 		ArrayList<String> result = new ArrayList<String>();
@@ -216,7 +246,8 @@ public class Database {
 					+ "/schema");
 
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader(schemaFile));
+				BufferedReader reader = new BufferedReader(new FileReader(
+						schemaFile));
 				try {
 					// Each line in the schema file is a defined column
 					String line = null;
@@ -239,7 +270,7 @@ public class Database {
 	}
 
 	/**
-	 * Write a table's schema
+	 * Write a table's schema to file.
 	 */
 	public void writeSchema(String tableName, ArrayList<String> schema) {
 		write.lock();
