@@ -1,6 +1,24 @@
-import java.io.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import javax.swing.Timer;
+
 
 //Client side, emulates nodes
 //TODO create multiple clients automatically with threads
@@ -8,108 +26,267 @@ import java.net.UnknownHostException;
 
 public class Client {
 	protected static int port = 9090;
+	//static int port;
 	protected static String host = "localhost";
 	static ClientConnect conn;
 	static String msg;
+  
+
+	
+	public Client(){
+	}
 
 	public static void main(String[] args) {
 		//TODO Remove hardcoded client
 		//Hardcoded client connect, send/receive, and disconnect
-		
-		conn = new ClientConnect(port, host);
+ 		conn = new ClientConnect(port, host);
 		conn.start();
-		
-		msg = "8787\nINIT\n0\n";
-		conn.send(msg);
-		//msg = conn.receive();
-		//System.out.println(msg);
-		conn.closeConnection();
-
+		//msg = "4567\nINIT\n0";
+		//conn.send(msg);
 	}
-
 }
 
+
+
 //Class for the client to connect to the server
+/* From main of Client
+
+ 		conn = new ClientConnect(port, host);
+		conn.start();
+		msg = "4567\nINIT\n0";
+		conn.send(msg);
+		//conn.receive();
+		//conn.closeConnection();
+ 
+ 
+ */
 
 class ClientConnect extends Thread {
 	int port;
 	String host;
 	String msg;
+
 	
-	Socket socket;
+	Timer timer;
+	byte[] buf;
 	
-	InputStream inStream;
-	DataInputStream inDataStream;
-	OutputStream outStream;
-	DataOutputStream outDataStream;
+	//Request variables
+	final static int INIT = 0;
+	final static int PLAY = 1;
+	final static int SWITCH =2;
+	final static int HALT = 3;
+	final static int DISCONNECT = 4;
+	final static int RECEIVED = 5;
 	
-	ClientConnect(int port, String host){
+	//State variables
+	final static int INITIALIZING = 0;
+	final static int WAITING = 1;
+	final static int STREAMING = 2;
+	static int state = -1;
+	
+	static int frameDelay = 100;
+	
+	//Network Variables
+	Socket TCPsocket = null;
+	DatagramSocket UDPsocket = null;
+	DatagramPacket UDPpacket = null;
+	InetAddress addr = null;
+	int nodeId = -1;
+	int connSeqNum = 0;
+	final static int serverId = 0;
+	
+	//File variables
+	String musicName = "01 Fortune Faded.wav";
+	File musicFile = new File(musicName);
+	int audioNum = 0;
+	int audioLen;
+	
+	//Transmitting or Receiving variables
+	InputStream is = null;
+	OutputStream os = null;
+	ByteArrayInputStream bais = null;
+	ByteArrayOutputStream baos = null;
+	BufferedReader br = null;
+	BufferedWriter bw = null;
+	AudioStream audio = null;
+	
+	
+	public ClientConnect(int port, String host){
 		this.port = port;
 		this.host = host;
 		clientConnect();
+	
+	    timer = new Timer(20, new timerListener());
+	    timer.setInitialDelay(0);
+	    timer.setCoalesce(true);
+	    buf = new byte[15000];		
+		state = INITIALIZING;
+		connSeqNum = 1;
 	}
 	public void run(){
-		
+		//stuff in main client.java
+		//ask for request type
+		msg = "INIT";
+		send(msg);
+		if(parseRequest() != INIT){
+			System.out.println("Invalid Server Response");
+		} else{
+			state = WAITING;
+		}
+		msg = "PLAY";
+		send(msg);
+		if(parseRequest() != RECEIVED){
+			System.out.println("Invalid Server Response");
+		} else{
+			state = STREAMING;
+			timer.start();
+		}
 	}
 	public void clientConnect() {
 		try {
 			//TODO Remove println
 			System.out.println("Creating Connection");
-			socket = new Socket(host, port);
+			TCPsocket = new Socket(host, port);
+			addr = TCPsocket.getInetAddress();
 		    
 			//outStream = socket.getOutputStream ();
 		    //outDataStream = new DataOutputStream ( outStream );
 		    //inStream = socket.getInputStream ();
 		    //inDataStream = new DataInputStream ( inStream );
-		    System.out.println("Client Socket Created");
+		    System.out.println("Client TCPSocket Created");
+		    UDPsocket = new DatagramSocket(port, addr);
+		    UDPsocket.setSoTimeout(5);
+		    System.out.println("Client UDPSocket Created");
+		    is = TCPsocket.getInputStream();
+			os = TCPsocket.getOutputStream();
+			br = new BufferedReader(new InputStreamReader(is));
+			bw = new BufferedWriter(new OutputStreamWriter(os));		
+		    
 		} catch (UnknownHostException e) {
 			System.out.println("Error Connecting");
-			System.out.println("Client clientConnect UnknownHostException\n");
+			System.out.println("Client clientConnect UnknownHostException");
 			e.printStackTrace();
 		} catch (IOException e) {
 			System.out.println("Error Connecting");
-			System.out.println("Client clientServer IOException\n");
+			System.out.println("Client clientServer IOException");
 			e.printStackTrace();
 		}
 		
 		
 	}
 
-	public void send(String msg){
+	public void send(String request){
 		try {
-			DataOutputStream os = new DataOutputStream(socket.getOutputStream());
-			os.writeChars(msg);
+			//os.writeChars(msg);
 			//os.writeBytes(msg);
-			System.out.println("Message sent\n");
+			//TODO userId required
+			int userIdent;
+			if(request.equals("INIT")) {
+				userIdent = 0;
+			}else if(request.equals("HALT")){
+				userIdent = 0;
+			}else if(request.equals("DISCONNECT")){
+				userIdent = 0;
+			}else{
+				userIdent = 3;
+			}
+			String message = nodeId + "\n" + request + "\n"+ userIdent + "\n";
+			//String message1 = "0\nINIT\n0";
+			System.out.println(nodeId + " " + request + " "+ userIdent + " ");
+			//System.out.println(message1);
+			bw.write(message);
+			bw.flush();
+			System.out.println("Message sent");
 		} catch (IOException e) {
 			System.out.println("Client clientConnect send\n");
 			e.printStackTrace();
 		}
-		
 	}
-	
-	public String receive(){
+	private int parseRequest() {
+		System.out.println("Client - Server Msg Received");
+		String requestState = null;
+		int serverId = 0;
+		int userId = 0;
+		int request = -1;
 		try {
-			InputStream is = socket.getInputStream();
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
-			System.out.println("Waiting to receive\n");
-			msg = br.readLine();
-			System.out.println("Message received\n");
+			serverId = Integer.parseInt(br.readLine());
+			requestState = br.readLine();
+			userId = Integer.parseInt(br.readLine());
+			System.out.println("Client - Server Msg: "+ serverId + " " + requestState + " " + userId);
+			
+			if(requestState.equals("INIT")){
+				request = INIT;
+				nodeId = userId;
+			}
+			else if(requestState.equals("PLAY")){
+				request = PLAY;
+			}
+			else if(requestState.equals("SWITCH")){
+				request = SWITCH;
+			}
+			else if(requestState.equals("HALT")){
+				request = HALT;
+			}
+			else if(requestState.equals("DISCONNECT")){
+				request = DISCONNECT;
+			}
+			else if(requestState.equals("RECEIVED")){
+				request = RECEIVED;
+			}
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("Client clientConnect receive\n");
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return msg;
+		return request;
+	}	
+	
+	class timerListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+		  
+			//Construct a DatagramPacket to receive data from the UDP socket
+			UDPpacket = new DatagramPacket(buf, buf.length);
+
+			try{
+				//receive the DP from the socket:
+				UDPsocket.receive(UDPpacket);
+				  
+				//create an packet object from the DP
+				Packet packet = new Packet(UDPpacket.getData(), UDPpacket.getLength());
+				//print important header fields of the RTP packet received: 
+				System.out.println("Received Packet with SeqNum # "+packet.getSeqNum());
+					
+				//get the payload bitstream from the RTPpacket object
+				int payloadLen = packet.getpayload_length();
+				byte [] payload = new byte[payloadLen];
+				packet.getpayload(payload);
+				
+				//TODO stream payload audio data
+			}catch (InterruptedIOException iioe){
+				System.out.println("Nothing to read");
+			}catch (IOException ioe) {
+				System.out.println("Exception caught: "+ioe);
+			}
+		}
 	}
+
 	
 	public void closeConnection() {
 		try {
-			socket.close();
+			TCPsocket.close();
+			UDPsocket.close();
 			System.out.println("Connection Closed");
 		} catch (IOException e) {
 			System.out.println("Error Closing Connection");
 			e.printStackTrace();
 		}
 	}
-	
+	public void setNodeId(int nodeId){
+		this.nodeId = nodeId;
+	}
+	public int getNodeId(){
+		return nodeId;
+	}
 }
