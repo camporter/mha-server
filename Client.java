@@ -41,6 +41,7 @@ public class Client {
 		//Hardcoded client connect, send/receive, and disconnect
  		conn = new ClientConnect(port, host);
 		conn.start();
+		//conn.closeConnection();
 		//msg = "4567\nINIT\n0";
 		//conn.send(msg);
 	}
@@ -62,8 +63,6 @@ public class Client {
  */
 
 class ClientConnect extends Thread {
-	int port;
-	String host;
 	String msg;
 
 	
@@ -87,10 +86,16 @@ class ClientConnect extends Thread {
 	static int frameDelay = 100;
 	
 	//Network Variables
-	Socket TCPsocket = null;
-	DatagramSocket UDPsocket = null;
-	DatagramPacket UDPpacket = null;
-	InetAddress addr = null;
+	Socket tcpSocket = null;
+	DatagramSocket udpSocket = null;
+	DatagramPacket recvPacket = null;
+	DatagramPacket sendPacket = null;
+	InetAddress udpAddrClient = null;
+	InetAddress udpAddrServer = null;
+	protected int udpPortServer = 0;
+	protected int tcpPortServer = 0;
+	
+	protected String host;
 	int nodeId = -1;
 	int connSeqNum = 0;
 	final static int serverId = 0;
@@ -110,19 +115,63 @@ class ClientConnect extends Thread {
 	BufferedWriter bw = null;
 	AudioStream audio = null;
 	
-	
+	//Constructor
 	public ClientConnect(int port, String host){
-		this.port = port;
+		this.tcpPortServer = port;
+		this.udpPortServer = port;
 		this.host = host;
 		clientConnect();
-	
+		
+		buf = new byte[15000];	
 	    timer = new Timer(20, new timerListener());
-	    timer.setInitialDelay(0);
+	    //timer.setInitialDelay(0);
 	    timer.setCoalesce(true);
-	    buf = new byte[15000];		
 		state = INITIALIZING;
 		connSeqNum = 1;
 	}
+	public void clientConnect() {
+		try {
+			//TODO Remove println
+			System.out.println("Creating Connection");
+			tcpSocket = new Socket(host, tcpPortServer);
+			System.out.println("Client TCP Socket Created");
+			
+			//Initiate UDP connection with server, send datagram then wait for response
+			udpSocket = new DatagramSocket();
+			udpAddrServer = InetAddress.getByName(host);
+			byte[] buf = new byte[5];
+			sendPacket = new DatagramPacket(buf, buf.length, udpAddrServer, tcpPortServer);
+			
+			//Gives time for server to initialize before packet is sent
+			//TODO possibly use udpSocket.setTimeout + while loop to resend packet
+			Thread.currentThread().sleep(500);
+			udpSocket.send(sendPacket);
+						
+			//Receive reply back from server
+			recvPacket = new DatagramPacket(buf, buf.length);
+			System.out.println("Waiting for Server Response");
+			udpSocket.receive(recvPacket);
+		    System.out.println("Client UDPSocket Created");
+		    
+		    is = tcpSocket.getInputStream();
+			os = tcpSocket.getOutputStream();
+			br = new BufferedReader(new InputStreamReader(is));
+			bw = new BufferedWriter(new OutputStreamWriter(os));		
+		    
+		} catch (UnknownHostException e) {
+			System.out.println("Error Connecting");
+			System.out.println("Client clientConnect UnknownHostException");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("Error Connecting");
+			System.out.println("Client clientServer IOException");
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+	}
+	
 	public void run(){
 		//stuff in main client.java
 		//ask for request type
@@ -140,40 +189,16 @@ class ClientConnect extends Thread {
 		} else{
 			state = STREAMING;
 			timer.start();
+			while(true){}
+			/*try {
+				Thread.currentThread().sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
 		}
 	}
-	public void clientConnect() {
-		try {
-			//TODO Remove println
-			System.out.println("Creating Connection");
-			TCPsocket = new Socket(host, port);
-			addr = TCPsocket.getInetAddress();
-		    
-			//outStream = socket.getOutputStream ();
-		    //outDataStream = new DataOutputStream ( outStream );
-		    //inStream = socket.getInputStream ();
-		    //inDataStream = new DataInputStream ( inStream );
-		    System.out.println("Client TCPSocket Created");
-		    UDPsocket = new DatagramSocket(port, addr);
-		    UDPsocket.setSoTimeout(5);
-		    System.out.println("Client UDPSocket Created");
-		    is = TCPsocket.getInputStream();
-			os = TCPsocket.getOutputStream();
-			br = new BufferedReader(new InputStreamReader(is));
-			bw = new BufferedWriter(new OutputStreamWriter(os));		
-		    
-		} catch (UnknownHostException e) {
-			System.out.println("Error Connecting");
-			System.out.println("Client clientConnect UnknownHostException");
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.out.println("Error Connecting");
-			System.out.println("Client clientServer IOException");
-			e.printStackTrace();
-		}
-		
-		
-	}
+
 
 	public void send(String request){
 		try {
@@ -245,16 +270,18 @@ class ClientConnect extends Thread {
 	
 	class timerListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			//System.out.println("Performing ActionListener");
 		  
 			//Construct a DatagramPacket to receive data from the UDP socket
-			UDPpacket = new DatagramPacket(buf, buf.length);
-
+			recvPacket = new DatagramPacket(buf, buf.length);
+		
 			try{
+				System.out.println("Waiting to Receive Datagram");
 				//receive the DP from the socket:
-				UDPsocket.receive(UDPpacket);
-				  
+				udpSocket.receive(recvPacket);
+			
 				//create an packet object from the DP
-				Packet packet = new Packet(UDPpacket.getData(), UDPpacket.getLength());
+				Packet packet = new Packet(recvPacket.getData(), recvPacket.getLength());
 				//print important header fields of the RTP packet received: 
 				System.out.println("Received Packet with SeqNum # "+packet.getSeqNum());
 					
@@ -275,8 +302,8 @@ class ClientConnect extends Thread {
 	
 	public void closeConnection() {
 		try {
-			TCPsocket.close();
-			UDPsocket.close();
+			tcpSocket.close();
+			udpSocket.close();
 			System.out.println("Connection Closed");
 		} catch (IOException e) {
 			System.out.println("Error Closing Connection");

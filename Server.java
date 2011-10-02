@@ -98,11 +98,16 @@ public class Server {
 //final class NodeRequest implements Runnable {
 class NodeRequest extends Thread implements ActionListener{
 	//Network Variables
-	Socket TCPsocket = null;
-	DatagramSocket UDPsocket = null;
-	DatagramPacket UDPpacket = null;
-	int port = 0;
-	InetAddress addr = null;
+	protected Socket tcpSocket = null;
+	protected DatagramSocket udpSocket = null;
+	DatagramPacket sendPacket = null;
+	DatagramPacket recvPacket = null;
+	protected int tcpPortClient = 0;
+	protected int tcpPortServer = 0;
+	protected int udpPortClient = 0;
+	protected int udpPortServer = 0;
+	protected InetAddress udpAddrClient = null;
+	//protected InetAddress localAddr = null;
 	final static int serverId = 10;
 	int nodeId = -1;
 	int userId = -1;
@@ -111,9 +116,10 @@ class NodeRequest extends Thread implements ActionListener{
 	//File variables
 	String musicName = "01 Fortune Faded.wav";
 	File musicFile = new File(musicName);
-	boolean d = musicFile.canRead();
-	int audioNum = 0;
-	int audioLen;
+	int audioNum = 0; //current frame of audio ready for transmission
+	int audioLen = 0; //length of the audio file
+	int audioFrameSize = 0;
+	final static int BUFFERSIZE = 15000;
 	
 	//Transmitting or Receiving variables
 	int seqNumber = 0;
@@ -149,17 +155,40 @@ class NodeRequest extends Thread implements ActionListener{
 	 * @return
 	 */
 	public NodeRequest(Socket socket, int numClients) {
-		this.TCPsocket = socket;
-		this.port = socket.getPort();
-		this.addr = socket.getInetAddress();
-		this.nodeId = numClients;
+		try{
+			this.tcpSocket = socket;
+			this.tcpPortServer = socket.getLocalPort();
+			this.tcpPortClient = socket.getPort();
+			this.udpSocket = new DatagramSocket(tcpPortServer);
+			
+			byte[] buf = new byte[5];
+			recvPacket = new DatagramPacket(buf, buf.length);
+			System.out.println("Waiting for first datagram from client");
+			udpSocket.receive(recvPacket);
+			System.out.println("Datagram Received");
+			this.udpAddrClient = recvPacket.getAddress();
+			this.udpPortClient = recvPacket.getPort();
+			this.nodeId = numClients;
+			
+		
+			sendPacket = new DatagramPacket(buf, buf.length, udpAddrClient, udpPortClient);
+			udpSocket.send(sendPacket);
+			
+		    timer = new Timer(frameDelay, this);
+		    this.timer.setInitialDelay(0);
+		    this.timer.setCoalesce(true);
 	
-	    timer = new Timer(frameDelay, this);
-	    this.timer.setInitialDelay(0);
-	    this.timer.setCoalesce(true);
-
-	    //allocate memory for the sending buffer
-	    this.buf = new byte[15000]; 
+		    //allocate memory for the sending buffer
+		    this.buf = new byte[BUFFERSIZE]; 
+		}catch (SocketException e){
+			//TODO
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 	}
 
 	private int parseRequest() {
@@ -240,42 +269,13 @@ class NodeRequest extends Thread implements ActionListener{
 	    }
 	}
 	
-	/* UDP datagram socket for streaming audio
-	 * @param
-	 * 
-	 * @return
-	 */
-	private void setupUDPsocket(){
-		try {
-			UDPsocket = new DatagramSocket(port, addr);
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	@SuppressWarnings("unused")
-	private void closeUDPsocket() throws SocketException{
-		UDPsocket.close();
-	}
-	
-	@SuppressWarnings("unused")
-	private void closeTCPsocket(){
-		try {
-			TCPsocket.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
 
 	public void run() {
 		//Initialize server state
 		state = INITIALIZING;
 		try {
-			is = TCPsocket.getInputStream();
-			os = TCPsocket.getOutputStream();
+			is = tcpSocket.getInputStream();
+			os = tcpSocket.getOutputStream();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -294,8 +294,6 @@ class NodeRequest extends Thread implements ActionListener{
 			if(requestType == INIT){
 				setup = true;
 				state = WAITING;
-				System.out.println(d);
-				setupUDPsocket();
 				sendResponse("INIT");
 			}
 		}
@@ -309,6 +307,7 @@ class NodeRequest extends Thread implements ActionListener{
 				sendResponse("RECEIVED");
 				audio = new AudioStream(musicFile);
 				audioLen = (int)audio.getNumFrames();
+				audioFrameSize = audio.getFrameSize();
 				System.out.println("Streaming Audio: "+ musicName);
 				timer.start();
 				
@@ -326,8 +325,8 @@ class NodeRequest extends Thread implements ActionListener{
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-		System.out.println("Trying to Stream: "+ audioNum + " " + audioLen);
-	    if (audioNum < audioLen){
+		System.out.println("Streaming: "+ audioNum + " " + ((audioLen*audioFrameSize)/BUFFERSIZE));
+	    if (audioNum < ((audioLen*audioFrameSize)/BUFFERSIZE)){
 			audioNum++;
 			try {
 				//get next frame to send
@@ -344,8 +343,8 @@ class NodeRequest extends Thread implements ActionListener{
 				packet.getpacket(packet_bits);
 		
 				//send the packet over the UDP socket
-				UDPpacket = new DatagramPacket(packet_bits, packetLen, addr, port);
-				UDPsocket.send(UDPpacket);
+				sendPacket = new DatagramPacket(packet_bits, packetLen, udpAddrClient, udpPortClient);
+				udpSocket.send(sendPacket);
 		
 				System.out.println("Send frame #"+audioNum);
 			}catch(Exception ex){
@@ -367,6 +366,7 @@ class AudioStream {
 	
 	private AudioFormat format;
 	private long numFrames;
+	private int frameSize;
 	
 
 	//constructor
@@ -383,22 +383,21 @@ class AudioStream {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		ais.getFormat();
-		ais.getFrameLength();
-
+		setFormat(ais.getFormat());
+		setNumFrames(ais.getFrameLength());
+		setFrameSize(ais.getFormat().getFrameSize());
 	}
 
-	public int getnextframe(byte[] frame) throws IOException{
-		int len = 0;
-		String len1;
-		byte[] frameLen = new byte[5];
-
-		ais.read(frameLen,0,5);
-		
-		len1 = new String(frameLen);
-		len = Integer.parseInt(len1);
-			
-		return(ais.read(frame,0,len));
+	public int getnextframe(byte[] frame){
+		int nBytesRead = 0;
+		//byte[] data = new byte[frame.length];
+		try {
+			nBytesRead = ais.read(frame, 0, frame.length);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return nBytesRead;
 	}
 
 	public void setFormat(AudioFormat format) {
@@ -415,6 +414,14 @@ class AudioStream {
 
 	public long getNumFrames() {
 		return numFrames;
+	}
+
+	public void setFrameSize(int frameSize) {
+		this.frameSize = frameSize;
+	}
+
+	public int getFrameSize() {
+		return frameSize;
 	}
 }
 
