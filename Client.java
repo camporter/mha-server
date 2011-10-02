@@ -15,6 +15,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import javax.swing.Timer;
@@ -132,25 +133,30 @@ class ClientConnect extends Thread {
 	public void clientConnect() {
 		try {
 			//TODO Remove println
+			int count = 0;
 			System.out.println("Creating Connection");
 			tcpSocket = new Socket(host, tcpPortServer);
 			System.out.println("Client TCP Socket Created");
 			
+			
 			//Initiate UDP connection with server, send datagram then wait for response
 			udpSocket = new DatagramSocket();
+			udpSocket.setSoTimeout(100);
 			udpAddrServer = InetAddress.getByName(host);
 			byte[] buf = new byte[5];
 			sendPacket = new DatagramPacket(buf, buf.length, udpAddrServer, tcpPortServer);
-			
-			//Gives time for server to initialize before packet is sent
-			//TODO possibly use udpSocket.setTimeout + while loop to resend packet
-			Thread.currentThread().sleep(500);
 			udpSocket.send(sendPacket);
 						
 			//Receive reply back from server
 			recvPacket = new DatagramPacket(buf, buf.length);
 			System.out.println("Waiting for Server Response");
-			udpSocket.receive(recvPacket);
+			while(!datagramReceive()){
+				count++;
+				if(count > 10){
+					System.out.println("Resending Packet");
+					udpSocket.send(sendPacket);
+				}
+			}
 		    System.out.println("Client UDPSocket Created");
 		    
 		    is = tcpSocket.getInputStream();
@@ -166,10 +172,17 @@ class ClientConnect extends Thread {
 			System.out.println("Error Connecting");
 			System.out.println("Client clientServer IOException");
 			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}	
+	}
+	private boolean datagramReceive(){
+		try {
+			udpSocket.receive(recvPacket);
+		} catch (SocketException e){
+			return false;
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
 	}
 	
 	public void run(){

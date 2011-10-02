@@ -99,7 +99,7 @@ public class Server {
 class NodeRequest extends Thread implements ActionListener{
 	//Network Variables
 	protected Socket tcpSocket = null;
-	protected DatagramSocket udpSocket = null;
+	protected static DatagramSocket udpSocket = null;
 	DatagramPacket sendPacket = null;
 	DatagramPacket recvPacket = null;
 	protected int tcpPortClient = 0;
@@ -159,7 +159,17 @@ class NodeRequest extends Thread implements ActionListener{
 			this.tcpSocket = socket;
 			this.tcpPortServer = socket.getLocalPort();
 			this.tcpPortClient = socket.getPort();
-			this.udpSocket = new DatagramSocket(tcpPortServer);
+			//SocketException, cannot use same port
+			//TODO use tcp connection, server picks random port and sends to client, cont. from here
+			//Make socket static?
+			
+			if(udpSocket != null){
+				if(!udpSocket.isBound()){
+					udpSocket = new DatagramSocket(tcpPortServer);
+				}
+			}else{
+				udpSocket = new DatagramSocket(tcpPortServer);
+			}
 			
 			byte[] buf = new byte[5];
 			recvPacket = new DatagramPacket(buf, buf.length);
@@ -169,8 +179,7 @@ class NodeRequest extends Thread implements ActionListener{
 			this.udpAddrClient = recvPacket.getAddress();
 			this.udpPortClient = recvPacket.getPort();
 			this.nodeId = numClients;
-			
-		
+					
 			sendPacket = new DatagramPacket(buf, buf.length, udpAddrClient, udpPortClient);
 			udpSocket.send(sendPacket);
 			
@@ -314,12 +323,15 @@ class NodeRequest extends Thread implements ActionListener{
 			}
 			else if(requestType == SWITCH && state == STREAMING){
 				//Node needs new audio stream and server currently streaming
+				//TODO complete
 			}
 			else if(requestType == HALT && state == STREAMING){
 				//Node requests streaming halt
+				//TODO complete
 			}
 			else if(requestType == DISCONNECT){
 				//Node wants to disconnect
+				//TODO complete
 			}
 		}	
 	}
