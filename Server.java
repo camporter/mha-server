@@ -49,23 +49,24 @@ public class Server {
 	protected static int port = 9090;
 
 	static int numClients = 0;
+
 	/**
 	 * @param args
 	 *            No parameters
 	 */
 	public static void main(String[] args) {
-		// TODO Client Node must send server INIT message, server will then create thread to handle requests
+		// TODO Client Node must send server INIT message, server will then
+		// create thread to handle requests
 		// InitializeSetup move to new class?
 
 		ServerSocket listenSocket = null;
 		try {
 			listenSocket = new ServerSocket(port);
-		} catch (IOException e)
-		{
-			System.out.println("Unable to bind to port: "+port);
+		} catch (IOException e) {
+			System.out.println("Unable to bind to port: " + port);
 			e.printStackTrace();
 		}
-		
+
 		try {
 			while (true) {
 				System.out.println("Listening");
@@ -74,11 +75,12 @@ public class Server {
 				System.out.println("Connection Found");
 				numClients++;
 
-				NodeRequest request = new NodeRequest(clientSocket, numClients+100);
+				NodeRequest request = new NodeRequest(clientSocket,
+						numClients + 100);
 
-				Thread thread = new Thread(request);
+				// Thread thread = new Thread(request);
 				System.out.println("Starting New Thread For Request");
-				thread.start();
+				request.start();
 
 			}
 		} catch (IOException e) {
@@ -88,16 +90,15 @@ public class Server {
 	}
 }
 
-/* NodeRequest Class
- * -Uses TCP connection to communicate with nodes
- * -Receiving action requests from the nodes
+/**
+ * NodeRequest Class -Uses TCP connection to communicate with nodes -Receiving
+ * action requests from the nodes
  * 
  * @author Ryan Brown
- * 
  */
-//final class NodeRequest implements Runnable {
-class NodeRequest extends Thread implements ActionListener{
-	//Network Variables
+// final class NodeRequest implements Runnable {
+class NodeRequest extends Thread implements ActionListener {
+	// Network Variables
 	protected Socket tcpSocket = null;
 	protected static DatagramSocket udpSocket = null;
 	DatagramPacket sendPacket = null;
@@ -107,21 +108,20 @@ class NodeRequest extends Thread implements ActionListener{
 	protected int udpPortClient = 0;
 	protected int udpPortServer = 0;
 	protected InetAddress udpAddrClient = null;
-	//protected InetAddress localAddr = null;
+	// protected InetAddress localAddr = null;
 	final static int serverId = 10;
 	int nodeId = -1;
 	int userId = -1;
-	
-	
-	//File variables
+
+	// File variables
 	String musicName = "01 Fortune Faded.wav";
 	File musicFile = new File(musicName);
-	int audioNum = 0; //current frame of audio ready for transmission
-	int audioLen = 0; //length of the audio file
+	int audioNum = 0; // current frame of audio ready for transmission
+	int audioLen = 0; // length of the audio file
 	int audioFrameSize = 0;
 	final static int BUFFERSIZE = 15000;
-	
-	//Transmitting or Receiving variables
+
+	// Transmitting or Receiving variables
 	int seqNumber = 0;
 	InputStream is = null;
 	OutputStream os = null;
@@ -130,47 +130,49 @@ class NodeRequest extends Thread implements ActionListener{
 	BufferedReader br = null;
 	BufferedWriter bw = null;
 	AudioStream audio = null;
-	
-	//Request variables
+
+	// Request variables
 	final static int INIT = 0;
 	final static int PLAY = 1;
-	final static int SWITCH =2;
+	final static int SWITCH = 2;
 	final static int HALT = 3;
 	final static int DISCONNECT = 4;
 	final static int RECEIVED = 5;
-	
-	//State variables
+
+	// State variables
 	final static int INITIALIZING = 0;
 	final static int WAITING = 1;
 	final static int STREAMING = 2;
 	static int state = -1;
-	
+
 	Timer timer;
 	byte[] buf;
 	static int frameDelay = 100;
-	
-	
-	/* Constructor
-	 * @param socket 		server side socket connected to client
-	 * @return
+
+	/**
+	 * 
+	 * @param socket
+	 *            server side socket connected to client
+	 * 
 	 */
 	public NodeRequest(Socket socket, int numClients) {
-		try{
+		try {
 			this.tcpSocket = socket;
 			this.tcpPortServer = socket.getLocalPort();
 			this.tcpPortClient = socket.getPort();
-			//SocketException, cannot use same port
-			//TODO use tcp connection, server picks random port and sends to client, cont. from here
-			//Make socket static?
-			
-			if(udpSocket != null){
-				if(!udpSocket.isBound()){
+			// SocketException, cannot use same port
+			// TODO use tcp connection, server picks random port and sends to
+			// client, cont. from here
+			// Make socket static?
+
+			if (udpSocket != null) {
+				if (!udpSocket.isBound()) {
 					udpSocket = new DatagramSocket(tcpPortServer);
 				}
-			}else{
+			} else {
 				udpSocket = new DatagramSocket(tcpPortServer);
 			}
-			
+
 			byte[] buf = new byte[5];
 			recvPacket = new DatagramPacket(buf, buf.length);
 			System.out.println("Waiting for first datagram from client");
@@ -179,31 +181,36 @@ class NodeRequest extends Thread implements ActionListener{
 			this.udpAddrClient = recvPacket.getAddress();
 			this.udpPortClient = recvPacket.getPort();
 			this.nodeId = numClients;
-					
-			sendPacket = new DatagramPacket(buf, buf.length, udpAddrClient, udpPortClient);
+
+			sendPacket = new DatagramPacket(buf, buf.length, udpAddrClient,
+					udpPortClient);
 			udpSocket.send(sendPacket);
-			
-		    timer = new Timer(frameDelay, this);
-		    this.timer.setInitialDelay(0);
-		    this.timer.setCoalesce(true);
-	
-		    //allocate memory for the sending buffer
-		    this.buf = new byte[BUFFERSIZE]; 
-		}catch (SocketException e){
-			//TODO
+
+			timer = new Timer(frameDelay, this);
+			this.timer.setInitialDelay(0);
+			this.timer.setCoalesce(true);
+
+			// allocate memory for the sending buffer
+			this.buf = new byte[BUFFERSIZE];
+		} catch (SocketException e) {
+			// TODO
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-	}
 
+	}
+	
+	/**
+	 * Parses requests made by the node.
+	 * 
+	 * @return The request being made.
+	 */
 	private int parseRequest() {
 		try {
-			if(!br.ready()){
-				//System.out.println("BufferedReader Not Ready");
+			if (!br.ready()) {
+				// System.out.println("BufferedReader Not Ready");
 				return -1;
 			}
 		} catch (IOException e) {
@@ -218,32 +225,28 @@ class NodeRequest extends Thread implements ActionListener{
 		int request = -1;
 		try {
 			String temp = br.readLine();
-			//System.out.println(temp);
+			// System.out.println(temp);
 			senderId = Integer.parseInt(temp);
-			//System.out.println("NodeId: "+nodeId);
+			// System.out.println("NodeId: "+nodeId);
 			requestState = br.readLine();
-			//System.out.println("RequestState: "+requestState);
+			// System.out.println("RequestState: "+requestState);
 			temp = br.readLine();
-			//System.out.println(temp);
+			// System.out.println(temp);
 			userId = Integer.parseInt(temp);
-			System.out.println("Server - Client Msg: "+ senderId + " " + requestState + " " + userId);
-			
-			if(requestState.equals("INIT")){
+			System.out.println("Server - Client Msg: " + senderId + " "
+					+ requestState + " " + userId);
+
+			if (requestState.equals("INIT")) {
 				request = INIT;
-			}
-			else if(requestState.equals("PLAY")){
+			} else if (requestState.equals("PLAY")) {
 				request = PLAY;
-			}
-			else if(requestState.equals("SWITCH")){
+			} else if (requestState.equals("SWITCH")) {
 				request = SWITCH;
-			}
-			else if(requestState.equals("HALT")){
+			} else if (requestState.equals("HALT")) {
 				request = HALT;
-			}
-			else if(requestState.equals("DISCONNECT")){
+			} else if (requestState.equals("DISCONNECT")) {
 				request = DISCONNECT;
-			}
-			else if(requestState.equals("RECEIVED")){
+			} else if (requestState.equals("RECEIVED")) {
 				request = RECEIVED;
 			}
 		} catch (NumberFormatException e) {
@@ -255,32 +258,31 @@ class NodeRequest extends Thread implements ActionListener{
 		}
 		return request;
 	}
-	
-	private void sendResponse(String request){
-		try{
-			/*The server sends two kinds of messages
-			 * INIT of the form - serverId \n request \n nodeId \n
-			 * ServerId - Ident of server, normally 0
-			 * Request - Type of request of server to client
-			 * 	- RECEIVED - returns after successful client request msg
-			 * 	- INIT - returns if client sends INIT, so client knows to set nodeId for future transmissions
-			 * nodeId - Always includes nodeId the server is talking to
+
+	private void sendResponse(String request) {
+		try {
+			/*
+			 * The server sends two kinds of messages INIT of the form -
+			 * serverId \n request \n nodeId \n ServerId - Ident of server,
+			 * normally 0 Request - Type of request of server to client -
+			 * RECEIVED - returns after successful client request msg - INIT -
+			 * returns if client sends INIT, so client knows to set nodeId for
+			 * future transmissions nodeId - Always includes nodeId the server
+			 * is talking to
 			 */
-			String msg = serverId + "\n" + request + "\n" + nodeId + "\n"; 
+			String msg = serverId + "\n" + request + "\n" + nodeId + "\n";
 			System.out.println(serverId + " " + request + " " + nodeId + " ");
 			bw.write(msg);
 			bw.flush();
 			System.out.println("Server - Sent response to Client.");
+		} catch (Exception ex) {
+			System.out.println("Exception caught: " + ex);
+			System.exit(0);
 		}
-	    catch(Exception ex){
-	    	System.out.println("Exception caught: "+ex);
-	    	System.exit(0);
-	    }
 	}
-	
 
 	public void run() {
-		//Initialize server state
+		// Initialize server state
 		state = INITIALIZING;
 		try {
 			is = tcpSocket.getInputStream();
@@ -289,122 +291,123 @@ class NodeRequest extends Thread implements ActionListener{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 
 		br = new BufferedReader(new InputStreamReader(is));
 		bw = new BufferedWriter(new OutputStreamWriter(os));
 
-		
-		//Get initial request from client, should be INIT request
+		// Get initial request from client, should be INIT request
 		int requestType = -1;
 		boolean setup = false;
-		while(!setup){
+		while (!setup) {
 			requestType = parseRequest();
-			if(requestType == INIT){
+			if (requestType == INIT) {
 				setup = true;
 				state = WAITING;
 				sendResponse("INIT");
 			}
 		}
-		while(true){
+		while (true) {
 			requestType = parseRequest();
-			if(requestType == INIT){
-				//Node requesting another initialization?
-			}
-			else if(requestType == PLAY && state == WAITING){
-				//Node wants audio stream and server ready to stream
+			if (requestType == INIT) {
+				// Node requesting another initialization?
+			} else if (requestType == PLAY && state == WAITING) {
+				// Node wants audio stream and server ready to stream
 				sendResponse("RECEIVED");
 				audio = new AudioStream(musicFile);
-				audioLen = (int)audio.getNumFrames();
+				audioLen = (int) audio.getNumFrames();
 				audioFrameSize = audio.getFrameSize();
-				System.out.println("Streaming Audio: "+ musicName);
+				System.out.println("Streaming Audio: " + musicName);
 				timer.start();
-				
+
+			} else if (requestType == SWITCH && state == STREAMING) {
+				// Node needs new audio stream and server currently streaming
+				// TODO complete
+			} else if (requestType == HALT && state == STREAMING) {
+				// Node requests streaming halt
+				// TODO complete
+			} else if (requestType == DISCONNECT) {
+				// Node wants to disconnect
+				// TODO complete
 			}
-			else if(requestType == SWITCH && state == STREAMING){
-				//Node needs new audio stream and server currently streaming
-				//TODO complete
-			}
-			else if(requestType == HALT && state == STREAMING){
-				//Node requests streaming halt
-				//TODO complete
-			}
-			else if(requestType == DISCONNECT){
-				//Node wants to disconnect
-				//TODO complete
-			}
-		}	
+		}
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-		System.out.println("Streaming: "+ audioNum + " " + ((audioLen*audioFrameSize)/BUFFERSIZE));
-	    if (audioNum < ((audioLen*audioFrameSize)/BUFFERSIZE)){
+		System.out.println("Streaming: " + audioNum + " "
+				+ ((audioLen * audioFrameSize) / BUFFERSIZE));
+		if (audioNum < ((audioLen * audioFrameSize) / BUFFERSIZE)) {
 			audioNum++;
 			try {
-				//get next frame to send
-				int audioSize = audio.getnextframe(buf);
-		
-				//Builds an Packet
+				// get next frame to send
+				int audioSize = audio.getNextFrame(buf);
+
+				// Builds an Packet
 				Packet packet = new Packet(audioNum, buf, audioSize);
-				 
-				//get to total length of the packet
+
+				// get to total length of the packet
 				int packetLen = packet.getlength();
-				
-				//get packet stream
+
+				// get packet stream
 				byte[] packet_bits = new byte[packetLen];
 				packet.getpacket(packet_bits);
-		
-				//send the packet over the UDP socket
-				sendPacket = new DatagramPacket(packet_bits, packetLen, udpAddrClient, udpPortClient);
+
+				// send the packet over the UDP socket
+				sendPacket = new DatagramPacket(packet_bits, packetLen,
+						udpAddrClient, udpPortClient);
 				udpSocket.send(sendPacket);
-		
-				System.out.println("Send frame #"+audioNum);
-			}catch(Exception ex){
-				System.out.println("Exception caught: "+ex);
+
+				System.out.println("Send frame #" + audioNum);
+			} catch (Exception ex) {
+				System.out.println("Exception caught: " + ex);
 				System.exit(0);
 			}
-	    }else{
-	    	//if we have reached the end of the audio file, stop the timer
-	    	timer.stop();
-	    }
+		} else {
+			// if we have reached the end of the audio file, stop the timer
+			timer.stop();
+		}
 	}
 }
 
-
+/**
+ * Allows audio files to be converted into frames of data for streaming.
+ * 
+ * @author Ryan Brown
+ * 
+ */
 class AudioStream {
 	File fileName;
-	AudioInputStream ais;
-	int frameNum; //current frame nb
-	
+	AudioInputStream audioInputStream;
+	int frameNumber; // current frame nb
+
 	private AudioFormat format;
 	private long numFrames;
 	private int frameSize;
-	
 
-	//constructor
-	public AudioStream(File file){
+	// constructor
+	public AudioStream(File file) {
 
-	    fileName = file;
-	    frameNum = 0;
-	    try {
-			ais = AudioSystem.getAudioInputStream(fileName);
+		this.fileName = file;
+		this.frameNumber = 0;
+
+		try {
+			audioInputStream = AudioSystem.getAudioInputStream(fileName);
 		} catch (UnsupportedAudioFileException e) {
-			// TODO Auto-generated catch block
+			System.out.println("The audio file " + fileName.getName()
+					+ " is not supported.");
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		setFormat(ais.getFormat());
-		setNumFrames(ais.getFrameLength());
-		setFrameSize(ais.getFormat().getFrameSize());
+		setFormat(audioInputStream.getFormat());
+		setNumFrames(audioInputStream.getFrameLength());
+		setFrameSize(audioInputStream.getFormat().getFrameSize());
 	}
 
-	public int getnextframe(byte[] frame){
+	public int getNextFrame(byte[] frame) {
 		int nBytesRead = 0;
-		//byte[] data = new byte[frame.length];
+		// byte[] data = new byte[frame.length];
 		try {
-			nBytesRead = ais.read(frame, 0, frame.length);
+			nBytesRead = audioInputStream.read(frame, 0, frame.length);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -436,4 +439,3 @@ class AudioStream {
 		return frameSize;
 	}
 }
-

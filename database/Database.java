@@ -169,7 +169,6 @@ public class Database {
 			File[] itemFileList = tableFolder.listFiles();
 
 			for (File f : itemFileList) {
-				System.out.println(f.getName());
 				if (f.isFile() && !f.getName().equals("schema")) {
 
 					int id = Integer.parseInt(f.getName());
