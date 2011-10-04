@@ -123,12 +123,12 @@ class NodeRequest extends Thread implements ActionListener {
 
 	// Transmitting or Receiving variables
 	int seqNumber = 0;
-	InputStream is = null;
-	OutputStream os = null;
+	InputStream inputStream = null;
+	OutputStream outputStream = null;
 	ByteArrayInputStream bais = null;
 	ByteArrayOutputStream baos = null;
-	BufferedReader br = null;
-	BufferedWriter bw = null;
+	BufferedReader bufferedReader = null;
+	BufferedWriter bufferedWriter = null;
 	AudioStream audio = null;
 
 	// Request variables
@@ -209,7 +209,7 @@ class NodeRequest extends Thread implements ActionListener {
 	 */
 	private int parseRequest() {
 		try {
-			if (!br.ready()) {
+			if (!bufferedReader.ready()) {
 				// System.out.println("BufferedReader Not Ready");
 				return -1;
 			}
@@ -224,13 +224,13 @@ class NodeRequest extends Thread implements ActionListener {
 		int userId = 0;
 		int request = -1;
 		try {
-			String temp = br.readLine();
+			String temp = bufferedReader.readLine();
 			// System.out.println(temp);
 			senderId = Integer.parseInt(temp);
 			// System.out.println("NodeId: "+nodeId);
-			requestState = br.readLine();
+			requestState = bufferedReader.readLine();
 			// System.out.println("RequestState: "+requestState);
-			temp = br.readLine();
+			temp = bufferedReader.readLine();
 			// System.out.println(temp);
 			userId = Integer.parseInt(temp);
 			System.out.println("Server - Client Msg: " + senderId + " "
@@ -272,10 +272,10 @@ class NodeRequest extends Thread implements ActionListener {
 			 */
 			String msg = serverId + "\n" + request + "\n" + nodeId + "\n";
 			System.out.println(serverId + " " + request + " " + nodeId + " ");
-			bw.write(msg);
-			bw.flush();
+			bufferedWriter.write(msg);
+			bufferedWriter.flush();
 			System.out.println("Server - Sent response to Client.");
-		} catch (Exception ex) {
+		} catch (IOException ex) {
 			System.out.println("Exception caught: " + ex);
 			System.exit(0);
 		}
@@ -283,17 +283,17 @@ class NodeRequest extends Thread implements ActionListener {
 
 	public void run() {
 		// Initialize server state
-		state = INITIALIZING;
+		this.state = INITIALIZING;
 		try {
-			is = tcpSocket.getInputStream();
-			os = tcpSocket.getOutputStream();
+			this.inputStream = this.tcpSocket.getInputStream();
+			this.outputStream = this.tcpSocket.getOutputStream();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		br = new BufferedReader(new InputStreamReader(is));
-		bw = new BufferedWriter(new OutputStreamWriter(os));
+		bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+		bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
 
 		// Get initial request from client, should be INIT request
 		int requestType = -1;
@@ -341,11 +341,11 @@ class NodeRequest extends Thread implements ActionListener {
 				// get next frame to send
 				int audioSize = audio.getNextFrame(buf);
 
-				// Builds an Packet
+				// Builds a Packet
 				Packet packet = new Packet(audioNum, buf, audioSize);
 
 				// get to total length of the packet
-				int packetLen = packet.getlength();
+				int packetLen = packet.getLength();
 
 				// get packet stream
 				byte[] packet_bits = new byte[packetLen];

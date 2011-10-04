@@ -285,12 +285,11 @@ class ClientConnect extends Thread {
 						recvPacket.getLength());
 				// print important header fields of the RTP packet received:
 				System.out.println("Received Packet with SeqNum # "
-						+ packet.getSeqNum());
+						+ packet.getSequenceNumber());
 
 				// get the payload bitstream from the RTPpacket object
-				int payloadLen = packet.getpayload_length();
-				byte[] payload = new byte[payloadLen];
-				packet.getpayload(payload);
+				int payloadLen = packet.getPayloadLength();
+				byte[] payload = packet.getPayload();
 
 				// TODO stream payload audio data
 			} catch (InterruptedIOException iioe) {
