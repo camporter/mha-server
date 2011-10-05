@@ -21,6 +21,10 @@ import java.net.SocketException;
 
 import javax.swing.Timer;
 
+import myhomeaudio.server.Node;
+import myhomeaudio.server.AudioStream;
+import myhomeaudio.server.Packet;
+
 /* Type of message sent by nodes to server (temporary)
  * 
  * id# \n request \n userId'

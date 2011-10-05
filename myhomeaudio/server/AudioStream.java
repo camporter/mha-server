@@ -14,7 +14,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  * @author Ryan Brown
  * 
  */
-class AudioStream {
+public class AudioStream {
 	File fileName;
 	AudioInputStream audioInputStream;
 	int frameNumber; // current frame nb

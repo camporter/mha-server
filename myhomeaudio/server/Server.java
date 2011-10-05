@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import myhomeaudio.request.NodeRequest;
+import myhomeaudio.server.request.NodeRequest;
 
 public class Server {
 	protected static int PORT = 9090;
