@@ -1,3 +1,5 @@
+package myhomeaudio.server;
+
 import javax.sound.sampled.AudioFormat;
 
 public class Packet {

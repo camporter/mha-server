@@ -1,3 +1,5 @@
+package myhomeaudio.server.request;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -40,58 +42,13 @@ import javax.swing.Timer;
 
 //TODO Remove excess System.out.println statements 
 
-public class Server {
-	protected static int PORT = 9090;
-
-	static int numClients = 0;
-
-	/**
-	 * @param args
-	 *            No parameters
-	 */
-	public static void main(String[] args) {
-		// TODO Client Node must send server INIT message, server will then
-		// create thread to handle requests
-		// InitializeSetup move to new class?
-
-		ServerSocket listenSocket = null;
-		try {
-			listenSocket = new ServerSocket(PORT);
-		} catch (IOException e) {
-			System.out.println("Unable to bind to port: " + PORT);
-			e.printStackTrace();
-		}
-
-		try {
-			while (true) {
-				System.out.println("Listening");
-
-				Socket clientSocket = listenSocket.accept();
-				System.out.println("Connection Found");
-				numClients++;
-
-				NodeRequest request = new NodeRequest(clientSocket, numClients);
-
-				// Thread thread = new Thread(request);
-				System.out.println("Starting New Thread For Request");
-				request.start();
-
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
-}
-
 /**
  * NodeRequest Class -Uses TCP connection to communicate with nodes -Receiving
  * action requests from the nodes
  * 
  * @author Ryan Brown
  */
-// final class NodeRequest implements Runnable {
-class NodeRequest extends Thread implements ActionListener {
+public class NodeRequest extends Thread implements ActionListener {
 	// Network Variables
 	protected Socket tcpSocket = null;
 	protected static DatagramSocket udpSocket = null;

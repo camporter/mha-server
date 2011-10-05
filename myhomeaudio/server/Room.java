@@ -1,3 +1,5 @@
+package myhomeaudio.server;
+
 /**
  * The Room object represents a room that a User may be in.
  * Nodes are located in a Room.

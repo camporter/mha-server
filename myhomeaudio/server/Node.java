@@ -1,3 +1,4 @@
+package myhomeaudio.server;
 
 /**
  * Represents a physical node.
