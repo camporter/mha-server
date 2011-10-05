@@ -1,4 +1,4 @@
-package com.mpatric.mp3agic;
+package myhomeaudio.server.mp3;
 
 import java.util.ArrayList;
 import java.util.List;

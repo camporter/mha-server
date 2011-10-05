@@ -1,4 +1,4 @@
-package com.mpatric.mp3agic;
+package myhomeaudio.server.mp3;
 
 public class ID3v24Frame extends ID3v2Frame {
 

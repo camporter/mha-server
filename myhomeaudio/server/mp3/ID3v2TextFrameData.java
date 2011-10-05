@@ -1,4 +1,4 @@
-package com.mpatric.mp3agic;
+package myhomeaudio.server.mp3;
 
 public class ID3v2TextFrameData extends AbstractID3v2FrameData {
 	

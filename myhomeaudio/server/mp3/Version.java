@@ -1,4 +1,4 @@
-package com.mpatric.mp3agic;
+package myhomeaudio.server.mp3;
 
 public class Version {
 	private static final int MAJOR_VERSION = 0;

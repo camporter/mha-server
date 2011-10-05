@@ -1,4 +1,4 @@
-package com.mpatric.mp3agic;
+package myhomeaudio.server.mp3;
 
 public class ID3v23Tag extends AbstractID3v2Tag {
 	
