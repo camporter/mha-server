@@ -136,7 +136,6 @@ public class NodeRequest extends Thread implements ActionListener {
 			this.udpClientAddress = recvPacket.getAddress();
 			this.udpPortClient = recvPacket.getPort();
 			this.node = new Node(numClients);
-			udpSocket.connect(udpClientAddress, udpPortClient);
 
 			sendPacket = new DatagramPacket(buf, buf.length, udpClientAddress,
 					udpPortClient);
