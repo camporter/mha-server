@@ -17,10 +17,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.Timer;
 
 /* Type of message sent by nodes to server (temporary)
@@ -105,10 +101,10 @@ class NodeRequest extends Thread implements ActionListener {
 	protected int tcpPortServer = 0;
 	protected int udpPortClient = 0;
 	protected int udpPortServer = 0;
-	protected InetAddress udpAddrClient = null;
+	protected InetAddress udpClientAddress = null;
 	// protected InetAddress localAddr = null;
 	final static int serverId = 10;
-	int nodeId = -1;
+	Node node;
 	int userId = -1;
 
 	// File variables
@@ -176,12 +172,12 @@ class NodeRequest extends Thread implements ActionListener {
 			System.out.println("Waiting for first datagram from client");
 			udpSocket.receive(recvPacket);
 			System.out.println("Datagram Received");
-			this.udpAddrClient = recvPacket.getAddress();
+			this.udpClientAddress = recvPacket.getAddress();
 			this.udpPortClient = recvPacket.getPort();
-			this.nodeId = numClients;
-			udpSocket.connect(udpAddrClient, udpPortClient);
+			this.node = new Node(numClients);
+			udpSocket.connect(udpClientAddress, udpPortClient);
 
-			sendPacket = new DatagramPacket(buf, buf.length, udpAddrClient,
+			sendPacket = new DatagramPacket(buf, buf.length, udpClientAddress,
 					udpPortClient);
 			udpSocket.send(sendPacket);
 
@@ -269,8 +265,8 @@ class NodeRequest extends Thread implements ActionListener {
 			 * future transmissions nodeId - Always includes nodeId the server
 			 * is talking to
 			 */
-			String msg = serverId + "\n" + request + "\n" + nodeId + "\n";
-			System.out.println(serverId + " " + request + " " + nodeId + " ");
+			String msg = serverId + "\n" + request + "\n" + node.getId() + "\n";
+			System.out.println(serverId + " " + request + " " + node.getId() + " ");
 			bufferedWriter.write(msg);
 			bufferedWriter.flush();
 			System.out.println("Server - Sent response to Client.");
@@ -353,7 +349,7 @@ class NodeRequest extends Thread implements ActionListener {
 
 				// send the packet over the UDP socket
 				sendPacket = new DatagramPacket(packet_bits, packetLen,
-						udpAddrClient, udpPortClient);
+						udpClientAddress, udpPortClient);
 				udpSocket.send(sendPacket);
 				System.out.println("Send frame #" + audioNum);
 			} catch (Exception ex) {
