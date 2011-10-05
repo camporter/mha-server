@@ -43,10 +43,9 @@ import javax.swing.Timer;
  */
 
 //TODO Remove excess System.out.println statements 
-//TODO Stream audio
 
 public class Server {
-	protected static int port = 9090;
+	protected static int PORT = 9090;
 
 	static int numClients = 0;
 
@@ -61,9 +60,9 @@ public class Server {
 
 		ServerSocket listenSocket = null;
 		try {
-			listenSocket = new ServerSocket(port);
+			listenSocket = new ServerSocket(PORT);
 		} catch (IOException e) {
-			System.out.println("Unable to bind to port: " + port);
+			System.out.println("Unable to bind to port: " + PORT);
 			e.printStackTrace();
 		}
 
@@ -75,8 +74,7 @@ public class Server {
 				System.out.println("Connection Found");
 				numClients++;
 
-				NodeRequest request = new NodeRequest(clientSocket,
-						numClients + 100);
+				NodeRequest request = new NodeRequest(clientSocket, numClients);
 
 				// Thread thread = new Thread(request);
 				System.out.println("Starting New Thread For Request");
@@ -181,6 +179,7 @@ class NodeRequest extends Thread implements ActionListener {
 			this.udpAddrClient = recvPacket.getAddress();
 			this.udpPortClient = recvPacket.getPort();
 			this.nodeId = numClients;
+			udpSocket.connect(udpAddrClient, udpPortClient);
 
 			sendPacket = new DatagramPacket(buf, buf.length, udpAddrClient,
 					udpPortClient);
@@ -201,7 +200,7 @@ class NodeRequest extends Thread implements ActionListener {
 		}
 
 	}
-	
+
 	/**
 	 * Parses requests made by the node.
 	 * 
@@ -293,7 +292,8 @@ class NodeRequest extends Thread implements ActionListener {
 		}
 
 		bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-		bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+		bufferedWriter = new BufferedWriter(
+				new OutputStreamWriter(outputStream));
 
 		// Get initial request from client, should be INIT request
 		int requestType = -1;
@@ -349,13 +349,12 @@ class NodeRequest extends Thread implements ActionListener {
 
 				// get packet stream
 				byte[] packet_bits = new byte[packetLen];
-				packet.getpacket(packet_bits);
+				packet.getPacket(packet_bits);
 
 				// send the packet over the UDP socket
 				sendPacket = new DatagramPacket(packet_bits, packetLen,
 						udpAddrClient, udpPortClient);
 				udpSocket.send(sendPacket);
-
 				System.out.println("Send frame #" + audioNum);
 			} catch (Exception ex) {
 				System.out.println("Exception caught: " + ex);
@@ -365,77 +364,5 @@ class NodeRequest extends Thread implements ActionListener {
 			// if we have reached the end of the audio file, stop the timer
 			timer.stop();
 		}
-	}
-}
-
-/**
- * Allows audio files to be converted into frames of data for streaming.
- * 
- * @author Ryan Brown
- * 
- */
-class AudioStream {
-	File fileName;
-	AudioInputStream audioInputStream;
-	int frameNumber; // current frame nb
-
-	private AudioFormat format;
-	private long numFrames;
-	private int frameSize;
-
-	// constructor
-	public AudioStream(File file) {
-
-		this.fileName = file;
-		this.frameNumber = 0;
-
-		try {
-			audioInputStream = AudioSystem.getAudioInputStream(fileName);
-		} catch (UnsupportedAudioFileException e) {
-			System.out.println("The audio file " + fileName.getName()
-					+ " is not supported.");
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		setFormat(audioInputStream.getFormat());
-		setNumFrames(audioInputStream.getFrameLength());
-		setFrameSize(audioInputStream.getFormat().getFrameSize());
-	}
-
-	public int getNextFrame(byte[] frame) {
-		int nBytesRead = 0;
-		// byte[] data = new byte[frame.length];
-		try {
-			nBytesRead = audioInputStream.read(frame, 0, frame.length);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return nBytesRead;
-	}
-
-	public void setFormat(AudioFormat format) {
-		this.format = format;
-	}
-
-	public AudioFormat getFormat() {
-		return format;
-	}
-
-	public void setNumFrames(long numFrames) {
-		this.numFrames = numFrames;
-	}
-
-	public long getNumFrames() {
-		return numFrames;
-	}
-
-	public void setFrameSize(int frameSize) {
-		this.frameSize = frameSize;
-	}
-
-	public int getFrameSize() {
-		return frameSize;
 	}
 }

@@ -105,7 +105,7 @@ public class Packet {
 	}
 
 	// getpacket: returns the packet bitstream and its length
-	public int getpacket(byte[] packet) {
+	public int getPacket(byte[] packet) {
 		// construct the packet = header + payload
 		for (int i = 0; i < HEADER_SIZE; i++) {
 			packet[i] = header[i];
