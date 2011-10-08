@@ -25,7 +25,8 @@ public class AudioStream {
 
 	// constructor
 	/* 
-	 * @param file Audio file to be placed in frames and streamed
+	 * @param file 
+	 * 		Audio file to be placed in frames and streamed.
 	 * 
 	 * @return
 	 * 
@@ -52,8 +53,10 @@ public class AudioStream {
 	/* NextFrame Getter
 	 * @param frame Byte stream to hold frames
 	 * 
-	 * @return nBytesRead Number of bytes read from audio input stream
-	 * @return frame Byte stream holding audio frame data
+	 * @return nBytesRead 
+	 * 		Number of bytes read from audio input stream.
+	 * @return frame 
+	 * 		Byte stream holding audio frame data.
 	 * 
 	 * 
 	 */
@@ -71,7 +74,8 @@ public class AudioStream {
 
 	/* Format Setter
 	 * 
-	 * @param format Set AudioFormat variable of instance
+	 * @param format 
+	 * 		Set AudioFormat variable of instance.
 	 * 
 	 * @return
 	 * 
@@ -84,7 +88,8 @@ public class AudioStream {
 	 * 
 	 * @param 
 	 * 
-	 * @return format AudioFormat variable of instance
+	 * @return format 
+	 * 		AudioFormat variable of instance.
 	 * 
 	 */
 	public AudioFormat getFormat() {
@@ -93,7 +98,8 @@ public class AudioStream {
 
 	/* NumFrames Setter
 	 * 
-	 * @param numFrames Number of frames of audio file
+	 * @param numFrames 
+	 * 		Number of frames of audio file.
 	 * 
 	 * @return
 	 * 
@@ -106,7 +112,8 @@ public class AudioStream {
 	 * 
 	 * @param 
 	 * 
-	 * @return numFrames Number of frames of audio file
+	 * @return numFrames 
+	 * 		Number of frames of audio file.
 	 * 
 	 */
 	public long getNumFrames() {
@@ -115,7 +122,8 @@ public class AudioStream {
 	
 	/* FrameSize Setter
 	 * 
-	 * @param frameSize Size of audio frame
+	 * @param frameSize 
+	 * 		Size of audio frame.
 	 * 
 	 * @return
 	 * 
@@ -128,7 +136,8 @@ public class AudioStream {
 	 * 
 	 * @param 
 	 * 
-	 * @return frameSize Frame of frame in bytes
+	 * @return frameSize 
+	 * 		Frame of frame in bytes.
 	 * 
 	 */
 	public int getFrameSize() {
