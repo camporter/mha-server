@@ -69,7 +69,9 @@ public class NodeRequest extends Thread implements ActionListener {
 
 	// File variables
 	String musicName = "01 Fortune Faded.wav";
+	String musicName2 = "02 For what.wav";
 	File musicFile = new File(musicName);
+	File musicFile2 = new File(musicName2);
 	int audioNum = 0; // current frame of audio ready for transmission
 	int audioLen = 0; // length of the audio file
 	int audioFrameSize = 0;
@@ -276,13 +278,22 @@ public class NodeRequest extends Thread implements ActionListener {
 
 			} else if (requestType == SWITCH && state == STREAMING) {
 				// Node needs new audio stream and server currently streaming
-				// TODO complete
+				timer.stop();
+				audioNum = 0;
+				audio = new AudioStream(musicFile2);
+				audioLen = (int)audio.getNumFrames();
+				audioFrameSize = audio.getFrameSize();
+				System.out.println("Streaming audio: " + musicName2);
+				timer.start();
 			} else if (requestType == HALT && state == STREAMING) {
 				// Node requests streaming halt
-				// TODO complete
+				timer.stop();
+				System.out.println("Halting Audio Stream");
+				
 			} else if (requestType == DISCONNECT) {
 				// Node wants to disconnect
-				// TODO complete
+				timer.stop();
+				closeConnection();
 			}
 		}
 	}
@@ -318,6 +329,16 @@ public class NodeRequest extends Thread implements ActionListener {
 		} else {
 			// if we have reached the end of the audio file, stop the timer
 			timer.stop();
+		}
+	}
+	public void closeConnection() {
+		try {
+			tcpSocket.close();
+			udpSocket.close();
+			System.out.println("Connection Closed");
+		} catch (IOException e) {
+			System.out.println("Error Closing Connection");
+			e.printStackTrace();
 		}
 	}
 }

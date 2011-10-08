@@ -1,13 +1,8 @@
 package myhomeaudio.server;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-
 import myhomeaudio.server.database.Database;
 import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.handler.NodeHandler;
-import myhomeaudio.server.node.NodeRequest;
 
 public class Server {
 	protected static int NODE_PORT = 9090; // port that nodes will open a socket on.
