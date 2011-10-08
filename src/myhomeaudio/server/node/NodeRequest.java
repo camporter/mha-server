@@ -1,4 +1,4 @@
-package myhomeaudio.server.request;
+package myhomeaudio.server.node;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,7 +21,6 @@ import java.net.SocketException;
 
 import javax.swing.Timer;
 
-import myhomeaudio.server.Node;
 import myhomeaudio.server.AudioStream;
 import myhomeaudio.server.Packet;
 

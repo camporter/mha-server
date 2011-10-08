@@ -1,4 +1,6 @@
-package myhomeaudio.server;
+package myhomeaudio.server.node;
+
+import myhomeaudio.server.Room;
 
 /**
  * Represents a physical node.

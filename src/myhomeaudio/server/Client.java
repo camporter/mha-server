@@ -27,7 +27,6 @@ import javax.swing.Timer;
 
 public class Client {
 	protected static int port = 9090;
-	// static int port;
 	protected static String host = "localhost";
 	static ClientConnect conn;
 	static String msg;
