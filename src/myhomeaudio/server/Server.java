@@ -16,10 +16,12 @@ public class Server {
 		
 		//Database db = new Database("/db");
 		
+		//Handles node requests ie arduino 
 		NodeHandler nodeHandler = new NodeHandler(NODE_PORT);
 		System.out.println("Starting Node Handler");
 		nodeHandler.start();
 		
+		//Handles client requests ie android and iphone
 		ClientHandler clientHandler = new ClientHandler(CLIENT_PORT);
 		System.out.println("Starting Client Handler");
 		clientHandler.start();
