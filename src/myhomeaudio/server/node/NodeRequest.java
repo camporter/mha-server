@@ -7,6 +7,8 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,6 +25,12 @@ import javax.swing.Timer;
 
 import myhomeaudio.server.AudioStream;
 import myhomeaudio.server.Packet;
+import myhomeaudio.server.mp3.FileWrapper;
+import myhomeaudio.server.mp3.InvalidDataException;
+import myhomeaudio.server.mp3.Mp3File;
+import myhomeaudio.server.mp3.UnsupportedTagException;
+
+
 
 /* Type of message sent by nodes to server (temporary)
  * 
@@ -69,10 +77,13 @@ public class NodeRequest extends Thread implements ActionListener {
 
 	// File variables
 	String musicName = "01 Fortune Faded.wav";
+	String musicName2 = "02 For what.wav";
 	File musicFile = new File(musicName);
+	File musicFile2 = new File(musicName2);
 	int audioNum = 0; // current frame of audio ready for transmission
-	int audioLen = 0; // length of the audio file
+	long audioLen = 0; // length of the audio file
 	int audioFrameSize = 0;
+	int audioFrameCount = 0;
 	final static int BUFFERSIZE = 15000;
 
 	// Transmitting or Receiving variables
@@ -102,6 +113,12 @@ public class NodeRequest extends Thread implements ActionListener {
 	Timer timer;
 	byte[] buf;
 	static int frameDelay = 100;
+	
+	FileWrapper musicWrap = null;
+	Mp3File musicMp3 = null;
+	
+	
+	
 
 	/**
 	 * 
@@ -111,6 +128,7 @@ public class NodeRequest extends Thread implements ActionListener {
 	 */
 	public NodeRequest(Socket socket, int numClients) {
 		try {
+			
 			this.tcpSocket = socket;
 			this.tcpPortServer = socket.getLocalPort();
 			this.tcpPortClient = socket.getPort();
@@ -268,26 +286,87 @@ public class NodeRequest extends Thread implements ActionListener {
 			} else if (requestType == PLAY && state == WAITING) {
 				// Node wants audio stream and server ready to stream
 				sendResponse("RECEIVED");
-				audio = new AudioStream(musicFile);
-				audioLen = (int) audio.getNumFrames();
-				audioFrameSize = audio.getFrameSize();
+				
+				//audio = new AudioStream(musicFile);
+				//audioLen = (int) audio.getNumFrames();
+				//audioFrameSize = audio.getFrameSize();
+				
+				//musicWrap = new FileWrapper(musicName);
+				/*try {
+					musicMp3 = new Mp3File(musicName);
+				} catch (UnsupportedTagException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvalidDataException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}*/
+				
+				
+				//audioLen = musicMp3.getLength();
+				//audioFrameCount = musicMp3.getFrameCount();
+				//audioFrameSize = (int)audioLen/audioFrameCount; //bytes per frame
+				
 				System.out.println("Streaming Audio: " + musicName);
 				timer.start();
 
 			} else if (requestType == SWITCH && state == STREAMING) {
 				// Node needs new audio stream and server currently streaming
-				// TODO complete
+				timer.stop();
+				audioNum = 0;
+				audio = new AudioStream(musicFile2);
+				audioLen = (int)audio.getNumFrames();
+				audioFrameSize = audio.getFrameSize();
+				System.out.println("Streaming audio: " + musicName2);
+				timer.start();
 			} else if (requestType == HALT && state == STREAMING) {
 				// Node requests streaming halt
-				// TODO complete
+				timer.stop();
+				System.out.println("Halting Audio Stream");
+				
 			} else if (requestType == DISCONNECT) {
 				// Node wants to disconnect
-				// TODO complete
+				timer.stop();
+				closeConnection();
 			}
 		}
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
+		FileInputStream file = null;
+		try {
+			file = new FileInputStream("Buffalo For What.mp3");
+			
+			int i = 0;
+			while ((i = file.read()) != -1) {
+				byte[] data = {(byte)i};
+				sendPacket = new DatagramPacket(data, 1,
+						udpClientAddress, udpPortClient);
+				udpSocket.send(sendPacket);
+			}
+			timer.stop();
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally {
+			if (file != null)
+			{
+				try {
+					file.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		/*
+		
 		System.out.println("Streaming: " + audioNum + " "
 				+ ((audioLen * audioFrameSize) / BUFFERSIZE));
 		if (audioNum < ((audioLen * audioFrameSize) / BUFFERSIZE)) {
@@ -318,6 +397,17 @@ public class NodeRequest extends Thread implements ActionListener {
 		} else {
 			// if we have reached the end of the audio file, stop the timer
 			timer.stop();
+		}
+		*/
+	}
+	public void closeConnection() {
+		try {
+			tcpSocket.close();
+			udpSocket.close();
+			System.out.println("Connection Closed");
+		} catch (IOException e) {
+			System.out.println("Error Closing Connection");
+			e.printStackTrace();
 		}
 	}
 }
