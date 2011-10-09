@@ -35,6 +35,13 @@ public class ClientHandler extends Thread {
 					+ this.clientListenPort);
 			e.printStackTrace();
 		}
+		
+		// Start our initial pool of Workers
+		for (int i = 0; i < this.maxNumWorkers; ++i) {
+			Worker w = new Worker(this);
+			w.start();
+			workerPool.add(w);
+		}
 
 	}
 
@@ -45,12 +52,6 @@ public class ClientHandler extends Thread {
 
 				if (this.clientListenSocket == null) {
 					return; // Stop this thread if the socket isn't available
-				}
-
-				for (int i = 0; i < this.maxNumWorkers; ++i) {
-					Worker w = new Worker(this);
-					w.start();
-					workerPool.add(w);
 				}
 
 				Socket clientSocket = this.clientListenSocket.accept();
@@ -73,7 +74,7 @@ public class ClientHandler extends Thread {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.out.println("NodeHandler exited!");
+			System.out.println("NodeHandler exited !");
 			return;
 		}
 	}
@@ -86,7 +87,7 @@ public class ClientHandler extends Thread {
 	 * @return Whether the Worker was added to the pool.
 	 */
 	synchronized public boolean addWorker(Worker worker) {
-		if (this.getWorkerCount() == getMaxWorkers())
+		if (this.getWorkerCount() >= getMaxWorkers())
 		{
 			// Already have enough workers!
 			return false;

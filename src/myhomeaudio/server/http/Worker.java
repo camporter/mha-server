@@ -143,6 +143,8 @@ outerloop:
 				}
 			}
 		} finally {
+			inputStream.close();
+			printStream.close();
 			this.clientSocket.close();
 		}
 		
