@@ -19,10 +19,8 @@ import myhomeaudio.server.handler.ClientHandler;
  * @author cameron
  * 
  */
-public class Worker extends Thread implements HTTPStatus {
+public class Worker extends Thread implements HTTPStatus, HTTPMimeType {
 	final static int BUF_SIZE = 2048;
-
-	static final String EOL = "\r\n";
 
 	// buffer to use for requests
 	byte[] buf;
@@ -39,9 +37,9 @@ public class Worker extends Thread implements HTTPStatus {
 		this.clientSocket = socket;
 		notify();
 	}
-	
+
 	synchronized public void run() {
-		while(true) {
+		while (true) {
 			if (clientSocket == null) {
 				// Don't have a socket yet!
 				try {
@@ -53,106 +51,118 @@ public class Worker extends Thread implements HTTPStatus {
 				}
 			}
 			
+			// The socket is ready, go ahead and start dealing with the client
 			try {
 				handleClient();
 			} catch (Exception e) {
 				e.printStackTrace();
 				return;
 			}
-			
+
 			clientSocket = null; // reset the socket for next use
-			
+
 			// Done using the Worker, put it back in the Worker pool
-			synchronized(clientHandler) {
+			synchronized (clientHandler) {
 				if (!clientHandler.addWorker(this)) {
-					// Worker no longer needed
+					// Worker no longer needed, so end it
 					return;
 				}
 			}
 		}
 	}
 
+	/**
+	 * Handles all HTTP requests that come in, and responds accordingly.
+	 * 
+	 * @throws IOException
+	 */
 	private void handleClient() throws IOException {
-		BufferedReader inputStream = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
-		DataOutputStream outputStream = new DataOutputStream(this.clientSocket.getOutputStream());
-		
-		String output;
-		String uri = "";
+		BufferedReader inputStream = new BufferedReader(new InputStreamReader(
+				this.clientSocket.getInputStream()));
+		DataOutputStream outputStream = new DataOutputStream(
+				this.clientSocket.getOutputStream());
+
+		String output; /*
+						 * The final output we will send back to the client. We
+						 * will slowly build it based off of what the client has
+						 * requested.
+						 */
+		String requestUri;
 		String requestMessageLine = inputStream.readLine();
-		
-		StringTokenizer tokenizedLine = new StringTokenizer(requestMessageLine);
-		
-		if (tokenizedLine.nextToken().equals("GET")) {
+
+		StringTokenizer tokenizedRequestMessage = new StringTokenizer(
+				requestMessageLine);
+
+		String httpMethod = tokenizedRequestMessage.nextToken();
+		if (httpMethod.equals("GET")) {
 			// We have an HTTP GET method
-			uri = tokenizedLine.nextToken();
-			uri = uri.startsWith("/") ? uri.substring(1) : uri; // Get rid of starting slash
+			requestUri = tokenizedRequestMessage.nextToken();
+			requestUri = requestUri.startsWith("/") ? requestUri.substring(1)
+					: requestUri; // Get rid of starting slash
+
 			
-			output = "HTTP/1.0 200 OK\r\n";
-			output += "Content-type: text/html\r\n";
-			output += "\r\n";
-			output += "<html><h1>I like puppies</h1></html>";
+			String content = "<html><h1>I like puppies!!!!!!!!!!!!!!11111111111111</h1></html>";
+			
+			output = buildHeader(HTTP_OK, true, MIME_HTML, content.getBytes().length);
+			output += content;
 			
 			outputStream.writeBytes(output);
-			
+
+		} else if (httpMethod.equals("POST")) {
+			// We have an HTTP POST method
 		}
-		
+
 		clientSocket.close();
-		uri = null;
+		requestUri = null;
 		output = null;
-		tokenizedLine = null;
-		/*
-		this.clientSocket.setSoTimeout(clientHandler.timeout);
-		this.clientSocket.setTcpNoDelay(true);
-		
-			
-			// figure out what the URI is
-			int i = 0;
-			for (i = index; i<nread; i++) {
-				if (buf[i] == (byte)' ') {
-					// Found the end of the URI (can't have spaces)
-					break;
-				}
-			}
-			String uri = (new String(buf, index, i-index));
-			output += printHeaders(uri, printStream);
-			if (doingGet) {
-				output += "<html>hi there</html>";
-				//printStream.print("<html>hi there</html>");
-				//printStream.write(EOL);
-			}
-			
-		} finally {
-			printStream.print(output);
-			inputStream.close();
-			printStream.close();
-			this.clientSocket.close();
-		}
-		*/
-		
+		tokenizedRequestMessage = null;
+
 	}
-	
-	String printHeaders(String uri, PrintStream printStream) throws IOException {
-		String ret = "";
-		int rCode = 0;
+
+	/**
+	 * Builds the HTTP header that will be sent back to the client.
+	 * 
+	 * @param httpStatus
+	 *            Status code of the response.
+	 * @param hasContent
+	 *            Indicates whether content is included in the response.
+	 * @param mimeType
+	 *            The mime-type of the content being served in the response. Not
+	 *            needed if hasContent is false.
+	 * @param contentLength
+	 *            The size (in bytes) of the content being sent. Not needed if
+	 *            hasContent is false.
+	 * @return
+	 * @throws IOException
+	 */
+	String buildHeader(int httpStatus, boolean hasContent, String mimeType,
+			int contentLength) throws IOException {
+		String ret = "HTTP/1.0 ";
+
+		switch (httpStatus) {
+		case HTTP_OK:
+			ret += HTTP_OK + " OK\r\n";
+			break;
+		case HTTP_NOT_FOUND:
+			ret += HTTP_NOT_FOUND + " Not Found\r\n";
+			break;
+		}
+
+		// Add server software name
+		ret += "Server: My Home Audio\r\n";
+
+		// Add the date
+		ret += "Date: " + (new Date()) + "\r\n";
+
+		if (hasContent) {
+			// Add the content type
+			ret += "Content-type: " + mimeType + "\r\n";
+
+			// Add the content length
+			ret += "Content-length: " + contentLength + "\r\n";
+		}
 		
-		// not considering bad uris here yet
-		
-		rCode = HTTP_OK;
-		//printStream.print("HTTP/1.0 "+HTTP_OK+" OK");
-		//printStream.write(EOL);
-		ret = "HTTP/1.0 " +HTTP_OK+" OK"+EOL;
-		
-		System.out.println("From "+this.clientSocket.getInetAddress().getHostAddress()+": GET "+uri+" --> "+rCode);
-		/*printStream.print("Server: My Home Audio");
-		printStream.write(EOL);
-		printStream.print("Date: "+(new Date()));
-		printStream.write(EOL);
-		printStream.print("Content-type: text/html");
-		printStream.write(EOL);
-		*/
-		
-		ret += "Server: My Home Audio" + EOL + "Date: "+(new Date()) + EOL + "Content-type: text/html" + EOL;
-		
+		ret += "\r\n";
 		return ret;
 	}
 }
