@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.Date;
 
 import myhomeaudio.server.handler.ClientHandler;
 
@@ -14,7 +15,7 @@ import myhomeaudio.server.handler.ClientHandler;
  * @author cameron
  * 
  */
-public class Worker extends Thread {
+public class Worker extends Thread implements HTTPStatus {
 	final static int BUF_SIZE = 2048;
 
 	static final byte[] EOL = { (byte) '\r', (byte) '\n' };
@@ -100,18 +101,73 @@ outerloop:
 			
 			// figure out which HTTP method we are doing, either GET or HEAD
 			boolean doingGet;
+			int index; // next byte to read
 			
 			if (buf[0] == (byte)'G' &&
 					buf[1] == (byte)'E' &&
 					buf[2] == (byte)'T' &&
 					buf[3] == (byte)' ') {
 				doingGet = true;
-				//index = 4;
+				index = 4;
+			} else if(buf[0] == (byte)'H' &&
+					buf[1] == (byte)'E' &&
+					buf[2] == (byte)'A' &&
+					buf[3] == (byte)'D' &&
+					buf[4] == (byte)' ') {
+				doingGet = false;
+				index  = 5;
+			} else {
+				// Method not supported (yet)
+				printStream.print("HTTP/1.0"+HTTP_BAD_METHOD+" unsupported method type: ");
+				printStream.write(buf, 0, 5);
+				printStream.write(EOL);
+				printStream.flush();
+				this.clientSocket.close();
+				return;
 			}
 			
+			// figure out what the URI is
+			int i = 0;
+			for (i = index; i<nread; i++) {
+				if (buf[i] == (byte)' ') {
+					// Found the end of the URI (can't have spaces)
+					break;
+				}
+			}
+			String uri = (new String(buf, index, i-index));
+			boolean OK = printHeaders(uri, printStream);
+			if (doingGet) {
+				if (OK) {
+					printStream.print("<html>hi there</html>");
+					printStream.write(EOL);
+				}
+			}
 		} finally {
-			
+			this.clientSocket.close();
 		}
 		
+	}
+	
+	boolean printHeaders(String uri, PrintStream printStream) throws IOException {
+		boolean ret = true;
+		int rCode = 0;
+		
+		// not considering bad uris here yet
+		
+		rCode = HTTP_OK;
+		printStream.print("HTTP/1.0 "+HTTP_OK+" OK");
+		printStream.write(EOL);
+		ret = true;
+		
+		System.out.println("From "+this.clientSocket.getInetAddress().getHostAddress()+": GET "+uri+" --> "+rCode);
+		printStream.print("Server: My Home Audio");
+		printStream.write(EOL);
+		printStream.print("Date: "+(new Date()));
+		printStream.write(EOL);
+		if (ret) {
+			printStream.print("Content-type: text/html");
+			printStream.write(EOL);
+		}
+		return ret;
 	}
 }
