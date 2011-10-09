@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import myhomeaudio.server.database.Database;
 import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.handler.NodeHandler;
 import myhomeaudio.server.node.NodeRequest;
@@ -17,7 +18,9 @@ public class Server {
 	 *            No parameters
 	 */
 	public static void main(String[] args) {
-
+		
+		//Database db = new Database("/db");
+		
 		NodeHandler nodeHandler = new NodeHandler(NODE_PORT);
 		System.out.println("Starting Node Handler");
 		nodeHandler.start();

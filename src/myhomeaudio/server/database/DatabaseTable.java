@@ -1,4 +1,4 @@
-package database;
+package myhomeaudio.server.database;
 
 import java.util.ArrayList;
 

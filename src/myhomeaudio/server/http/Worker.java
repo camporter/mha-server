@@ -1,11 +1,15 @@
 package myhomeaudio.server.http;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Date;
+import java.util.StringTokenizer;
 
 import myhomeaudio.server.handler.ClientHandler;
 
@@ -18,7 +22,7 @@ import myhomeaudio.server.handler.ClientHandler;
 public class Worker extends Thread implements HTTPStatus {
 	final static int BUF_SIZE = 2048;
 
-	static final byte[] EOL = { (byte) '\r', (byte) '\n' };
+	static final String EOL = "\r\n";
 
 	// buffer to use for requests
 	byte[] buf;
@@ -27,7 +31,6 @@ public class Worker extends Thread implements HTTPStatus {
 
 	public Worker(ClientHandler clientHandler) {
 		this.clientHandler = clientHandler;
-		this.buf = new byte[BUF_SIZE];
 		this.clientSocket = null;
 	}
 
@@ -70,61 +73,37 @@ public class Worker extends Thread implements HTTPStatus {
 	}
 
 	private void handleClient() throws IOException {
-		InputStream inputStream = new BufferedInputStream(this.clientSocket.getInputStream());
-		PrintStream printStream = new PrintStream(this.clientSocket.getOutputStream());
+		BufferedReader inputStream = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
+		DataOutputStream outputStream = new DataOutputStream(this.clientSocket.getOutputStream());
 		
+		String output;
+		String uri = "";
+		String requestMessageLine = inputStream.readLine();
+		
+		StringTokenizer tokenizedLine = new StringTokenizer(requestMessageLine);
+		
+		if (tokenizedLine.nextToken().equals("GET")) {
+			// We have an HTTP GET method
+			uri = tokenizedLine.nextToken();
+			uri = uri.startsWith("/") ? uri.substring(1) : uri; // Get rid of starting slash
+			
+			output = "HTTP/1.0 200 OK\r\n";
+			output += "Content-type: text/html\r\n";
+			output += "\r\n";
+			output += "<html><h1>I like puppies</h1></html>";
+			
+			outputStream.writeBytes(output);
+			
+		}
+		
+		clientSocket.close();
+		uri = null;
+		output = null;
+		tokenizedLine = null;
+		/*
 		this.clientSocket.setSoTimeout(clientHandler.timeout);
 		this.clientSocket.setTcpNoDelay(true);
 		
-		// zero out the buffer from its last use
-		for (int i=0; i<BUF_SIZE;i++) {
-			buf[i] = 0;
-		}
-		try {
-			int nread = 0, r = 0;
-outerloop:
-			while(nread < BUF_SIZE) {
-				r = inputStream.read(buf, nread, BUF_SIZE - nread);
-				if ( r == -1) {
-					// EOF
-					return;
-				}
-				int i = nread;
-				nread += r;
-				for (; i<nread; i++) {
-					if (buf[i] == (byte)'\n' || buf[i] == (byte)'\r') {
-						//read one line
-						break outerloop;
-					}
-				}
-			}
-			
-			// figure out which HTTP method we are doing, either GET or HEAD
-			boolean doingGet;
-			int index; // next byte to read
-			
-			if (buf[0] == (byte)'G' &&
-					buf[1] == (byte)'E' &&
-					buf[2] == (byte)'T' &&
-					buf[3] == (byte)' ') {
-				doingGet = true;
-				index = 4;
-			} else if(buf[0] == (byte)'H' &&
-					buf[1] == (byte)'E' &&
-					buf[2] == (byte)'A' &&
-					buf[3] == (byte)'D' &&
-					buf[4] == (byte)' ') {
-				doingGet = false;
-				index  = 5;
-			} else {
-				// Method not supported (yet)
-				printStream.print("HTTP/1.0"+HTTP_BAD_METHOD+" unsupported method type: ");
-				printStream.write(buf, 0, 5);
-				printStream.write(EOL);
-				printStream.flush();
-				this.clientSocket.close();
-				return;
-			}
 			
 			// figure out what the URI is
 			int i = 0;
@@ -135,41 +114,45 @@ outerloop:
 				}
 			}
 			String uri = (new String(buf, index, i-index));
-			boolean OK = printHeaders(uri, printStream);
+			output += printHeaders(uri, printStream);
 			if (doingGet) {
-				if (OK) {
-					printStream.print("<html>hi there</html>");
-					printStream.write(EOL);
-				}
+				output += "<html>hi there</html>";
+				//printStream.print("<html>hi there</html>");
+				//printStream.write(EOL);
 			}
+			
 		} finally {
+			printStream.print(output);
 			inputStream.close();
 			printStream.close();
 			this.clientSocket.close();
 		}
+		*/
 		
 	}
 	
-	boolean printHeaders(String uri, PrintStream printStream) throws IOException {
-		boolean ret = true;
+	String printHeaders(String uri, PrintStream printStream) throws IOException {
+		String ret = "";
 		int rCode = 0;
 		
 		// not considering bad uris here yet
 		
 		rCode = HTTP_OK;
-		printStream.print("HTTP/1.0 "+HTTP_OK+" OK");
-		printStream.write(EOL);
-		ret = true;
+		//printStream.print("HTTP/1.0 "+HTTP_OK+" OK");
+		//printStream.write(EOL);
+		ret = "HTTP/1.0 " +HTTP_OK+" OK"+EOL;
 		
 		System.out.println("From "+this.clientSocket.getInetAddress().getHostAddress()+": GET "+uri+" --> "+rCode);
-		printStream.print("Server: My Home Audio");
+		/*printStream.print("Server: My Home Audio");
 		printStream.write(EOL);
 		printStream.print("Date: "+(new Date()));
 		printStream.write(EOL);
-		if (ret) {
-			printStream.print("Content-type: text/html");
-			printStream.write(EOL);
-		}
+		printStream.print("Content-type: text/html");
+		printStream.write(EOL);
+		*/
+		
+		ret += "Server: My Home Audio" + EOL + "Date: "+(new Date()) + EOL + "Content-type: text/html" + EOL;
+		
 		return ret;
 	}
 }
