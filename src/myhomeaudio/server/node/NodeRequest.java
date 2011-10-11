@@ -62,39 +62,21 @@ import myhomeaudio.server.mp3.UnsupportedTagException;
 public class NodeRequest extends Thread implements ActionListener {
 	// Network Variables
 	protected Socket tcpSocket = null;
-	protected static DatagramSocket udpSocket = null;
-	DatagramPacket sendPacket = null;
-	DatagramPacket recvPacket = null;
+	//DatagramPacket sendPacket = null;
+	//DatagramPacket recvPacket = null;
 	protected int tcpPortClient = 0;
 	protected int tcpPortServer = 0;
-	protected int udpPortClient = 0;
-	protected int udpPortServer = 0;
-	protected InetAddress udpClientAddress = null;
-	// protected InetAddress localAddr = null;
 	final static int serverId = 10;
 	Node node;
 	int userId = -1;
 
-	// File variables
-	String musicName = "01 Fortune Faded.wav";
-	String musicName2 = "02 For what.wav";
-	File musicFile = new File(musicName);
-	File musicFile2 = new File(musicName2);
-	int audioNum = 0; // current frame of audio ready for transmission
-	long audioLen = 0; // length of the audio file
-	int audioFrameSize = 0;
-	int audioFrameCount = 0;
 	final static int BUFFERSIZE = 15000;
 
 	// Transmitting or Receiving variables
-	int seqNumber = 0;
 	InputStream inputStream = null;
 	OutputStream outputStream = null;
-	ByteArrayInputStream bais = null;
-	ByteArrayOutputStream baos = null;
 	BufferedReader bufferedReader = null;
 	BufferedWriter bufferedWriter = null;
-	AudioStream audio = null;
 
 	// Request variables
 	final static int INIT = 0;
@@ -113,11 +95,6 @@ public class NodeRequest extends Thread implements ActionListener {
 	Timer timer;
 	byte[] buf;
 	static int frameDelay = 100;
-	
-	FileWrapper musicWrap = null;
-	Mp3File musicMp3 = null;
-	
-	
 	
 
 	/**
@@ -336,9 +313,12 @@ public class NodeRequest extends Thread implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-		FileInputStream file = null;
+		File file = null;
 		try {
-			file = new FileInputStream("Buffalo For What.mp3");
+			file = new File("Buffalo For What.mp3");
+			fileInputStream = new FileInputStream(file);
+			
+			byte[file.length()] data;
 			
 			int i = 0;
 			while ((i = file.read()) != -1) {
@@ -403,7 +383,6 @@ public class NodeRequest extends Thread implements ActionListener {
 	public void closeConnection() {
 		try {
 			tcpSocket.close();
-			udpSocket.close();
 			System.out.println("Connection Closed");
 		} catch (IOException e) {
 			System.out.println("Error Closing Connection");
