@@ -37,6 +37,7 @@ public class NodeHandler extends Thread {
 		}
 	}
 
+
 	public void run() {
 		try {
 			while (true) {
@@ -63,5 +64,13 @@ public class NodeHandler extends Thread {
 			System.out.println("NodeHandler exited!");
 			return;
 		}
+	}
+	
+	/**
+	 * @return numNodes
+	 * 		Number of nodes currently connect to the server
+	 */
+	public int getNumNodes() {
+		return numNodes;
 	}
 }
