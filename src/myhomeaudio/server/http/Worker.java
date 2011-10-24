@@ -12,6 +12,10 @@ import java.util.Date;
 import java.util.StringTokenizer;
 
 import myhomeaudio.server.handler.ClientHandler;
+import myhomeaudio.server.helper.NodeHelper;
+import myhomeaudio.server.helper.SteamHelper;
+import myhomeaudio.server.helper.StreamHelper;
+import myhomeaudio.server.helper.UserHelper;
 
 /**
  * Worker is a thread that services a client's request.
@@ -105,10 +109,18 @@ public class Worker extends Thread implements HTTPStatus, HTTPMimeType {
 			String stringMethod = tokenizedUri.nextToken();
 			
 			if (stringHelper == "node") {
+				//TODO Tell what node client referring to
+				//Uri contains /node/stream
+				//Possibly /node/stream/10    -> 10 = nodeID
 				NodeHelper nodeHelper = new NodeHelper();
-			} else if (StringHelper == "stream") {
-				SteamHelper stremHelper = new NodeHelper()
+				//TODO create output message with name of stream
+				nodeHelper
+			} else if (stringHelper == "stream") {
+				StreamHelper streamHelper = new StreamHelper();
+			} else if (stringHelper == "user") {
+				UserHelper userHelper = new UserHelper();
 			}
+			
 			
 			
 			//output = buildHeader(HTTP_OK, true, MIME_HTML, content.getBytes().length);
