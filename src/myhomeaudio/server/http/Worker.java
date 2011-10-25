@@ -105,13 +105,15 @@ public class Worker extends Thread implements HTTPStatus, HTTPMimeType {
 			StringTokenizer tokenizedUri = new StringTokenizer(requestUri, "/");
 			
 			String stringHelper = tokenizedUri.nextToken();
-			String stringMethod = tokenizedUri.nextToken();
+			//String stringMethod = tokenizedUri.nextToken();
 			
 			if (stringHelper == "node") {
 				//TODO Tell what node client referring to
-				//Uri contains /node/stream
-				//Possibly /node/stream/10    -> 10 = nodeID
-				NodeHelper nodeHelper = new NodeHelper();
+				//Uri contains /node/nodeID/stream
+				int nodeID = Integer.parseInt(tokenizedUri.nextToken());
+				String stringMethod = tokenizedUri.nextToken();
+				NodeHelper nodeHelper = new NodeHelper(nodeID,stringMethod);
+				nodeHelper.getNodeID();
 				//TODO create output message with name of stream
 				//nodeHelper
 			} else if (stringHelper == "stream") {
