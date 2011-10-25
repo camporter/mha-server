@@ -94,23 +94,27 @@ public class Worker extends Thread implements HTTPStatus, HTTPMimeType {
 				requestMessageLine);
 
 		String httpMethod = tokenizedRequestMessage.nextToken();
-		if (httpMethod.equals("GET")) {
-			// We have an HTTP GET method
+		
 			requestUri = tokenizedRequestMessage.nextToken();
 			requestUri = requestUri.startsWith("/") ? requestUri.substring(1)
 					: requestUri; // Get rid of starting slash
 
+			StringTokenizer tokenizedUri = new StringTokenizer(requestUri, "/");
 			
-			String content = "<html><h1>I like puppies!!!!!!!!!!!!!!11111111111111</h1></html>";
+			String stringHelper = tokenizedUri.nextToken();
+			String stringMethod = tokenizedUri.nextToken();
 			
-			output = buildHeader(HTTP_OK, true, MIME_HTML, content.getBytes().length);
-			output += content;
+			if (stringHelper == "node") {
+				NodeHelper nodeHelper = new NodeHelper();
+			} else if (StringHelper == "stream") {
+				SteamHelper stremHelper = new NodeHelper()
+			}
 			
-			outputStream.writeBytes(output);
-
-		} else if (httpMethod.equals("POST")) {
-			// We have an HTTP POST method
-		}
+			
+			//output = buildHeader(HTTP_OK, true, MIME_HTML, content.getBytes().length);
+			//output += content;
+			
+			//outputStream.writeBytes(output);
 
 		clientSocket.close();
 		requestUri = null;
