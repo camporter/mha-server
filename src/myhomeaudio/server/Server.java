@@ -1,6 +1,6 @@
 package myhomeaudio.server;
 
-import myhomeaudio.server.database.Database;
+//import myhomeaudio.server.database.Database;
 import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.handler.NodeHandler;
 
@@ -14,7 +14,7 @@ public class Server {
 	 */
 	public static void main(String[] args) {
 		
-		Database db = Database.getInstance();
+		//Database db = Database.getInstance();
 		
 		//Handles node requests ie arduino 
 		NodeHandler nodeHandler = new NodeHandler(NODE_PORT);

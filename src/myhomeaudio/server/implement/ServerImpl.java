@@ -23,9 +23,10 @@ import myhomeaudio.server.interfaces.UserInterface;
  * @author Ryan Brown
  *
  */
-class ServerImpl implements ServerInterface {
+public class ServerImpl implements ServerInterface {
 	//Networking variables
-	protected static int port = 9090;
+	protected static int tcpPort = 9090;
+	protected static int udpPort = 9080;
 	protected InetAddress ipAddr;
 	protected InetAddress ipBroadcast;
 	private Socket tcpSocket;
@@ -47,18 +48,45 @@ class ServerImpl implements ServerInterface {
 	public boolean connect() {
 		
 		try {
+			//Gets IP address, Uses the information to create a NetworkInterface that
+			//will create a broadcast IP address based on the IP of the host
+			//therefore the broadcast will stay within the network
 			ipAddr = InetAddress.getLocalHost();
 			NetworkInterface networkInterface = NetworkInterface.getByInetAddress(ipAddr);
 			List<InterfaceAddress> interfaceAddrCollection = networkInterface.getInterfaceAddresses();
 			InterfaceAddress interfaceAddr = interfaceAddrCollection.get(0);
 			ipBroadcast = interfaceAddr.getBroadcast();
+			System.out.println(ipBroadcast.getHostAddress());
 			//Create UDP packet and broadcast to network
-			//Wait for Server response 
-			//Extract IP and call attemptConnect()
+			DatagramSocket udpSocket = new DatagramSocket();
+			udpSocket.setSoTimeout(100);
+			byte[] buf = new byte[5];//empty data to be sent
+			DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, ipBroadcast,
+					udpPort);
+			udpSocket.send(sendPacket);
+
+			// Receive reply back from server
+			DatagramPacket recvPacket = new DatagramPacket(buf, buf.length);
+			System.out.println("Waiting for Server Response");
+			int count = 0;
+			while (!datagramReceive(udpSocket, recvPacket)) {
+				count++;
+				if (count > 10) {
+					System.out.println("Resending Packet");
+					udpSocket.send(sendPacket);
+					count = 0;
+				}
+			}
+			System.out.println("Client UDPSocket Created");
+			ipAddr = udpSocket.getInetAddress();
+			return attemptConnect();
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -155,13 +183,23 @@ class ServerImpl implements ServerInterface {
 		//Creates TCP Connection for HTTP requests
 		System.out.println("Creating Connection");
 		try {
-			tcpSocket = new Socket(ipAddr, port);
+			this.tcpSocket = new Socket(ipAddr, tcpPort);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
 			return false;
 		}
 		System.out.println("Client TCP Socket Created");
+		return true;
+	}
+	private boolean datagramReceive(DatagramSocket udpSocket, DatagramPacket recvPacket) {
+		try {
+			udpSocket.receive(recvPacket);
+		} catch (SocketException e) {
+			return false;
+		} catch (IOException e) {
+			return false;
+		}
 		return true;
 	}
 }
