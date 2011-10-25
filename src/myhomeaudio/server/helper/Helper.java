@@ -23,7 +23,8 @@ public class Helper implements HelperInterface, HTTPStatus {
 	 * @param contentLength
 	 *            The size (in bytes) of the content being sent. Not needed if
 	 *            hasContent is false.
-	 * @return
+	 * @return headerString
+	 * 			  HTTP header string
 	 * @throws IOException
 	 */
 	String buildHeader(int httpStatus, boolean hasContent, String mimeType,

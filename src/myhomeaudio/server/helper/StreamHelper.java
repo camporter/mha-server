@@ -1,6 +1,6 @@
 package myhomeaudio.server.helper;
 
-public class StreamHelper {
+public class StreamHelper extends Helper implements HelperInterface {
 	
 	public boolean play(){
 		return false;

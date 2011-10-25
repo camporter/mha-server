@@ -168,6 +168,9 @@ public class Worker extends Thread implements HTTPStatus, HTTPMimeType {
 		if (helperName == "node") {
 			return new NodeHelper();
 		}
+		else if(helperName == "song"){
+			return new SongHelper();
+		}
 		else {
 			// default
 			return new Helper();
