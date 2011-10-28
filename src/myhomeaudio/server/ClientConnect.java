@@ -33,7 +33,7 @@ import myhomeaudio.server.node.NodeRequestCommands;
  * conn.send(msg); //conn.receive(); //conn.closeConnection();
  */
 
-class ClientConnect extends Thread implements NodeRequestCommands{
+public class ClientConnect extends Thread implements NodeRequestCommands{
 	String msg;
 
 	Timer timer;

@@ -14,7 +14,7 @@ public class Server {
 	 */
 	public static void main(String[] args) {
 		
-		//Database db = new Database("/db");
+		Database db = Database.getInstance();
 		
 		//Handles node requests ie arduino 
 		NodeHandler nodeHandler = new NodeHandler(NODE_PORT);

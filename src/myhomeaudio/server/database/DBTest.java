@@ -7,7 +7,7 @@ public class DBTest {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-			Database db = new Database("db");
+			//Database db = new Database("db");
 	}
 
 }

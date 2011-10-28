@@ -24,7 +24,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class Database {
 
-	private String databaseFolder;
+	private static Database instance = null; // The instance that will be used.
+												// Also the only instance that
+												// will exist of the Database
+												// object.
+
+	private String databaseFolder = "db";
 
 	private ArrayList<DatabaseTable> tables;
 
@@ -36,33 +41,42 @@ public class Database {
 	/**
 	 * Populates the database with its tables from the stored folders/files.
 	 */
-	public Database(String databaseFolder) {
-		this.databaseFolder = databaseFolder;
+	protected Database() {
 
 		tables = new ArrayList<DatabaseTable>();
 
 		// Find all table folders and create table objects based off of them
 		File dbFolder = new File(this.databaseFolder);
-		File[] fileList = dbFolder.listFiles();
-		for (File f : fileList) {
-			if (f.isDirectory()) {
-				DatabaseTable table = new DatabaseTable(this, f.getName());
+		if (dbFolder.exists()) {
+			File[] fileList = dbFolder.listFiles();
+			for (File f : fileList) {
+				if (f.isDirectory()) {
+					DatabaseTable table = new DatabaseTable(this, f.getName());
 
-				// Keep record of the table in the database
-				this.tables.add(table);
+					// Keep record of the table in the database
+					this.tables.add(table);
+				}
 			}
 		}
 	}
-	
+
+	// The only way for the rest of the program to get a Database object.
+	public static Database getInstance() {
+		if (instance == null) {
+			instance = new Database();
+		}
+		return instance;
+	}
+
 	/**
 	 * Get a list of tables in the Database.
+	 * 
 	 * @return
 	 */
-	public ArrayList<DatabaseTable> getTables()
-	{
+	public ArrayList<DatabaseTable> getTables() {
 		return new ArrayList<DatabaseTable>(this.tables);
 	}
-	
+
 	public DatabaseTable createTable(String tableName, ArrayList<String> schema) {
 		write.lock();
 		try {
