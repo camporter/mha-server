@@ -61,7 +61,7 @@ public class Database {
 	}
 
 	// The only way for the rest of the program to get a Database object.
-	public static Database getInstance() {
+	public static synchronized Database getInstance() {
 		if (instance == null) {
 			instance = new Database();
 		}

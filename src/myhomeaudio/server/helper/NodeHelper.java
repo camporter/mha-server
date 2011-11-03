@@ -13,32 +13,13 @@ import myhomeaudio.server.interfaces.StreamInterface;
  * 
  */
 
-public class NodeHelper {
-	private int nodeID;
-	//TODO what needs to be returned?
-	//private StringInterface nodeStream;
+public class NodeHelper extends Helper implements HelperInterface {
 	
-	/* Constructor
-	 * 
-	 */
-	public NodeHelper(int nodeID, String stringMethod){
-		this.setNodeID(nodeID);
-		if(stringMethod == "stream"){
-			stream();
-		}
+	public String getOutput() {
+		String output = "";
 		
+		
+		return output;
 	}
 	
-	public StreamInterface stream(){
-		return null;
-	}
-
-	public void setNodeID(int nodeID) {
-		this.nodeID = nodeID;
-	}
-
-	public int getNodeID() {
-		return nodeID;
-	}
-
 }
