@@ -26,10 +26,9 @@ public class NodeRequest2 extends Thread implements NodeRequestCommands {
 	// Stream variables
 	BufferedReader inputStream = null;
 	DataOutputStream outputStream = null;
-
 	// MP3 I/O
 	boolean isMP3Playing = false; /* Whether MP3 data is being sent. */
-	File mp3File = new File("Buffalo For What.mp3");
+	File mp3File = new File("music/Buffalo For What.mp3");
 	FileInputStream mp3Stream = null;
 	byte[] mp3Buffer;
 
@@ -90,6 +89,7 @@ public class NodeRequest2 extends Thread implements NodeRequestCommands {
 
 	public void run() {
 		// Initialize server state
+		System.out.println("Running");
 		try {
 			this.inputStream = new BufferedReader(new InputStreamReader(
 					this.tcpSocket.getInputStream()));
