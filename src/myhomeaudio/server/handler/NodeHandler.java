@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 //import myhomeaudio.server.node.NodeRequest;
+import myhomeaudio.server.NodeManager;
+import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeRequest2;
 
 /**
@@ -16,7 +18,6 @@ import myhomeaudio.server.node.NodeRequest2;
 public class NodeHandler extends Thread {
 	private ServerSocket nodeListenSocket; // Socket to use for listening
 	private int nodeListenPort; // Port to listen on
-	private int numNodes = 0; // Number of nodes that have connected
 
 	/**
 	 * 
@@ -50,13 +51,16 @@ public class NodeHandler extends Thread {
 				// Start listening
 				Socket nodeSocket = this.nodeListenSocket.accept();
 				System.out.println("Node connection Found");
-				this.numNodes++;
-
+				
+				NodeManager nm = NodeManager.getInstance();
+				Node newNode = new Node(nodeSocket.getInetAddress().getHostAddress());
+				nm.addNode(newNode);
+				
 				// Give the request its own thread
-				NodeRequest2 request = new NodeRequest2(nodeSocket);
+				/*NodeRequest2 request = new NodeRequest2(nodeSocket);
 
 				System.out.println("Starting New NodeRequest");
-				request.start();
+				request.start();*/
 
 			}
 		} catch (IOException e) {
@@ -64,13 +68,5 @@ public class NodeHandler extends Thread {
 			System.out.println("NodeHandler exited!");
 			return;
 		}
-	}
-	
-	/**
-	 * @return numNodes
-	 * 		Number of nodes currently connect to the server
-	 */
-	public int getNumNodes() {
-		return numNodes;
 	}
 }

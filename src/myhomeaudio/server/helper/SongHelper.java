@@ -5,9 +5,13 @@ import java.util.StringTokenizer;
 
 import com.google.gson.Gson;
 
+import myhomeaudio.server.NodeManager;
 import myhomeaudio.server.Songs;
+import myhomeaudio.server.http.HTTPHeader;
+import myhomeaudio.server.http.HTTPMimeType;
+import myhomeaudio.server.node.NodeCommands;
 
-public class SongHelper extends Helper implements HelperInterface {
+public class SongHelper extends Helper implements HelperInterface, HTTPMimeType, NodeCommands {
 	
 	@Override
 	public void setData(String uri, String body)
@@ -35,15 +39,17 @@ public class SongHelper extends Helper implements HelperInterface {
 				Gson gson = new Gson();
 				
 				body = gson.toJson(songs.getSongList());
-				header = buildHeader(HTTP_OK, true, "application/json", body.length());
+				header = HTTPHeader.buildResponse(HTTP_OK, true, MIME_JSON, body.length());
 			}
 			else if (method.equals("play"))
 			{
-				
+				NodeManager nm = NodeManager.getInstance();
+				nm.sendNodeCommand(NODE_PLAY, " ");
 			}
 			else if (method.equals("pause"))
 			{
-				
+				NodeManager nm = NodeManager.getInstance();
+				nm.sendNodeCommand(NODE_PAUSE, "");
 			}
 			
 		}

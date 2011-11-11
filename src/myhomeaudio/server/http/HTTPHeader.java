@@ -24,7 +24,7 @@ public class HTTPHeader implements HTTPStatus {
 	 * 			  HTTP header string
 	 * @throws IOException
 	 */
-	public String buildResponse(int httpStatus, boolean hasContent, String mimeType,
+	public static String buildResponse(int httpStatus, boolean hasContent, String mimeType,
 			int contentLength) {
 		String headerString = "HTTP/1.0 ";
 
@@ -55,7 +55,7 @@ public class HTTPHeader implements HTTPStatus {
 		return headerString;
 	}
 	
-	public String buildRequest(String httpMethod, String uri, boolean hasContent, String mimeType, int contentLength) {
+	public static String buildRequest(String httpMethod, String uri, boolean hasContent, String mimeType, int contentLength) {
 		String headerString = httpMethod + " " + uri + " " + "HTTP/1.0\r\n";
 		if (hasContent) {
 			headerString += "Content-type: " + mimeType + "\r\n";
