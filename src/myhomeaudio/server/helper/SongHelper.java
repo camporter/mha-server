@@ -1,15 +1,32 @@
 package myhomeaudio.server.helper;
 
 import java.io.File;
-//import org.json.simple.JSONObject;
+import org.json.JSONObject;
+
+import com.google.gson.Gson;
+
+import myhomeaudio.server.Songs;
 
 public class SongHelper extends Helper implements HelperInterface {
-	public String getOutput() {
-		File files = new File("/music");
-		String[] array = files.list();
-		//String output = array.toJSONstring();
-		String output = array[0]+array[1];
-		return output;
+	
+	@Override
+	public void setData(String uri, String body)
+	{
+		this.uri = uri;
+		this.body = body;
 	}
+	
+	@Override
+	public String getOutput() {
+		Songs songs = Songs.getInstance();
+		Gson gson = new Gson();
+		
+		String body = gson.toJson(songs.getSongList());
+		String header = buildHeader(HTTP_OK, true, "application/json", body.length());
+		
+		return header + body;
+	}
+	
+
 
 }

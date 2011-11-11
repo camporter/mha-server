@@ -7,8 +7,8 @@ import myhomeaudio.server.http.HTTPStatus;
 
 public class Helper implements HelperInterface, HTTPStatus {
 	
-	private String uri = "";
-	private String body = "";
+	protected String uri = "";
+	protected String body = "";
 	
 	/**
 	 * Builds the HTTP header that will be sent back to the client.
@@ -27,8 +27,8 @@ public class Helper implements HelperInterface, HTTPStatus {
 	 * 			  HTTP header string
 	 * @throws IOException
 	 */
-	String buildHeader(int httpStatus, boolean hasContent, String mimeType,
-			int contentLength) throws IOException {
+	protected String buildHeader(int httpStatus, boolean hasContent, String mimeType,
+			int contentLength) {
 		String headerString = "HTTP/1.0 ";
 
 		switch (httpStatus) {
