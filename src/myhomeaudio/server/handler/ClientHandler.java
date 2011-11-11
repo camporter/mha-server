@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import myhomeaudio.server.http.Worker;
+import myhomeaudio.server.http.ClientWorker;
 
 /**
  * ClientHandler runs as a thread and waits for Clients to connect through its
@@ -17,7 +17,7 @@ import myhomeaudio.server.http.Worker;
 public class ClientHandler extends Thread {
 	private ServerSocket clientListenSocket;
 	private int clientListenPort;
-	private ArrayList<Worker> workerPool; // holds all the workers we can use to
+	private ArrayList<ClientWorker> workerPool; // holds all the workers we can use to
 										// service client requests
 	public final int timeout = 0;
 	private int maxNumWorkers;
@@ -25,7 +25,7 @@ public class ClientHandler extends Thread {
 	public ClientHandler(int port) {
 		this.clientListenSocket = null;
 		this.clientListenPort = port;
-		this.workerPool = new ArrayList<Worker>();
+		this.workerPool = new ArrayList<ClientWorker>();
 		this.maxNumWorkers = 5;
 
 		try {
@@ -38,7 +38,7 @@ public class ClientHandler extends Thread {
 		
 		// Start our initial pool of Workers
 		for (int i = 0; i < this.maxNumWorkers; ++i) {
-			Worker w = new Worker(this);
+			ClientWorker w = new ClientWorker(this);
 			w.start();
 			workerPool.add(w);
 		}
@@ -56,16 +56,16 @@ public class ClientHandler extends Thread {
 
 				Socket clientSocket = this.clientListenSocket.accept();
 				System.out.println("Client connection Found");
-				Worker worker = null;
+				ClientWorker worker = null;
 				synchronized (workerPool) {
 					if (workerPool.isEmpty()) {
 						// We don't have anymore workers, add a new one to use
-						worker = new Worker(this);
+						worker = new ClientWorker(this);
 						worker.setClientSocket(clientSocket);
 						worker.start();
 					} else {
 						// We have a worker -- give it the socket
-						worker = (Worker) workerPool.get(0);
+						worker = (ClientWorker) workerPool.get(0);
 						workerPool.remove(0);
 						worker.setClientSocket(clientSocket);
 					}
@@ -80,20 +80,20 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Attempts to add a Worker to the Worker pool. It won't add another Worker
+	 * Attempts to add a ClientWorker to the ClientWorker pool. It won't add another ClientWorker
 	 * if there are enough in the pool already.
 	 * 
-	 * @param worker Worker object to be added.
-	 * @return Whether the Worker was added to the pool.
+	 * @param worker ClientWorker object to be added.
+	 * @return Whether the ClientWorker was added to the pool.
 	 */
-	synchronized public boolean addWorker(Worker worker) {
+	synchronized public boolean addWorker(ClientWorker worker) {
 		if (this.getWorkerCount() >= getMaxWorkers())
 		{
 			// Already have enough workers!
 			return false;
 		}
 		else {
-			// We have space, let's add this Worker.
+			// We have space, let's add this ClientWorker.
 			this.workerPool.add(worker);
 			return true;
 		}

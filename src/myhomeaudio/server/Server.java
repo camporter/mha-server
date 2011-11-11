@@ -15,6 +15,7 @@ public class Server {
 	public static void main(String[] args) {
 		
 		//Database db = Database.getInstance();
+		NodeManager nm = NodeManager.getInstance(); // Used to create inital nodemanager instance
 		
 		//Handles node requests ie arduino 
 		NodeHandler nodeHandler = new NodeHandler(NODE_PORT);

@@ -4,7 +4,7 @@ import myhomeaudio.server.interfaces.StreamInterface;
 
 /* Filename: NodeHelper.java
  * 
- * Helps Worker.java handle client requests concerning nodes
+ * Helps ClientWorker.java handle client requests concerning nodes
  * 
  * Requests
  * -server/node/Stream
