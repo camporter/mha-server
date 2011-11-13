@@ -27,11 +27,12 @@ public class SongHelper extends Helper implements HelperInterface, HTTPMimeType,
 		String header = "";
 		
 		StringTokenizer tokenizedUri = new StringTokenizer(this.uri, "/");
-		tokenizedUri.nextToken(); // throw the first part away
+		tokenizedUri.nextToken(); // throw the first part away, throws /song away
 		
 		
 		if (tokenizedUri.hasMoreTokens())
 		{
+			//Possible methods: list, play, pause
 			String method = tokenizedUri.nextToken();
 			if (method.equals("list"))
 			{
@@ -46,6 +47,7 @@ public class SongHelper extends Helper implements HelperInterface, HTTPMimeType,
 			}
 			else if (method.equals("play"))
 			{
+				//TODO need to know ipaddress of node to send data to
 				NodeManager nm = NodeManager.getInstance();
 				nm.sendNodeCommand(NODE_PLAY, " ");
 			}

@@ -15,6 +15,7 @@ import myhomeaudio.server.interfaces.StreamInterface;
 
 public class NodeHelper extends Helper implements HelperInterface {
 	
+	//TODO
 	public String getOutput() {
 		String output = "";
 		

@@ -20,6 +20,7 @@ public class NodeHandler extends Thread {
 	private int nodeListenPort; // Port to listen on
 
 	/**
+	 * Node Handler Constructor
 	 * 
 	 * @param port
 	 *            Give the ClientHandler the port we will be using.

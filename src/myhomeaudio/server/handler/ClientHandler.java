@@ -29,6 +29,7 @@ public class ClientHandler extends Thread {
 		this.maxNumWorkers = 5;
 
 		try {
+			//Creates ServerSocket to listen on
 			clientListenSocket = new ServerSocket(this.clientListenPort);
 		} catch (IOException e) {
 			System.out.println("ClientHandler: Unable to bind to port: "
@@ -99,10 +100,22 @@ public class ClientHandler extends Thread {
 		}
 	}
 
+	/* Returns the number of workers in the pool
+	 * 
+	 * @return	size
+	 * 		Size of the worker pool
+	 * 
+	 */
 	public int getWorkerCount() {
 		return this.workerPool.size();
 	}
 
+	/* Returns the maximum number of workers allowed
+	 * 
+	 * @return maxNumWorkers
+	 * 		Maximum number of workers
+	 * 
+	 */
 	public int getMaxWorkers() {
 		return this.maxNumWorkers;
 	}

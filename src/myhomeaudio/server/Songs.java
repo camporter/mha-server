@@ -54,6 +54,13 @@ public class Songs {
 	{
 		return new ArrayList<String>(this.songList);
 	}
+	
+	/* Reads song data into string buffer
+	 * 
+	 * @return songdata
+	 * 			StringBuffer of mp3 music data	 * 
+	 * 
+	 */
 	public String getSongData() {
 		try {
 			FileReader songFile = new FileReader("music/"+songList.get(0));
