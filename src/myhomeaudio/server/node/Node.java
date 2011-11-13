@@ -8,19 +8,16 @@ import myhomeaudio.server.Room;
  *
  */
 public class Node {
-	int id;
 	Room room;
+	String ipAddress;
 	
-	public Node(int nodeId) {
-		this.id = nodeId;
+	public Node(String ipAddress) {
+		this.ipAddress = ipAddress;
 		//this.room = room;
 	}
 	
-	/**
-	 * Gets the node's associated id.
-	 * @return
-	 */
-	public int getId() {
-		return this.id;
+	public String getIpAddress()
+	{
+		return this.ipAddress;
 	}
 }
