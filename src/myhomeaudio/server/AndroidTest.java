@@ -19,7 +19,7 @@ public class AndroidTest {
 	protected static int port = 8080;
 	protected static String host = "localhost";
 	private static Socket tcpSocket;
-	static ClientConnect conn;
+	static NodeClientConnect conn;
 	static String msg;
 	private static BufferedReader br;
 	private static BufferedWriter bw;

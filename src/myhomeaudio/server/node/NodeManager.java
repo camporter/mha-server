@@ -1,10 +1,8 @@
-package myhomeaudio.server;
+package myhomeaudio.server.node;
 
 import java.util.ArrayList;
 
 import myhomeaudio.server.http.NodeWorker;
-import myhomeaudio.server.node.Node;
-import myhomeaudio.server.node.NodeCommands;
 
 public class NodeManager implements NodeCommands {
 	private static NodeManager instance = null;

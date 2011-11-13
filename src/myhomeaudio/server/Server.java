@@ -1,8 +1,10 @@
 package myhomeaudio.server;
 
 //import myhomeaudio.server.database.Database;
+import myhomeaudio.server.client.ClientManager;
 import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.handler.NodeHandler;
+import myhomeaudio.server.node.NodeManager;
 
 public class Server {
 	protected static int NODE_PORT = 9090; // port that nodes will open a socket
@@ -17,8 +19,9 @@ public class Server {
 	public static void main(String[] args) {
 
 		// Database db = Database.getInstance();
-		NodeManager nm = NodeManager.getInstance(); // Used to create inital
+		NodeManager nm = NodeManager.getInstance(); // Used to create initial
 													// nodemanager instance
+		ClientManager cm = ClientManager.getInstance(); //Create initial clientmanager
 		Songs songs = Songs.getInstance();
 		songs.populateSongList();
 

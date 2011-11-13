@@ -22,7 +22,7 @@ import java.net.UnknownHostException;
 
 import javax.swing.Timer;
 
-import myhomeaudio.server.ClientConnect.timerListener;
+import myhomeaudio.server.NodeClientConnect.timerListener;
 import myhomeaudio.server.node.NodeRequestCommands;
 
 // Class for the client to connect to the server
@@ -34,7 +34,7 @@ import myhomeaudio.server.node.NodeRequestCommands;
  */
 
 @SuppressWarnings("unused")
-public class ClientConnect extends Thread implements NodeRequestCommands{
+public class NodeClientConnect extends Thread implements NodeRequestCommands{
 	String msg;
 
 	Timer timer;
@@ -79,7 +79,7 @@ public class ClientConnect extends Thread implements NodeRequestCommands{
 	AudioStream audio = null;
 
 	// Constructor
-	public ClientConnect(int port, String host) {
+	public NodeClientConnect(int port, String host) {
 		this.tcpPortServer = port;
 		this.udpPortServer = port;
 		this.host = host;
