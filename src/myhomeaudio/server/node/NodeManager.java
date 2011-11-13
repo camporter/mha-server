@@ -6,6 +6,7 @@ import myhomeaudio.server.http.NodeWorker;
 
 public class NodeManager implements NodeCommands {
 	private static NodeManager instance = null;
+	private static int nodeCount = 0;
 	private ArrayList<Node> nodeList = new ArrayList<Node>();
 	
 	protected NodeManager() {
@@ -25,6 +26,7 @@ public class NodeManager implements NodeCommands {
 		return instance;
 	}
 	
+	//TODO add removeNode, checkNode to make sure no nodes have suddenly disconnected
 	/**
 	 * Add Node, places nodes within network into an arrayList
 	 * @param node
@@ -32,6 +34,7 @@ public class NodeManager implements NodeCommands {
 	 */
 	public synchronized void addNode(Node node) {
 		nodeList.add(node);
+		nodeCount++;
 	}
 	
 	/**
@@ -45,6 +48,10 @@ public class NodeManager implements NodeCommands {
 		NodeWorker worker = new NodeWorker();
 		worker.start();
 		
+	}
+	
+	public synchronized int getNodeCount(){
+		return nodeCount;
 	}
 	
 }

@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import myhomeaudio.server.client.Client;
+import myhomeaudio.server.client.ClientManager;
 import myhomeaudio.server.http.ClientWorker;
 
 /**
@@ -57,6 +59,14 @@ public class ClientHandler extends Thread {
 
 				Socket clientSocket = this.clientListenSocket.accept();
 				System.out.println("Client connection Found");
+				
+				//Adds client to array
+				ClientManager cm = ClientManager.getInstance();
+				Client client = new Client(clientSocket.getInetAddress().getHostAddress());
+				cm.addClient(client);
+				
+				
+				
 				ClientWorker worker = null;
 				synchronized (workerPool) {
 					if (workerPool.isEmpty()) {

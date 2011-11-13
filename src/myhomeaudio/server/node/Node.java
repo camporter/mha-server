@@ -12,11 +12,9 @@ public class Node {
 	String ipAddress;
 	int nodeID;
 	
-	private static int nodeCount;
-	
 	public Node(String ipAddress) {
 		this.ipAddress = ipAddress;
-		this.nodeID = ++nodeCount;
+		//this.nodeID = nodeCount;
 		//this.room = room;
 	}
 	
@@ -38,15 +36,5 @@ public class Node {
 	public int getnodeID()
 	{
 		return this.nodeID;
-	}
-	
-	/**
-	 * nodeCount getter
-	 * @return nodeCount
-	 * 		Returns the total number of nodes within the network
-	 */
-	public static int getNodeCount()
-	{
-		return nodeCount;
 	}
 }
