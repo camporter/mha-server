@@ -162,10 +162,22 @@ public class ClientWorker extends Thread implements HTTPStatus, HTTPMimeType {
 
 	}
 
+	/* Uses root of URI directory to choose correct Helper to handle request
+	 * 	/node/list   <- NodeHelper
+	 *  /song/list   <- SongHelper
+	 * 
+	 * @param helperName
+	 * 		Name of the Helper class required to handle the request
+	 * 
+	 * @return Helper
+	 * 		Returns the specified Helper class
+	 */
 	private Helper getCorrectHelper(String helperName) {
 		if (helperName.equals("node")) {
+			System.out.println("Creating NodeHelper");
 			return new NodeHelper();
 		} else if (helperName.equals("song")) {
+			System.out.println("Creating SongHelper");
 			return new SongHelper();
 		} else {
 			// default

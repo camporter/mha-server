@@ -37,6 +37,7 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 	synchronized public void run() {
 		if (this.command == -1) {
 			// request data hasn't been set yet
+			System.out.println("NodeWorker: Request data hasn't been set");
 			try {
 				// put the thread to sleep
 				wait();

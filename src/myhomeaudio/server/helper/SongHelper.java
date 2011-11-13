@@ -35,11 +35,14 @@ public class SongHelper extends Helper implements HelperInterface, HTTPMimeType,
 			String method = tokenizedUri.nextToken();
 			if (method.equals("list"))
 			{
+				System.out.println("SongHelper List");
 				Songs songs = Songs.getInstance();
 				Gson gson = new Gson();
 				
 				body = gson.toJson(songs.getSongList());
+				System.out.println(body);
 				header = HTTPHeader.buildResponse(HTTP_OK, true, MIME_JSON, body.length());
+				System.out.println(header);
 			}
 			else if (method.equals("play"))
 			{
