@@ -1,4 +1,4 @@
-package myhomeaudio.server.client;
+package myhomeaudio.server.manager;
 
 import java.util.ArrayList;
 

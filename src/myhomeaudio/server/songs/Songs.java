@@ -1,4 +1,4 @@
-package myhomeaudio.server;
+package myhomeaudio.server.songs;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -94,6 +94,13 @@ public class Songs {
 		return new byte[0];
 	}
 	
+	/**
+	 * Checks songList of available files to see if song is exists within list
+	 * @param songName
+	 * 		Name of song to check within list
+	 * @return
+	 * 		True if song is available to stream
+	 */
 	public boolean songExists(String songName) {
 		this.populateSongList(); // Repopulate the list so we know it's up to date
 		

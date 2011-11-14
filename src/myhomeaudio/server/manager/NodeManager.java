@@ -1,8 +1,10 @@
-package myhomeaudio.server.node;
+package myhomeaudio.server.manager;
 
 import java.util.ArrayList;
 
 import myhomeaudio.server.http.NodeWorker;
+import myhomeaudio.server.node.Node;
+import myhomeaudio.server.node.NodeCommands;
 
 public class NodeManager implements NodeCommands {
 	private static NodeManager instance = null;
@@ -47,11 +49,17 @@ public class NodeManager implements NodeCommands {
 	public synchronized void sendNodeCommand(int command, String data) {
 		NodeWorker worker = new NodeWorker();
 		// TODO: THIS DEFAULTS TO THE FIRST NODE!
+		//Possibly use ClientManager
 		worker.setRequestData(command, this.nodeList.get(0).getIpAddress(), data);
 		worker.start();
 		
 	}
 	
+	/**
+	 * 
+	 * @return nodeCount
+	 * 		Number of nodes under NodeManager management
+	 */
 	public synchronized int getNodeCount(){
 		return nodeCount;
 	}

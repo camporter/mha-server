@@ -6,8 +6,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import myhomeaudio.server.client.Client;
-import myhomeaudio.server.client.ClientManager;
 import myhomeaudio.server.http.ClientWorker;
+import myhomeaudio.server.manager.ClientManager;
 
 /**
  * ClientHandler runs as a thread and waits for Clients to connect through its

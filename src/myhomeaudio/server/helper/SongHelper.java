@@ -7,11 +7,11 @@ import java.util.StringTokenizer;
 
 import com.google.gson.Gson;
 
-import myhomeaudio.server.Songs;
 import myhomeaudio.server.http.HTTPHeader;
 import myhomeaudio.server.http.HTTPMimeType;
+import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.NodeCommands;
-import myhomeaudio.server.node.NodeManager;
+import myhomeaudio.server.songs.Songs;
 
 public class SongHelper extends Helper implements HelperInterface, HTTPMimeType, NodeCommands {
 	
@@ -27,6 +27,9 @@ public class SongHelper extends Helper implements HelperInterface, HTTPMimeType,
 	public String getOutput() {
 		String body = "";
 		String header = "";
+		
+		//System.out.println(this.uri);
+		//System.out.println(this.data);
 		
 		StringTokenizer tokenizedUri = new StringTokenizer(this.uri, "/");
 		tokenizedUri.nextToken(); // throw the first part away, throws /song away
@@ -53,6 +56,7 @@ public class SongHelper extends Helper implements HelperInterface, HTTPMimeType,
 				//TODO need to know ipaddress of node to send data to
 				NodeManager nm = NodeManager.getInstance();
 				nm.sendNodeCommand(NODE_PLAY, hasht.get("song").toString());
+				//nm.sendNodeCommand(NODE_PLAY, "Buffalo For What.mp3");
 			}
 			else if (method.equals("pause"))
 			{

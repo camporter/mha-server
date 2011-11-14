@@ -5,8 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 //import myhomeaudio.server.node.NodeRequest;
+import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.Node;
-import myhomeaudio.server.node.NodeManager;
 import myhomeaudio.server.node.NodeRequest2;
 
 /**
