@@ -12,6 +12,19 @@ import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpServerConnection;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.DefaultHttpServerConnection;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.SyncBasicHttpParams;
+
 import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.helper.Helper;
 import myhomeaudio.server.helper.NodeHelper;
@@ -27,15 +40,25 @@ import myhomeaudio.server.helper.UserHelper;
  */
 public class ClientWorker extends Thread implements HTTPStatus, HTTPMimeType {
 	final static int BUF_SIZE = 2048;
-
+	
 	// buffer to use for requests
 	byte[] buf;
 	private Socket clientSocket;
 	private ClientHandler clientHandler;
+	
+	//http parameters
+	private final HttpParams params;
 
 	public ClientWorker(ClientHandler clientHandler) {
 		this.clientHandler = clientHandler;
 		this.clientSocket = null;
+		
+        this.params = new SyncBasicHttpParams();
+        this.params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000);
+        this.params.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024);
+        this.params.setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
+        this.params.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true);
+        this.params.setParameter(CoreProtocolPNames.ORIGIN_SERVER, "Server: My Home Audio");
 	}
 
 	// Set the client socket
@@ -61,6 +84,7 @@ public class ClientWorker extends Thread implements HTTPStatus, HTTPMimeType {
 			try {
 				handleClient();
 			} catch (Exception e) {
+				log.println("");
 				e.printStackTrace();
 				return;
 			}
@@ -88,13 +112,47 @@ public class ClientWorker extends Thread implements HTTPStatus, HTTPMimeType {
 					this.clientSocket.getInputStream()));
 			DataOutputStream outputStream = new DataOutputStream(
 					this.clientSocket.getOutputStream());
+			
+			
+			HttpEntityEnclosingRequest entityRequest = null;
+			DefaultHttpServerConnection serverConn = new DefaultHttpServerConnection();
+			serverConn.bind(this.clientSocket, this.params);
+			try{
+				serverConn.receiveRequestEntity(entityRequest);
+			}catch(HttpException e){
+				System.out.println("kie");
+			}catch(IOException e){
+				System.out.println("dfs");
+			}
+			HttpEntity entity = entityRequest.getEntity();//throws httpException and IOException
+			BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
+			
+			String line = null;
+			while((line = reader.readLine()) != null){
+				System.out.println(line);
+			}
+			
+
+			
+			/*
+			HttpResponse response;
+			
+			String t = this.host+"/song/list";
+			//HttpGet httpGet = new HttpGet(this.host+"/song/list");
+			System.out.println(t);
+			HttpGet httpGet = new HttpGet(t);
+			HttpClient httpClient;
+			HttpResponse response = httpClient.execute(httpGet);
+			HttpEntity entity = response.getEntity();
+			
 	
 			System.out.println("Handling the client...");
 	
 			/*
 			 * The final output we will send back to the client. We will slowly
 			 * build it based off of what the client has requested.
-			 */
+			 *
+			 *
 			String output = "";
 	
 			String requestUri;
@@ -163,8 +221,13 @@ public class ClientWorker extends Thread implements HTTPStatus, HTTPMimeType {
 			requestUri = null;
 			output = null;
 			tokenizedRequestMessage = null;
+			
+			*/
 		}catch(NullPointerException e){
 			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}

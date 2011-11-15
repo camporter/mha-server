@@ -1,4 +1,4 @@
-package myhomeaudio.server;
+package myhomeaudio.server.client;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

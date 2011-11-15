@@ -46,7 +46,6 @@ public class NodeHandler extends Thread{
 		while (true) {
 			try {
 				System.out.println("Listening for nodes");
-				this.nodeListenSocket = null;
 				if (this.nodeListenSocket == null) {
 					System.out.println("Node Server Listen Socket Unavailable");
 					return; // Stop this thread if the socket isn't available
