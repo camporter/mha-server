@@ -11,7 +11,7 @@ import myhomeaudio.server.http.HTTPHeader;
 import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.NodeCommands;
-import myhomeaudio.server.songs.Songs;
+import myhomeaudio.server.songs.SongFiles;
 
 public class SongHelper extends Helper implements HelperInterface, HTTPMimeType, NodeCommands {
 	
@@ -38,10 +38,10 @@ public class SongHelper extends Helper implements HelperInterface, HTTPMimeType,
 		if (tokenizedUri.hasMoreTokens())
 		{
 			//Possible methods: list, play, pause
-			String method = tokenizedUri.nextToken();
+			String method = tokenizedUri.nextToken(); //NoSuchElementException
 			if (method.equals("list"))
 			{
-				Songs songs = Songs.getInstance();
+				SongFiles songs = SongFiles.getInstance();
 				Gson gson = new Gson();
 				
 				body = gson.toJson(songs.getSongList());

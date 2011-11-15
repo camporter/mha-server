@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import myhomeaudio.server.node.NodeCommands;
-import myhomeaudio.server.songs.Songs;
+import myhomeaudio.server.songs.SongFiles;
 
 /**
  * NodeWorker is a thread that sends commands to nodes and receives
@@ -65,7 +65,7 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 
 			switch (command) {
 			case NODE_PLAY:
-				Songs s = Songs.getInstance(); //Gets song list
+				SongFiles s = SongFiles.getInstance(); //Gets song list
 				System.out.println("Song instance " + this.data);
 				byte[] songData = s.getSongData(this.data); //Gets byte[] of mp3 data
 				outputStream.writeBytes(HTTPHeader.buildRequest("POST", "play", true,

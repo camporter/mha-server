@@ -15,7 +15,7 @@ import myhomeaudio.server.node.NodeRequest2;
  * @author cameron
  * 
  */
-public class NodeHandler extends Thread {
+public class NodeHandler extends Thread{
 	private ServerSocket nodeListenSocket; // Socket to use for listening
 	private int nodeListenPort; // Port to listen on
 
@@ -31,45 +31,53 @@ public class NodeHandler extends Thread {
 
 		try {
 			// Start a socket on the specified port
+			System.out.println("Creating Node Server Listen Socket");
 			nodeListenSocket = new ServerSocket(this.nodeListenPort);
 		} catch (IOException e) {
 			System.out.println("NodeHandler: Unable to bind to port: "
 					+ this.nodeListenPort);
-			e.printStackTrace();
+			System.out.println("Exiting");
+			return;
 		}
 	}
 
 
 	public void run() {
-		try {
-			while (true) {
+		while (true) {
+			try {
 				System.out.println("Listening for nodes");
-
+				this.nodeListenSocket = null;
 				if (this.nodeListenSocket == null) {
+					System.out.println("Node Server Listen Socket Unavailable");
 					return; // Stop this thread if the socket isn't available
+				} else{
+				
+					// Start listening
+					Socket nodeSocket = this.nodeListenSocket.accept();
+					System.out.println("Node connection Found");
+					
+					NodeManager nm = NodeManager.getInstance();
+					Node newNode = new Node(nodeSocket.getInetAddress().getHostAddress());
+					nm.addNode(newNode);
+					
+					nodeSocket.close();
+					
+					// Give the request its own thread
+					/*NodeRequest2 request = new NodeRequest2(nodeSocket);
+	
+					System.out.println("Starting New NodeRequest");
+					request.start();*/
 				}
-				
-				// Start listening
-				Socket nodeSocket = this.nodeListenSocket.accept();
-				System.out.println("Node connection Found");
-				
-				NodeManager nm = NodeManager.getInstance();
-				Node newNode = new Node(nodeSocket.getInetAddress().getHostAddress());
-				nm.addNode(newNode);
-				
-				nodeSocket.close();
-				
-				// Give the request its own thread
-				/*NodeRequest2 request = new NodeRequest2(nodeSocket);
-
-				System.out.println("Starting New NodeRequest");
-				request.start();*/
-				
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("NodeHandler exited!");
-			return;
+			} catch (IOException e) {
+				//e.printStackTrace();
+				System.out.println("NodeHandler exited!");
+				return;
+			}		
 		}
+	}
+
+
+	public ServerSocket getNodeListenSocket() {
+		return nodeListenSocket;
 	}
 }

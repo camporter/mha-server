@@ -9,12 +9,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class Songs {
-	private static Songs instance = null;
+public class SongFiles {
+	private static SongFiles instance = null;
 	ArrayList<String> songList = new ArrayList<String>(); // List of available
 															// mp3 files
 
-	protected Songs() {
+	protected SongFiles() {
 
 	}
 
@@ -23,28 +23,29 @@ public class Songs {
 	 * 
 	 * @return instance Songs instance
 	 */
-	public static synchronized Songs getInstance() {
+	public static synchronized SongFiles getInstance() {
 		if (instance == null) {
-			instance = new Songs();
+			instance = new SongFiles();
 		}
 		return instance;
 	}
 
 	/*
 	 * Searches music directory and adds mp3 files to array list
-	 * 
-	 * @param
-	 * 
-	 * @return
 	 */
 	public void populateSongList() {
-		File songDirectory = new File("music");
-		
-		songList = null;
-		songList = new ArrayList<String>();
-		
-		for (String songFile : songDirectory.list()) {
-			this.songList.add(songFile);
+		try{
+			File songDirectory = new File("music");
+			
+			songList = null;
+			songList = new ArrayList<String>();
+			
+			for (String songFile : songDirectory.list()) {
+				this.songList.add(songFile);
+			}
+		}catch(NullPointerException e){
+			System.out.println("Null Pointer Exception SongFiles.populateSongList");
+			//e.printStackTrace();
 		}
 		return;
 	}
@@ -89,7 +90,9 @@ public class Songs {
 			}
 			return null;
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+		} catch(NullPointerException e){
+			//e.printStackTrace();
 		}
 		return new byte[0];
 	}

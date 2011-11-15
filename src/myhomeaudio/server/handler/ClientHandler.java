@@ -36,7 +36,8 @@ public class ClientHandler extends Thread {
 		} catch (IOException e) {
 			System.out.println("ClientHandler: Unable to bind to port: "
 					+ this.clientListenPort);
-			e.printStackTrace();
+			System.out.println("Exiting");
+			return;
 		}
 		
 		// Start our initial pool of Workers
@@ -54,6 +55,7 @@ public class ClientHandler extends Thread {
 				System.out.println("Listening for clients");
 
 				if (this.clientListenSocket == null) {
+					System.out.println("Client Server Listen Socket Unavailable");
 					return; // Stop this thread if the socket isn't available
 				}
 
@@ -84,8 +86,8 @@ public class ClientHandler extends Thread {
 
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("NodeHandler exited !");
+			//e.printStackTrace();
+			System.out.println("ClientHandler exited !");
 			return;
 		}
 	}
