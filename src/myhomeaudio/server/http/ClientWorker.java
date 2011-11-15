@@ -84,7 +84,6 @@ public class ClientWorker extends Thread implements HTTPStatus, HTTPMimeType {
 			try {
 				handleClient();
 			} catch (Exception e) {
-				log.println("");
 				e.printStackTrace();
 				return;
 			}
