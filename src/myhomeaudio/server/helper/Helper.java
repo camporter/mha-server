@@ -22,4 +22,8 @@ public class Helper implements HelperInterface, HTTPStatus {
 		this.data = data;
 		
 	}
+
+	public int getStatusCode() {
+		return HTTPStatus.HTTP_NOT_FOUND;
+	}
 }

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -16,14 +17,26 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpServerConnection;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.DefaultConnectionReuseStrategy;
+import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.DefaultHttpServerConnection;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.SyncBasicHttpParams;
+import org.apache.http.protocol.HttpProcessor;
+import org.apache.http.protocol.HttpRequestHandlerRegistry;
+import org.apache.http.protocol.HttpResponseInterceptorList;
+import org.apache.http.protocol.HttpService;
+import org.apache.http.protocol.ImmutableHttpProcessor;
+import org.apache.http.protocol.ResponseConnControl;
+import org.apache.http.protocol.ResponseContent;
+import org.apache.http.protocol.ResponseDate;
+import org.apache.http.protocol.ResponseServer;
 
 import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.helper.Helper;
@@ -38,27 +51,24 @@ import myhomeaudio.server.helper.UserHelper;
  * @author cameron
  * 
  */
-public class ClientWorker extends Thread implements HTTPStatus, HTTPMimeType {
+public class ClientWorker extends Thread implements Worker {
 	final static int BUF_SIZE = 2048;
 	
 	// buffer to use for requests
 	byte[] buf;
 	private Socket clientSocket;
 	private ClientHandler clientHandler;
+
 	
-	//http parameters
-	private final HttpParams params;
+	//Root "directory" of client commands
+	private final String rootDirectory = "/";
+	
 
 	public ClientWorker(ClientHandler clientHandler) {
 		this.clientHandler = clientHandler;
 		this.clientSocket = null;
 		
-        this.params = new SyncBasicHttpParams();
-        this.params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000);
-        this.params.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024);
-        this.params.setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
-        this.params.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true);
-        this.params.setParameter(CoreProtocolPNames.ORIGIN_SERVER, "Server: My Home Audio");
+
 	}
 
 	// Set the client socket

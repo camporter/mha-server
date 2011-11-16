@@ -2,11 +2,13 @@
 <classpath>
 	<classpathentry excluding="myhomeaudio/server/node/NodeRequest.java" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpCore/commons-codec-1.4.jar"/>
-	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpCore/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpCore/httpclient-4.1.2.jar"/>
-	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpCore/httpclient-cache-4.1.2.jar"/>
-	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpCore/httpcore-4.1.2.jar"/>
-	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpCore/httpmime-4.1.2.jar"/>
+	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpClient/commons-codec-1.4.jar"/>
+	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpClient/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpClient/httpclient-4.1.2.jar"/>
+	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpClient/httpclient-cache-4.1.2.jar"/>
+	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpClient/httpcore-4.1.2.jar"/>
+	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpClient/httpmime-4.1.2.jar"/>
+	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpCore/httpcore-4.2-alpha2.jar"/>
+	<classpathentry kind="lib" path="/home/grimmjow/workspace/mha-server/lib/HttpCore/httpcore-nio-4.2-alpha2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
