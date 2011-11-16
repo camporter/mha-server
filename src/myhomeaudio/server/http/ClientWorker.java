@@ -14,7 +14,7 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpService;
 
-public class ClientWorker extends Worker implements Runnable {
+public class ClientWorker extends Worker {
 	//http parameters and services
 	private final HttpParams params;
 	private final HttpService httpService;
@@ -69,7 +69,7 @@ public class ClientWorker extends Worker implements Runnable {
 	}
 
 	private void handleClient() {
-		while (!Thread.interrupted()) {
+		while (!this.isInterrupted()) {
 			try {
 				// Set up HTTP connection
                 this.conn.bind(clientSocket, this.params);
@@ -89,7 +89,7 @@ public class ClientWorker extends Worker implements Runnable {
             }finally {
                 try {
                     this.conn.shutdown();
-                } catch (IOException ignore) {}
+                } catch (IOException e) {}
             }
 		}
 	}

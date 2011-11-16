@@ -1,6 +1,5 @@
 package myhomeaudio.server.helper;
 
-import myhomeaudio.server.interfaces.StreamInterface;
 
 /* Filename: NodeHelper.java
  * 

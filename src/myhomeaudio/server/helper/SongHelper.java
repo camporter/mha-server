@@ -1,19 +1,17 @@
 package myhomeaudio.server.helper;
 
-import java.io.File;
-import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
-import com.google.gson.Gson;
-
-import myhomeaudio.server.http.HTTPHeader;
-import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.NodeCommands;
 import myhomeaudio.server.songs.SongFiles;
 
-public class SongHelper extends Helper implements HelperInterface, HTTPMimeType, NodeCommands {
+import org.apache.http.HttpStatus;
+
+import com.google.gson.Gson;
+
+public class SongHelper extends Helper implements HelperInterface, NodeCommands {
 	
 	@Override
 	public void setData(String uri, String data)
@@ -26,7 +24,6 @@ public class SongHelper extends Helper implements HelperInterface, HTTPMimeType,
 	@Override
 	public String getOutput() {
 		String body = "";
-		String header = "";
 		
 		//System.out.println(this.uri);
 		//System.out.println(this.data);
@@ -45,14 +42,14 @@ public class SongHelper extends Helper implements HelperInterface, HTTPMimeType,
 				Gson gson = new Gson();
 				
 				body = gson.toJson(songs.getSongList());
-				header = HTTPHeader.buildResponse(HTTP_OK, true, MIME_JSON, body.length());
+				this.statusCode = HttpStatus.SC_OK;
 			}
 			else if (method.equals("play"))
 			{
 				Gson gson = new Gson();
 				Hashtable hasht = gson.fromJson(this.data.trim(), Hashtable.class);
 				
-				header = HTTPHeader.buildResponse(HTTP_OK, false, "", 0);
+				this.statusCode = HttpStatus.SC_OK;
 				//TODO need to know ipaddress of node to send data to
 				NodeManager nm = NodeManager.getInstance();
 				nm.sendNodeCommand(NODE_PLAY, hasht.get("song").toString());
@@ -60,7 +57,7 @@ public class SongHelper extends Helper implements HelperInterface, HTTPMimeType,
 			}
 			else if (method.equals("pause"))
 			{
-				header = HTTPHeader.buildResponse(HTTP_OK, false, "", 0);
+				this.statusCode = HttpStatus.SC_OK;
 				NodeManager nm = NodeManager.getInstance();
 				nm.sendNodeCommand(NODE_PAUSE, "");
 			}
@@ -69,7 +66,7 @@ public class SongHelper extends Helper implements HelperInterface, HTTPMimeType,
 		else {
 			
 		}
-		return header + body;
+		return body;
 	}
 	
 

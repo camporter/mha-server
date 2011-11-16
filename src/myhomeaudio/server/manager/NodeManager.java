@@ -33,10 +33,16 @@ public class NodeManager implements NodeCommands {
 	 * Add Node, places nodes within network into an arrayList
 	 * @param node
 	 * 		Node to be added to the arrayList
+	 * @return
+	 * 		True - Item added to list, False - Item already in list
 	 */
-	public synchronized void addNode(Node node) {
+	public synchronized boolean addNode(Node node) {
+		if(nodeList.contains(node)){
+			return false;
+		}
 		nodeList.add(node);
 		nodeCount++;
+		return true;
 	}
 	
 	/**

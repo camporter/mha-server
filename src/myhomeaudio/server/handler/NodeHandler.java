@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-//import myhomeaudio.server.node.NodeRequest;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.Node;
-import myhomeaudio.server.node.NodeRequest2;
 
 /**
  * NodeHandler runs as a thread, waiting for nodes to connect through its loop.
@@ -41,10 +39,11 @@ public class NodeHandler extends Thread{
 		}
 	}
 
-
+	//TODO Allow node to send commands to server, server needs to listen
 	public void run() {
 		while (true) {
 			try {
+				
 				System.out.println("Listening for nodes");
 				if (this.nodeListenSocket == null) {
 					System.out.println("Node Server Listen Socket Unavailable");
@@ -53,11 +52,14 @@ public class NodeHandler extends Thread{
 				
 					// Start listening
 					Socket nodeSocket = this.nodeListenSocket.accept();
-					System.out.println("Node connection Found");
+					System.out.println("Node connection Found: " + nodeSocket.getPort() + 
+							"/" + nodeSocket.getInetAddress().getHostAddress());
 					
 					NodeManager nm = NodeManager.getInstance();
 					Node newNode = new Node(nodeSocket.getInetAddress().getHostAddress());
-					nm.addNode(newNode);
+					if(!nm.addNode(newNode)){
+						//TODO do something, node already in list
+					}
 					
 					nodeSocket.close();
 					

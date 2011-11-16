@@ -35,7 +35,6 @@ import org.apache.http.protocol.ResponseConnControl;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
-import org.apache.http.util.EntityUtils;
 
 /**
  * Worker thread that handles incoming http requests
@@ -43,7 +42,7 @@ import org.apache.http.util.EntityUtils;
  * @author grimmjow
  *
  */
-public class Worker {
+public class Worker extends Thread {
 	
 	protected final String rootDirectory = "/";
 	
@@ -84,24 +83,6 @@ public class Worker {
         		httpRequestReqistry,
         		this.params);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	static class HttpFileHandler implements HttpRequestHandler  {

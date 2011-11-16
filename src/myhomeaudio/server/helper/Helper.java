@@ -1,18 +1,18 @@
 package myhomeaudio.server.helper;
 
-import java.io.IOException;
-import java.util.Date;
+import org.apache.http.HttpStatus;
 
-import myhomeaudio.server.http.HTTPStatus;
 
-public class Helper implements HelperInterface, HTTPStatus {
+public class Helper implements HelperInterface {
 	
 	protected String uri = "";
 	protected String data = "";
+	protected int statusCode = 0;
 	
 	@Override
 	public String getOutput() {
 		// The default helper produces no output
+		statusCode = HttpStatus.SC_NOT_FOUND;
 		return "";
 	}
 
@@ -24,6 +24,6 @@ public class Helper implements HelperInterface, HTTPStatus {
 	}
 
 	public int getStatusCode() {
-		return HTTPStatus.HTTP_NOT_FOUND;
+		return this.statusCode;
 	}
 }
