@@ -43,7 +43,8 @@ public class ClientHandler extends Thread {
 		// Start our initial pool of Workers
 		for (int i = 0; i < this.maxNumWorkers; ++i) {
 			ClientWorker w = new ClientWorker(this);
-			w.start();
+			Thread thread = new Thread(w);
+			thread.start();
 			workerPool.add(w);
 		}
 
@@ -60,7 +61,7 @@ public class ClientHandler extends Thread {
 				}
 
 				Socket clientSocket = this.clientListenSocket.accept();
-				System.out.println("Client connection Found");
+				System.out.println("Client connection Found: " + clientSocket.getInetAddress().getHostAddress());
 				
 				//Adds client to array
 				ClientManager cm = ClientManager.getInstance();
@@ -75,7 +76,8 @@ public class ClientHandler extends Thread {
 						// We don't have anymore workers, add a new one to use
 						worker = new ClientWorker(this);
 						worker.setClientSocket(clientSocket);
-						worker.start();
+						Thread thread = new Thread(worker);
+						thread.start();
 					} else {
 						// We have a worker -- give it the socket
 						worker = (ClientWorker) workerPool.get(0);

@@ -60,7 +60,7 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 			String output = "";
 			BufferedReader inputStream = new BufferedReader(
 					new InputStreamReader(socket.getInputStream()));
-			DataOutputStream outputStream = new DataOutputStream(git 
+			DataOutputStream outputStream = new DataOutputStream( 
 					socket.getOutputStream());
 
 			switch (command) {
