@@ -8,7 +8,7 @@ import myhomeaudio.server.http.HTTPStatus;
 public class Helper implements HelperInterface, HTTPStatus {
 	
 	protected String uri = "";
-	protected String body = "";
+	protected String data = "";
 	
 	@Override
 	public String getOutput() {
@@ -17,9 +17,9 @@ public class Helper implements HelperInterface, HTTPStatus {
 	}
 
 	@Override
-	public void setData(String uri, String body) {
+	public void setData(String uri, String data) {
 		this.uri = uri;
-		this.body = body;
+		this.data = data;
 		
 	}
 }

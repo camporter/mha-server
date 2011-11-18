@@ -46,7 +46,7 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 			}
 		}
 		try {
-			Socket socket = new Socket(this.ipAddress, 9090);
+			Socket socket = new Socket(this.ipAddress, 9091);
 			String output = "";
 			BufferedReader inputStream = new BufferedReader(
 					new InputStreamReader(socket.getInputStream()));

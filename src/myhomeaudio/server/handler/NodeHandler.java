@@ -57,12 +57,14 @@ public class NodeHandler extends Thread {
 				Node newNode = new Node(nodeSocket.getInetAddress().getHostAddress());
 				nm.addNode(newNode);
 				
+				nodeSocket.close();
+				
 				// Give the request its own thread
 				/*NodeRequest2 request = new NodeRequest2(nodeSocket);
 
 				System.out.println("Starting New NodeRequest");
 				request.start();*/
-
+				
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

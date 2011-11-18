@@ -15,13 +15,13 @@ public interface HelperInterface {
 	public String getOutput();
 
 	/**
-	 * Sets the URI and HTTP body that the helper needs to do generate an
+	 * Sets the URI and HTTP data that the helper needs to do generate an
 	 * output.
 	 * 
 	 * @param uri
 	 *            URI from the client
-	 * @param body
-	 *            Body of the HTTP request being sent
+	 * @param data
+	 *            Data of the HTTP request being sent
 	 */
-	public void setData(String uri, String body);
+	public void setData(String uri, String data);
 }

@@ -46,6 +46,8 @@ public class NodeManager implements NodeCommands {
 	 */
 	public synchronized void sendNodeCommand(int command, String data) {
 		NodeWorker worker = new NodeWorker();
+		// TODO: THIS DEFAULTS TO THE FIRST NODE!
+		worker.setRequestData(command, this.nodeList.get(0).getIpAddress(), data);
 		worker.start();
 		
 	}
