@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import myhomeaudio.server.Songs;
 import myhomeaudio.server.node.NodeCommands;
 
 /**
@@ -57,7 +58,8 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 			case NODE_PLAY:
 				output = HTTPHeader.buildRequest("POST", "play", true,
 						MIME_MP3, this.data.length());
-				output += this.data;
+				Songs s = Songs.getInstance();
+				output += s.getSongData();
 				break;
 			case NODE_PAUSE:
 				output = HTTPHeader.buildRequest("GET", "pause", false, "", 0);

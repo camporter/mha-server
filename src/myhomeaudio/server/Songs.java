@@ -55,10 +55,10 @@ public class Songs {
 		return new ArrayList<String>(this.songList);
 	}
 	
-	/* Reads song data into string buffer
+	/* Reads song data into a string buffer
 	 * 
 	 * @return songdata
-	 * 			StringBuffer of mp3 music data	 * 
+	 * 			StringBuffer of mp3 music data
 	 * 
 	 */
 	public String getSongData() {
@@ -74,6 +74,7 @@ public class Songs {
 				songData.append(buf, 0, numRead);
 			}
 			
+			return songData.toString();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -81,7 +82,7 @@ public class Songs {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		return null;
+		
 	}
 }
