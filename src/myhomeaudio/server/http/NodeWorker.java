@@ -56,17 +56,19 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 
 			switch (command) {
 			case NODE_PLAY:
-				output = HTTPHeader.buildRequest("POST", "play", true,
-						MIME_MP3, this.data.length());
 				Songs s = Songs.getInstance();
-				output += s.getSongData();
+				byte[] songData = s.getSongData();
+				outputStream.writeBytes(HTTPHeader.buildRequest("POST", "play", true,
+						MIME_MP3, songData.length));
+				
+				outputStream.write(songData);
 				break;
 			case NODE_PAUSE:
-				output = HTTPHeader.buildRequest("GET", "pause", false, "", 0);
+				outputStream.writeBytes(HTTPHeader.buildRequest("GET", "pause", false, "", 0));
 				break;
 			}
 
-			outputStream.writeBytes(output);
+			//outputStream.writeBytes(output);
 
 			socket.close();
 

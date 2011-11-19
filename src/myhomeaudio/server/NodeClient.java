@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.StringTokenizer;
@@ -52,38 +54,50 @@ public class NodeClient {
 
 				String httpMethod = tokenizedRequestMessage.nextToken();
 
-				String httpBody = "";
+				char[] httpData = new char[0];
+				
 				if (httpMethod.equals("POST")) {
 					// POST methods contain data, so we need to put it in
 					// httpBody
 					String scan; // a string to read out individual lines
-
+					int content_length = 0;
 					// Keep reading lines until we find a blank line.
 					// A blank line tells us when the HTTP header has ended and
 					// the HTTP
 					// body begins.
 					do {
 						scan = inputStream.readLine();
+						if (scan.startsWith("Content-Length:")) {
+							System.out.println("Found content-length");
+							content_length = Integer.parseInt(scan.substring(16));
+						}
+							
 					} while (scan != null && scan.length() != 0);
-
-					if (scan != null) {
+					
+					httpData = new char[content_length];
+					inputStream.read(httpData, 0, content_length);
+					/*if (scan != null) {
 						// Found the empty line, everything below is the body
 						do {
-							scan = inputStream.readLine();
+							scan = inputStream.
 							httpBody += (scan != null) ? (scan + "\r\n") : "";
 						} while (scan != null && scan.length() != 0);
 
-					}
+					}*/
+					System.out.println("Got here.");
 					requestUri = tokenizedRequestMessage.nextToken();
 					requestUri = requestUri.startsWith("/") ? requestUri
 							.substring(1) : requestUri;
 
 					System.out.println(requestUri);
 					//if (requestUri.equals("play")) {
-						BufferedWriter songOut = new BufferedWriter(
-								new FileWriter("song.mp3"));
-						songOut.write(httpBody.trim());
-						songOut.close();
+						DataOutputStream outFile = new DataOutputStream(new FileOutputStream("song.mp3"));
+						for (int i=0;i<httpData.length;i++)
+						{
+							System.out.println("running...");
+							outFile.writeByte(httpData[i]);
+						}
+						outFile.close();
 					//}
 				}
 			}

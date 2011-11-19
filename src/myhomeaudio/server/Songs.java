@@ -2,9 +2,11 @@ package myhomeaudio.server;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class Songs {
@@ -61,7 +63,7 @@ public class Songs {
 	 * 			StringBuffer of mp3 music data
 	 * 
 	 */
-	public String getSongData() {
+	/*public String getSongData() {
 		try {
 			FileReader songFile = new FileReader("music/"+songList.get(0));
 			
@@ -84,5 +86,32 @@ public class Songs {
 		}
 		return null;
 		
+	}*/
+	
+	public byte[] getSongData() {
+		try {
+			File file = new File("music/"+songList.get(0));
+			InputStream input = new FileInputStream(file);
+			long length = file.length();
+			
+			byte[] bytes = new byte[(int) length];
+			
+			int offset = 0;
+			int numRead = 0;
+			while(offset < bytes.length && (numRead=input.read(bytes, offset, bytes.length-offset)) >= 0) {
+				offset += numRead;
+			}
+			
+			if (offset < bytes.length)
+			{
+				throw new IOException("Didn't completely read file.");
+			}
+			
+			input.close();
+			return bytes;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return new byte[0];
 	}
 }
