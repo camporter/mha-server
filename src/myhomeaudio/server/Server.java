@@ -1,6 +1,5 @@
 package myhomeaudio.server;
 
-//import myhomeaudio.server.database.Database;
 import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.handler.NodeHandler;
 import myhomeaudio.server.manager.ClientManager;
@@ -8,10 +7,14 @@ import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.songs.SongFiles;
 
 public class Server {
-	protected static int NODE_PORT = 9090; // port that nodes will open a socket
-											// on.
-	protected static int CLIENT_PORT = 8080; // port that clients (phones) will
-												// open a socket on.
+
+	// port that nodes will open a socket on
+	protected static int NODE_PORT = 9090;
+	// port that clients (phones) will open a socket on
+	protected static int CLIENT_PORT = 8080;
+
+	static NodeHandler nodeHandler;
+	static ClientHandler clientHandler;
 
 	/**
 	 * @param args
@@ -19,48 +22,58 @@ public class Server {
 	 */
 	public static void main(String[] args) {
 
-		// Database db = Database.getInstance();
-		NodeManager nm = NodeManager.getInstance(); // Used to create initial
-													// nodemanager instance
-		ClientManager cm = ClientManager.getInstance(); //Create initial clientmanager
+		// Create an instance of the NodeManager object, which keeps track of
+		// nodes
+		NodeManager nm = NodeManager.getInstance();
+		// Create an instance of the ClientManager object, which keeps track of
+		// clients
+		ClientManager cm = ClientManager.getInstance();
+
 		SongFiles songs = SongFiles.getInstance();
-		//TODO search database of stored music library directories
-		//Add function to add new root directory
-		//songDir[0] = "music";
-		//songs.populateDirectoryList(songDir);
 		songs.populateSongList();
-		
-		
 
 		// Handles node requests
-		NodeHandler nodeHandler = new NodeHandler(NODE_PORT);
 		System.out.println("Starting Node Handler");
-		nodeHandler.start();
-		
-		// Handles client requests ie android and iphone
-		ClientHandler clientHandler = new ClientHandler(CLIENT_PORT);
+		startNodeHandler();
+
+		// Handles client requests (android or iphone)
 		System.out.println("Starting Client Handler");
-		clientHandler.start();
-		
-		while(true){
+		startClientHandler();
+
+		while (true) {
 			try {
-				Thread.sleep(20000); //Checks that threads are still alive
-				if(!nodeHandler.isAlive()){
-					//TODO Save server state, restart
-					System.out.println("Node Handler Thread Dead");
-					System.out.println("Unable to listen for new nodes");
-					//System.exit(0);
+				// Checks that threads are still alive every so often
+				Thread.sleep(10000);
+				if (!nodeHandler.isAlive()) {
+					System.out.println("Node Handler Thread Dead !");
+					System.out.println("Attempting to restart NodeHandler..");
+					startNodeHandler();
 				}
-				if(!clientHandler.isAlive()){
-					//TODO Save server state, restart
-					System.out.println("Client Handler Thread Dead - Server Exiting");
+				if (!clientHandler.isAlive()) {
+					System.out.println("Client Handler Thread Dead !");
 					System.out.println("Unable to listen for new clients");
-					//System.exit(0);
+					startClientHandler();
 				}
 			} catch (InterruptedException e) {
 				System.out.println("Exception: Server Exiting");
 				System.exit(0);
 			}
 		}
+	}
+	
+	/**
+	 * Starts up a new NodeHandler thread
+	 */
+	public static void startNodeHandler() {
+		nodeHandler = new NodeHandler(NODE_PORT);
+		nodeHandler.start();
+	}
+	
+	/**
+	 * Starts up a new ClientHandler thread
+	 */
+	public static void startClientHandler() {
+		clientHandler = new ClientHandler(CLIENT_PORT);
+		clientHandler.start();
 	}
 }

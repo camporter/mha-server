@@ -17,7 +17,7 @@ import myhomeaudio.server.http.HTTPHeader;
 
 public class AndroidTest {
 	protected static int port = 8080;
-	protected static String host = "localhost";
+	protected static String host = "192.168.10.101";
 	private static Socket tcpSocket;
 	//static NodeClientConnect conn;
 	static String msg;
