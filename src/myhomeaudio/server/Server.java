@@ -1,6 +1,7 @@
 package myhomeaudio.server;
 
 import myhomeaudio.server.handler.ClientHandler;
+import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.handler.NodeHandler;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;

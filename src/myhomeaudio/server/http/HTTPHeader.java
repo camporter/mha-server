@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.util.Date;
 
 public class HTTPHeader implements HTTPStatus {
-	
-	protected HTTPHeader(){}
-	
+
+	protected HTTPHeader() {
+	}
+
 	/**
 	 * Builds the HTTP header that will be sent back to the client.
 	 * 
@@ -20,8 +21,7 @@ public class HTTPHeader implements HTTPStatus {
 	 * @param contentLength
 	 *            The size (in bytes) of the content being sent. Not needed if
 	 *            hasContent is false.
-	 * @return headerString
-	 * 			  HTTP header string
+	 * @return headerString HTTP header string
 	 * @throws IOException
 	 */
 	public static String buildResponse(int httpStatus, boolean hasContent, String mimeType,
@@ -50,21 +50,21 @@ public class HTTPHeader implements HTTPStatus {
 			// Add the content length
 			headerString += "Content-length: " + contentLength + "\r\n";
 		}
-		
+
 		headerString += "\r\n";
 		return headerString;
 	}
-	
-	public static String buildRequest(String httpMethod, String uri, boolean hasContent, String mimeType, int contentLength) {
+
+	public static String buildRequest(String httpMethod, String uri, boolean hasContent,
+			String mimeType, int contentLength) {
 		String headerString = httpMethod + " " + uri + " " + "HTTP/1.0\r\n";
 		if (hasContent) {
 			headerString += "Content-type: " + mimeType + "\r\n";
 			headerString += "Content-length: " + contentLength + "\r\n";
 		}
-		
+
 		headerString += "\r\n";
 		return headerString;
-		
-		
+
 	}
 }

@@ -22,7 +22,7 @@ public class NodeHandler extends Thread {
 	 * Node Handler Constructor
 	 * 
 	 * @param port
-	 *            Give the ClientHandler the port we will be using.
+	 *            Give the NodeHandler the port we will be using.
 	 */
 	public NodeHandler(int port) {
 		this.setName("NodeHandler");

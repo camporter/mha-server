@@ -57,7 +57,7 @@ public class Worker extends Thread {
         this.params.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024);
         this.params.setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
         this.params.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true);
-        this.params.setParameter(CoreProtocolPNames.ORIGIN_SERVER, "Server: My Home Audio");
+        this.params.setParameter(CoreProtocolPNames.ORIGIN_SERVER, "MyHomeAudio");
         
         //Create interceptor array that will handle the response
         HttpResponseInterceptor[] httpResponseInter = new HttpResponseInterceptor[]{
@@ -137,19 +137,19 @@ public class Worker extends Thread {
 			}
 			
 			// Give the helper the URI and body
-			currentHelper.setData(requestUri, httpBody);
+			//currentHelper.setData(requestUri, httpBody);
 			
 			// Get back the output it has generated
-			String output = currentHelper.getOutput();
+			//String output = currentHelper.getOutput();
 			
 			//Set response status code and entity body
-			response.setStatusCode(currentHelper.getStatusCode());
-			StringEntity stringEntity = new StringEntity(output);
-			response.setEntity(stringEntity);
+			//response.setStatusCode(currentHelper.getStatusCode());
+			//StringEntity stringEntity = new StringEntity(output);
+			//response.setEntity(stringEntity);
 			
 			// Clean up stuff
 			requestUri = null;
-			output = null;
+			//output = null;
 	        }
 	    }
 			

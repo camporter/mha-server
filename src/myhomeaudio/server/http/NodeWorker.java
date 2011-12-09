@@ -78,8 +78,6 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 				break;
 			}
 
-			//outputStream.writeBytes(output);
-
 			socket.close();
 
 		} catch (UnknownHostException e) {

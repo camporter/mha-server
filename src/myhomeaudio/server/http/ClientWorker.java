@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.Socket;
 
-import myhomeaudio.server.handler.ClientHandler;
+import myhomeaudio.server.handler.ClientHandler2;
 
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;
@@ -23,9 +23,9 @@ public class ClientWorker extends Worker {
 	
 	//Client networking
 	private Socket clientSocket;
-	private ClientHandler clientHandler;
+	private ClientHandler2 clientHandler;
 
-	public ClientWorker(ClientHandler clientHandler) {
+	public ClientWorker(ClientHandler2 clientHandler) {
 		super();
 		this.params = super.getParams();
 		this.httpService = super.getHttpService();

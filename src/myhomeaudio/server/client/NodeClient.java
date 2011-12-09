@@ -48,8 +48,7 @@ import org.apache.http.util.EntityUtils;
 public class NodeClient {
 	protected static int serverPort = 9090;
 	protected static int nodePort = 9091;
-	//protected static String host = "192.168.10.101";
-	protected static String host = "127.0.0.1";
+	protected static String host = "192.168.10.101";
 	
 	public static void main(String[] args) {
 		System.out.println("Starting...");

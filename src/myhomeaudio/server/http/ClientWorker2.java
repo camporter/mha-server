@@ -38,7 +38,7 @@ import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 
-import myhomeaudio.server.handler.ClientHandler;
+import myhomeaudio.server.handler.ClientHandler2;
 import myhomeaudio.server.helper.Helper;
 import myhomeaudio.server.helper.NodeHelper;
 import myhomeaudio.server.helper.SongHelper;
@@ -57,7 +57,7 @@ public class ClientWorker2 extends Thread{
 	// buffer to use for requests
 	byte[] buf;
 	private Socket clientSocket;
-	private ClientHandler clientHandler;
+	private ClientHandler2 clientHandler;
 
 	
 	//Root "directory" of client commands
@@ -66,7 +66,7 @@ public class ClientWorker2 extends Thread{
 	private HttpParams params;
 	
 
-	public ClientWorker2(ClientHandler clientHandler) {
+	public ClientWorker2(ClientHandler2 clientHandler) {
 		this.clientHandler = clientHandler;
 		this.clientSocket = null;
 		

@@ -1,142 +1,154 @@
 package myhomeaudio.server.handler;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.Locale;
 
-import myhomeaudio.server.client.Client;
-import myhomeaudio.server.http.ClientWorker;
-import myhomeaudio.server.manager.ClientManager;
+import myhomeaudio.server.helper.SongHelper;
 
-/**
- * ClientHandler runs as a thread and waits for Clients to connect through its
- * loop.
- * 
- * @author Cameron
- * 
- */
+import org.apache.http.ConnectionClosedException;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.HttpServerConnection;
+import org.apache.http.HttpStatus;
+import org.apache.http.MethodNotSupportedException;
+import org.apache.http.impl.DefaultConnectionReuseStrategy;
+import org.apache.http.impl.DefaultHttpResponseFactory;
+import org.apache.http.impl.DefaultHttpServerConnection;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.SyncBasicHttpParams;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpProcessor;
+import org.apache.http.protocol.HttpRequestHandler;
+import org.apache.http.protocol.HttpRequestHandlerRegistry;
+import org.apache.http.protocol.HttpService;
+import org.apache.http.protocol.ImmutableHttpProcessor;
+import org.apache.http.protocol.ResponseConnControl;
+import org.apache.http.protocol.ResponseContent;
+import org.apache.http.protocol.ResponseDate;
+import org.apache.http.protocol.ResponseServer;
+
 public class ClientHandler extends Thread {
 
-	private ServerSocket clientListenSocket;
+	// Port which the ClientHandler will listen on
 	private int clientListenPort;
-
-	/*
-	 * holds all the workers we can use to service client requests
-	 */
-	private ArrayList<ClientWorker> workerPool;
-
-	private int maxNumWorkers;
+	
+	private ServerSocket serverSocket;
+	
+	private final HttpParams httpParameters;
+	private final HttpService httpService;
 
 	public ClientHandler(int port) {
 		this.setName("ClientHandler");
-		
-		this.clientListenSocket = null;
 		this.clientListenPort = port;
-		this.workerPool = new ArrayList<ClientWorker>();
-		this.maxNumWorkers = 5;
 
-		try {
-			// Creates ServerSocket to listen on
-			clientListenSocket = new ServerSocket(this.clientListenPort);
-		} catch (IOException e) {
-			System.out.println("ClientHandler: Unable to bind to port: " + this.clientListenPort);
-			System.out.println("Exiting");
-			return;
-		}
+		// Setup our HTTP parameters
+		this.httpParameters = new SyncBasicHttpParams();
+		this.httpParameters.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000)
+				.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
+				.setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false)
+				.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true)
+				.setParameter(CoreProtocolPNames.ORIGIN_SERVER, "MyHomeAudio");
 
-		// Start our an initial pool of ClientWorkers
-		for (int i = 0; i < this.maxNumWorkers; ++i) {
-			ClientWorker w = new ClientWorker(this);
-			w.start();
-			workerPool.add(w);
-		}
+		// Create an interceptor array that will handle the response
+		HttpResponseInterceptor[] httpResponseInter = new HttpResponseInterceptor[] {
+				new ResponseDate(), new ResponseServer(), new ResponseContent(),
+				new ResponseConnControl() };
+		
+		// Create a new HttpProcessor, pass it our interceptors
+		HttpProcessor httpProcessor = new ImmutableHttpProcessor(httpResponseInter);
+		
+		// Create registry that stores key used to process request URI
+		HttpRequestHandlerRegistry httpRequestRegistry = new HttpRequestHandlerRegistry();
+		httpRequestRegistry.register("/song*", new SongHelper());
+		// TODO: Add other helpers to the request registry
+		
+		this.httpService = new HttpService(
+				httpProcessor,
+				new DefaultConnectionReuseStrategy(),
+				new DefaultHttpResponseFactory(),
+				httpRequestRegistry,
+				this.httpParameters);
 	}
 
 	public void run() {
+		
+		// Open the port we want to listen on
 		try {
-			while (true) {
-				System.out.println("Listening for clients");
-
-				if (this.clientListenSocket == null) {
-					System.out.println("Client Server Listen Socket Unavailable");
-					// Stop this thread if the socket isn't available
-					return;
-				}
-
-				// Wait until a connection is found
-				Socket clientSocket = this.clientListenSocket.accept();
-				System.out.println("Client connection Found: " + clientSocket.getPort() + "/"
-						+ clientSocket.getInetAddress().getHostAddress());
-
-				// Add the client to the ClientManager
-				ClientManager cm = ClientManager.getInstance();
-				Client client = new Client(clientSocket.getInetAddress().getHostAddress());
-				cm.addClient(client);
-
-				// Make a ClientWorker handle the client's request
-				ClientWorker worker = null;
-				synchronized (workerPool) {
-					if (workerPool.isEmpty()) {
-						/*
-						 * We don't have any unused workers, add a new one to
-						 * use
-						 */
-						worker = new ClientWorker(this);
-						worker.setClientSocket(clientSocket);
-						worker.start();
-					} else {
-						// We have a worker -- give it the socket
-						worker = (ClientWorker) workerPool.get(0);
-						workerPool.remove(0);
-						worker.setClientSocket(clientSocket);
-					}
-				}
-
-			}
+			this.serverSocket = new ServerSocket(this.clientListenPort);
 		} catch (IOException e) {
-			// e.printStackTrace();
-			System.out.println("ClientHandler exited !");
-			return;
+			System.err.println("Unable ClientHandler unable to bind to port "+this.clientListenPort);
+		}
+		
+		while(!Thread.interrupted()) {
+			try {
+				Socket socket = this.serverSocket.accept();
+				DefaultHttpServerConnection httpConnection = new DefaultHttpServerConnection();
+				httpConnection.bind(socket, this.httpParameters);
+				
+				Thread worker = new WorkerThread(this.httpService, httpConnection);
+				worker.start();
+			} catch (InterruptedIOException e) {
+				break;
+			}
+			catch (IOException e) {
+				System.err.println("I/O error initializing connection thread: "+e.getMessage());
+				break;
+			}
+		}
+		
+	}
+	
+	static class HttpFileHandler implements HttpRequestHandler {
+
+		@Override
+		public void handle(final HttpRequest request, HttpResponse response, HttpContext context)
+				throws HttpException, IOException {
+			
+			String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
+			if (!method.equals("GET") && !method.equals("POST")) {
+				throw new MethodNotSupportedException(method + " method not supported");
+			}
+			response.setStatusCode(HttpStatus.SC_OK);
+			System.out.println("Request found");
 		}
 	}
-
-	/**
-	 * Attempts to add a ClientWorker to the ClientWorker pool. It won't add
-	 * another ClientWorker if there are enough in the pool already.
-	 * 
-	 * @param worker
-	 *            ClientWorker object to be added.
-	 * @return Whether the ClientWorker was added to the pool.
-	 */
-	synchronized public boolean addWorker(ClientWorker worker) {
-		if (this.getWorkerCount() >= getMaxWorkers()) {
-			// Already have enough workers!
-			return false;
-		} else {
-			// We have space, let's add this ClientWorker.
-			this.workerPool.add(worker);
-			return true;
+	
+	static class WorkerThread extends Thread {
+		
+		private final HttpService httpService;
+		private final HttpServerConnection httpConnection;
+		
+		public WorkerThread(final HttpService httpService, final HttpServerConnection httpConnection) {
+			super();
+			this.httpService = httpService;
+			this.httpConnection = httpConnection;
 		}
-	}
-
-	/**
-	 * Returns the number of workers in the pool
-	 * 
-	 * @return size Size of the worker pool
-	 * 
-	 */
-	public int getWorkerCount() {
-		return this.workerPool.size();
-	}
-
-	/**
-	 * Returns the maximum number of workers allowed
-	 * 
-	 * @return maxNumWorkers Maximum number of workers
-	 * 
-	 */
-	public int getMaxWorkers() {
-		return this.maxNumWorkers;
+		
+		public void run() {
+			HttpContext httpContext = new BasicHttpContext(null);
+			try {
+				while (!Thread.interrupted() && this.httpConnection.isOpen()) {
+					this.httpService.handleRequest(httpConnection, httpContext);
+				}
+			} catch (ConnectionClosedException ex) {
+                System.err.println("Client closed connection");
+            } catch (IOException ex) {
+                System.err.println("I/O error: " + ex.getMessage());
+            } catch (HttpException ex) {
+                System.err.println("Unrecoverable HTTP protocol violation: " + ex.getMessage());
+            } finally {
+                try {
+                    this.httpConnection.shutdown();
+                } catch (IOException ignore) {}
+            }
+		}
 	}
 }

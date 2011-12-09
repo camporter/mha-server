@@ -7,21 +7,11 @@ package myhomeaudio.server.helper;
  * 
  */
 public interface HelperInterface {
+
 	/**
 	 * Gets the helper's final HTTP output after it has been created.
 	 * 
 	 * @return The HTTP output to be sent back to the client.
 	 */
-	public String getOutput();
-
-	/**
-	 * Sets the URI and HTTP data that the helper needs to do generate an
-	 * output.
-	 * 
-	 * @param uri
-	 *            URI from the client
-	 * @param data
-	 *            Data of the HTTP request being sent
-	 */
-	public void setData(String uri, String data);
+	public String getOutput(String uri, String data);
 }
