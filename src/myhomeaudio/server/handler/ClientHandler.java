@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Locale;
 
+import myhomeaudio.server.helper.NodeHelper;
 import myhomeaudio.server.helper.SongHelper;
 
 import org.apache.http.ConnectionClosedException;
@@ -68,6 +69,7 @@ public class ClientHandler extends Thread {
 		// Create registry that stores key used to process request URI
 		HttpRequestHandlerRegistry httpRequestRegistry = new HttpRequestHandlerRegistry();
 		httpRequestRegistry.register("/song*", new SongHelper());
+		httpRequestRegistry.register("/node*", new NodeHelper());
 		// TODO: Add other helpers to the request registry
 		
 		this.httpService = new HttpService(

@@ -37,24 +37,35 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 									// away
 
 		if (tokenizedUri.hasMoreTokens()) {
-			// Possible methods: list, play, pause
+			
 			String method = tokenizedUri.nextToken(); // NoSuchElementException
 			if (method.equals("list")) {
+				// List the songs available
 				SongFiles songs = SongFiles.getInstance();
 				Gson gson = new Gson();
 
 				body = gson.toJson(songs.getSongList());
 				this.statusCode = HttpStatus.SC_OK;
+				
 			} else if (method.equals("play")) {
+				// Play a defined song
 				Gson gson = new Gson();
 				Hashtable hasht = gson.fromJson(data.trim(), Hashtable.class);
-
-				this.statusCode = HttpStatus.SC_OK;
-				// TODO need to know ipaddress of node to send data to
-				NodeManager nm = NodeManager.getInstance();
-				nm.sendNodeCommand(NODE_PLAY, hasht.get("song").toString());
-				// nm.sendNodeCommand(NODE_PLAY, "Buffalo For What.mp3");
+				
+				// Make sure a song to play is actually given
+				if (hasht != null && hasht.containsKey("song")) {
+					this.statusCode = HttpStatus.SC_OK;
+					
+					NodeManager nm = NodeManager.getInstance();
+					nm.sendNodeCommand(NODE_PLAY, hasht.get("song").toString());
+				}
+				else {
+					// No song given, send a bad request response
+					this.statusCode = HttpStatus.SC_BAD_REQUEST;
+				}
+				
 			} else if (method.equals("pause")) {
+				// Pause the song playing
 				this.statusCode = HttpStatus.SC_OK;
 				NodeManager nm = NodeManager.getInstance();
 				nm.sendNodeCommand(NODE_PAUSE, "");
