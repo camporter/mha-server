@@ -7,6 +7,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.NodeCommands;
 import myhomeaudio.server.songs.SongFiles;
@@ -31,7 +32,8 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 	@Override
 	public String getOutput(String uri, String data) {
 		String body = "";
-
+		ClientManager cm = ClientManager.getInstance();
+		
 		StringTokenizer tokenizedUri = new StringTokenizer(uri, "/");
 		tokenizedUri.nextToken(); // throw the first part away, throws /song
 									// away
@@ -57,8 +59,10 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 					this.statusCode = HttpStatus.SC_OK;
 					
 					NodeManager nm = NodeManager.getInstance();
-					// TODO: GET RID OF THESE HARDCODED IPs!!!!!!!!!!!!!!!!!!!!!
-					nm.sendNodeCommand(NODE_PLAY, "127.0.0.1", hasht.get("song").toString());
+					// TODO: GET RID OF THIS UGLY
+					String songName = hasht.get("song").toString();
+					nm.sendNodeCommand(NODE_PLAY, nm.getNodeByName(cm.getClient().getClosestNodeName()).getIpAddress(), hasht.get("song").toString());
+					cm.getClient().setCurrentSong(songName);
 				}
 				else {
 					// No song given, send a bad request response
@@ -69,8 +73,8 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 				// Pause the song playing
 				this.statusCode = HttpStatus.SC_OK;
 				NodeManager nm = NodeManager.getInstance();
-				// TODO: GET RID OF THESE HARDCODED IPs!!!!!!!!!!!!!!!!!!!!!
-				nm.sendNodeCommand(NODE_PAUSE, "127.0.0.1", "");
+				
+				nm.sendNodeCommand(NODE_PAUSE, nm.getNodeByName(cm.getClient().getClosestNodeName()).getIpAddress(), "");
 			}
 
 		} else {

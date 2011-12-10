@@ -139,6 +139,7 @@ public class NodeClient {
 				// Method is not GET or POST
 				throw new MethodNotSupportedException(method + " method not supported.");
 			}
+			System.out.println("Playing song...");
 			String target = request.getRequestLine().getUri();
 			if (request instanceof HttpEntityEnclosingRequest) {
 				// Request has data, so we save it
@@ -161,6 +162,8 @@ public class NodeClient {
 				throw new MethodNotSupportedException(method + " method not supported.");
 			}
 			
+			System.out.println("Pausing song...");
+			
 			response.setStatusCode(HttpStatus.SC_OK);
 			
 		}
@@ -179,6 +182,8 @@ public class NodeClient {
 				// Method is not a GET
 				throw new MethodNotSupportedException(method + " method not supported.");
 			}
+			
+			System.out.println("Sending name...");
 			// Send the name of the node as data
 			response.setEntity(new StringEntity(this.nodeName));
 			response.setStatusCode(HttpStatus.SC_OK);

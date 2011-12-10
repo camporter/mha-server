@@ -95,4 +95,13 @@ public class NodeManager implements NodeCommands {
 		}
 		return null;
 	}
+	
+	public Node getNodeByName(String name) {
+		for (Node item : nodeList) {
+			if (item.getBluetoothName().equals(name)) {
+				return item;
+			}
+		}
+		return null;
+	}
 }

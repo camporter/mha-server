@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
+import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
 import myhomeaudio.server.songs.SongFiles;
 
@@ -50,7 +51,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 			
 			String method = tokenizedUri.nextToken(); // NoSuchElementException
 			 if (method.equals("rssi")) {
-				// Play a defined song
+				 System.out.println("Getting rssi values from client");
 				Gson gson = new Gson();
 				
 				JsonParser parser = new JsonParser();
@@ -63,7 +64,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 				for (JsonElement item : deviceArray)
 				{
 					DeviceObject device = gson.fromJson(item, DeviceObject.class);
-					if (nm.isValidNode(device.name) && device.rssi > lowestDeviceRSSI) {
+					if (device != null && nm.isValidNode(device.name) && device.rssi > lowestDeviceRSSI) {
 						lowestDeviceName = device.name;
 						lowestDeviceRSSI = device.rssi;
 					}
@@ -74,11 +75,22 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 				
 				Client client = cm.getClient();
 				if (!client.getClosestNodeName().equals(lowestDeviceName)) {
-					
+					// Move song playing to new node
+					nm.sendNodeCommand(NODE_PLAY, nm.getNodeByName(cm.getClient().getClosestNodeName()).getIpAddress(), client.getCurrentSong());
 				}
 				client.setClosestNodeName(lowestDeviceName);
 				
-				this.statusCode = HttpStatus.SC_OK;			
+				this.statusCode = HttpStatus.SC_OK;		
+				
+			 } else if (method.equals("start")) {
+				 System.out.println("Getting start from client "+data);
+				 ClientManager cm = ClientManager.getInstance();
+				 Client client = new Client(data);
+				 cm.addClient(client);
+				 this.statusCode = HttpStatus.SC_OK;
+				 
+			 } else {
+				 this.statusCode = HttpStatus.SC_BAD_REQUEST;
 			 }
 
 		} else {
