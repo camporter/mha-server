@@ -1,12 +1,13 @@
 package myhomeaudio.server.helper;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import myhomeaudio.server.client.Client;
+import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.NodeCommands;
 import myhomeaudio.server.songs.SongFiles;
@@ -18,20 +19,29 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.MethodNotSupportedException;
-import org.apache.http.entity.ContentProducer;
-import org.apache.http.entity.EntityTemplate;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
-public class SongHelper extends Helper implements HelperInterface, NodeCommands {
-
-	@Override
+public class ClientHelper extends Helper implements HelperInterface, NodeCommands {
+	
+	class DeviceObject {
+		public String name;
+		public int rssi;
+		public DeviceObject(String name, int rssi) {
+			this.name = name;
+			this.rssi = rssi;
+		}
+	}
+	
 	public String getOutput(String uri, String data) {
 		String body = "";
-
+		
 		StringTokenizer tokenizedUri = new StringTokenizer(uri, "/");
 		tokenizedUri.nextToken(); // throw the first part away, throws /song
 									// away
@@ -39,54 +49,55 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 		if (tokenizedUri.hasMoreTokens()) {
 			
 			String method = tokenizedUri.nextToken(); // NoSuchElementException
-			if (method.equals("list")) {
-				// List the songs available
-				SongFiles songs = SongFiles.getInstance();
-				Gson gson = new Gson();
-
-				body = gson.toJson(songs.getSongList());
-				this.statusCode = HttpStatus.SC_OK;
-				
-			} else if (method.equals("play")) {
+			 if (method.equals("rssi")) {
 				// Play a defined song
 				Gson gson = new Gson();
-				Hashtable hasht = gson.fromJson(data.trim(), Hashtable.class);
 				
-				// Make sure a song to play is actually given
-				if (hasht != null && hasht.containsKey("song")) {
-					this.statusCode = HttpStatus.SC_OK;
-					
-					NodeManager nm = NodeManager.getInstance();
-					// TODO: GET RID OF THESE HARDCODED IPs!!!!!!!!!!!!!!!!!!!!!
-					nm.sendNodeCommand(NODE_PLAY, "127.0.0.1", hasht.get("song").toString());
-				}
-				else {
-					// No song given, send a bad request response
-					this.statusCode = HttpStatus.SC_BAD_REQUEST;
-				}
+				JsonParser parser = new JsonParser();
+				JsonArray deviceArray = parser.parse(data).getAsJsonArray();
 				
-			} else if (method.equals("pause")) {
-				// Pause the song playing
-				this.statusCode = HttpStatus.SC_OK;
 				NodeManager nm = NodeManager.getInstance();
-				// TODO: GET RID OF THESE HARDCODED IPs!!!!!!!!!!!!!!!!!!!!!
-				nm.sendNodeCommand(NODE_PAUSE, "127.0.0.1", "");
-			}
+				
+				String lowestDeviceName = "";
+				int lowestDeviceRSSI = Integer.MIN_VALUE;
+				for (JsonElement item : deviceArray)
+				{
+					DeviceObject device = gson.fromJson(item, DeviceObject.class);
+					if (nm.isValidNode(device.name) && device.rssi > lowestDeviceRSSI) {
+						lowestDeviceName = device.name;
+						lowestDeviceRSSI = device.rssi;
+					}
+						
+				}
+				
+				ClientManager cm = ClientManager.getInstance();
+				
+				Client client = cm.getClient();
+				if (!client.getClosestNodeName().equals(lowestDeviceName)) {
+					
+				}
+				client.setClosestNodeName(lowestDeviceName);
+				
+				this.statusCode = HttpStatus.SC_OK;			
+			 }
 
 		} else {
 
 		}
+		
 		return body;
 	}
-
+	
 	@Override
 	public void handle(HttpRequest request, HttpResponse response, HttpContext context)
 			throws HttpException, IOException {
 		
 		String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
+		
         if (!method.equals("GET") && !method.equals("POST")) {
             throw new MethodNotSupportedException(method + " method not supported"); 
         }
+        
         String requestData = "";
         if (request instanceof HttpEntityEnclosingRequest) {
             HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
@@ -99,5 +110,5 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 		response.setStatusCode(this.statusCode);
 
 	}
-
+	
 }

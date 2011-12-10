@@ -6,6 +6,7 @@ import java.net.Socket;
 
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.Node;
+import myhomeaudio.server.node.NodeCommands;
 
 /**
  * NodeHandler runs as a thread, waiting for nodes to connect through its loop.
@@ -57,9 +58,11 @@ public class NodeHandler extends Thread {
 							+ nodeSocket.getInetAddress().getHostAddress());
 
 					NodeManager nm = NodeManager.getInstance();
-					Node newNode = new Node(nodeSocket.getInetAddress().getHostAddress());
-					if (!nm.addNode(newNode)) {
-						// TODO do something, node already in list
+					Node newNode = new Node(nodeSocket.getInetAddress().getHostAddress(), "");
+					
+					if (nm.addNode(newNode)) {
+						// Request the name from the node
+						nm.sendNodeCommand(NodeCommands.NODE_NAME, nodeSocket.getInetAddress().getHostAddress(), "");
 					}
 
 					nodeSocket.close();

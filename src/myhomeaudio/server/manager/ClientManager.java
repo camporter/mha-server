@@ -23,23 +23,7 @@ public class ClientManager {
 		clientCount++;
 	}
 	
-	/** Updates Client object's closest node ipAddress
-	 * 
-	 * @param ipAddress
-	 * 		ipAddress of client to be updates
-	 * @param nodeIpAddress
-	 * 		ipAddress of node closest to client
-	 */
-	public synchronized void updateClosestNode(String ipAddress, String nodeIpAddress){
-		int i=0;
-		while(i<clientCount){
-			if(clientList.get(i) != null){
-				if(clientList.get(i).getIpAddress().equals(ipAddress)){
-					clientList.get(i).setNodeIpAddress(nodeIpAddress);
-					i=clientCount;
-				}
-			}
-			i++;
-		}
+	public synchronized Client getClient() {
+		return clientList.get(0);
 	}
 }

@@ -37,7 +37,7 @@ public class NodeManager implements NodeCommands {
 	 * 		True - Item added to list, False - Item already in list
 	 */
 	public synchronized boolean addNode(Node node) {
-		if(nodeList.contains(node)){
+		if(nodeList.contains(node)) {
 			return false;
 		}
 		nodeList.add(node);
@@ -52,11 +52,10 @@ public class NodeManager implements NodeCommands {
 	 * @param data
 	 * 		Necessary data the node would need to execute the command
 	 */
-	public synchronized void sendNodeCommand(int command, String data) {
+	public synchronized void sendNodeCommand(int command, String ipAddress, String data) {
 		NodeWorker worker = new NodeWorker();
-		// TODO: THIS DEFAULTS TO THE FIRST NODE!
-		//Possibly use ClientManager
-		worker.setRequestData(command, this.nodeList.get(0).getIpAddress(), data);
+		
+		worker.setRequestData(command, ipAddress, data);
 		worker.start();
 		
 	}
@@ -70,4 +69,30 @@ public class NodeManager implements NodeCommands {
 		return nodeCount;
 	}
 	
+	public boolean isValidNode(String bluetoothName) {
+		for (Node node : this.nodeList)
+		{
+			if (node.getBluetoothName().equals(bluetoothName))
+			{
+				return true;
+			}
+		}
+		return false;
+		
+	}
+	
+	/**
+	 * Get a Node object with the given IP address
+	 * @param ipAddress The IP address of the node to return.
+	 * @return The Node with the corresponding IP. If no nodes match, return null.
+	 */
+	public Node getNodeByIpAddress(String ipAddress) {
+		for (Node item : nodeList) {
+			if (item.getIpAddress().equals(ipAddress))
+			{
+				return item;
+			}
+		}
+		return null;
+	}
 }

@@ -21,7 +21,9 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.HttpStatus;
 import org.apache.http.MethodNotSupportedException;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.DefaultHttpServerConnection;
@@ -52,6 +54,16 @@ public class NodeClient {
 	
 	public static void main(String[] args) {
 		System.out.println("Starting...");
+		
+		String nodeName = "node";
+		
+		if (args.length > 0) {
+			nodeName = args[0];
+		} else {
+			System.err.println("A Node name must be provided!");
+			//System.exit(1);
+		}
+		
 		doServerDiscovery();
 		try {
 			ServerSocket nodeSocket = new ServerSocket(NodeClient.nodePort);
@@ -71,7 +83,9 @@ public class NodeClient {
 			});
 			
 			HttpRequestHandlerRegistry registry = new HttpRequestHandlerRegistry();
-			registry.register("*", new HttpNodeRequestHandler());
+			registry.register("play", new PlayRequestHandler());
+			registry.register("pause", new PauseRequestHandler());
+			registry.register("name", new NameRequestHandler(nodeName));
 			
 			HttpService httpService = new HttpService(httpProc, new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory(), registry, params);
 			
@@ -118,7 +132,7 @@ public class NodeClient {
 		}
 	}
 	
-	static class HttpNodeRequestHandler implements HttpRequestHandler {
+	static class PlayRequestHandler implements HttpRequestHandler {
 		public void handle(final HttpRequest request, final HttpResponse response, final HttpContext context) throws HttpException, IOException {
 			String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
 			if (!method.equals("GET") && !method.equals("POST")) {
@@ -136,6 +150,39 @@ public class NodeClient {
 				outFile.close();
 				
 			}
+		}
+	}
+	
+	static class PauseRequestHandler implements HttpRequestHandler {
+		public void handle(final HttpRequest request, final HttpResponse response, final HttpContext context) throws HttpException, IOException {
+			String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
+			if (!method.equals("GET")) {
+				// Method is not a GET
+				throw new MethodNotSupportedException(method + " method not supported.");
+			}
+			
+			response.setStatusCode(HttpStatus.SC_OK);
+			
+		}
+	}
+	
+	static class NameRequestHandler implements HttpRequestHandler {
+		private String nodeName;
+		
+		public NameRequestHandler(String nodeName) {
+			this.nodeName = nodeName;
+		}
+		
+		public void handle(final HttpRequest request, final HttpResponse response, final HttpContext context) throws HttpException, IOException {
+			String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
+			if (!method.equals("GET")) {
+				// Method is not a GET
+				throw new MethodNotSupportedException(method + " method not supported.");
+			}
+			// Send the name of the node as data
+			response.setEntity(new StringEntity(this.nodeName));
+			response.setStatusCode(HttpStatus.SC_OK);
+			
 		}
 	}
 }

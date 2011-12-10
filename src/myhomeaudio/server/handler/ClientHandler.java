@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Locale;
 
+import myhomeaudio.server.helper.ClientHelper;
 import myhomeaudio.server.helper.NodeHelper;
 import myhomeaudio.server.helper.SongHelper;
 
@@ -70,6 +71,7 @@ public class ClientHandler extends Thread {
 		HttpRequestHandlerRegistry httpRequestRegistry = new HttpRequestHandlerRegistry();
 		httpRequestRegistry.register("/song*", new SongHelper());
 		httpRequestRegistry.register("/node*", new NodeHelper());
+		httpRequestRegistry.register("/client*", new ClientHelper());
 		// TODO: Add other helpers to the request registry
 		
 		this.httpService = new HttpService(
@@ -106,21 +108,6 @@ public class ClientHandler extends Thread {
 			}
 		}
 		
-	}
-	
-	static class HttpFileHandler implements HttpRequestHandler {
-
-		@Override
-		public void handle(final HttpRequest request, HttpResponse response, HttpContext context)
-				throws HttpException, IOException {
-			
-			String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
-			if (!method.equals("GET") && !method.equals("POST")) {
-				throw new MethodNotSupportedException(method + " method not supported");
-			}
-			response.setStatusCode(HttpStatus.SC_OK);
-			System.out.println("Request found");
-		}
 	}
 	
 	static class WorkerThread extends Thread {
