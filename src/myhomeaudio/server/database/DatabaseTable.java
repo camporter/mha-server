@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * 
  */
 public class DatabaseTable {
-	private ArrayList<String> schema;
+	private DatabaseTableSchema schema;
 	private ArrayList<DatabaseItem> items;
 	private Database database;
 	private String name;
@@ -20,12 +20,10 @@ public class DatabaseTable {
 	/**
 	 * Constructor that populates the table with its schema and items
 	 * 
-	 * @param db
 	 * @param tableName
-	 * @param schema
 	 */
-	public DatabaseTable(Database db, String tableName) {
-		this.database = db;
+	public DatabaseTable(String tableName) {
+		this.database = Database.getInstance();
 		this.name = tableName;
 
 		// Get the schema from the file

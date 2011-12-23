@@ -7,8 +7,10 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import myhomeaudio.server.client.Client;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
+import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
 import myhomeaudio.server.songs.SongFiles;
 
@@ -61,7 +63,11 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 					NodeManager nm = NodeManager.getInstance();
 					// TODO: GET RID OF THIS UGLY
 					String songName = hasht.get("song").toString();
-					nm.sendNodeCommand(NODE_PLAY, nm.getNodeByName(cm.getClient().getClosestNodeName()).getIpAddress(), hasht.get("song").toString());
+					Client client = cm.getClient();
+					String closestNodeName = client.getClosestNodeName();
+					Node node = nm.getNodeByName(closestNodeName);
+					String ipaddr = node.getIpAddress();
+					nm.sendNodeCommand(NODE_PLAY, ipaddr, hasht.get("song").toString());
 					cm.getClient().setCurrentSong(songName);
 				}
 				else {

@@ -7,11 +7,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Class that takes care of all database file operations.
+ * 
  * 
  * The Database object keeps record of its database tables. It communicates with
  * the file I/O to write or read files as needed. There should only be one
@@ -43,7 +45,7 @@ public class Database {
 	 */
 	protected Database() {
 
-		tables = new ArrayList<DatabaseTable>();
+		this.tables = new ArrayList<DatabaseTable>();
 
 		// Find all table folders and create table objects based off of them
 		File dbFolder = new File(this.databaseFolder);
@@ -51,7 +53,7 @@ public class Database {
 			File[] fileList = dbFolder.listFiles();
 			for (File f : fileList) {
 				if (f.isDirectory()) {
-					DatabaseTable table = new DatabaseTable(this, f.getName());
+					DatabaseTable table = new DatabaseTable(f.getName());
 
 					// Keep record of the table in the database
 					this.tables.add(table);
@@ -71,10 +73,31 @@ public class Database {
 	/**
 	 * Get a list of tables in the Database.
 	 * 
-	 * @return
+	 * @return An ArrayList of all DatabaseTable objects as part of the database
 	 */
 	public ArrayList<DatabaseTable> getTables() {
 		return new ArrayList<DatabaseTable>(this.tables);
+	}
+
+	/**
+	 * Get the DatabaseTable for a given table name.
+	 * 
+	 * @param tableName
+	 *            The name of the table
+	 * @return The DatabaseTable representing the specified table. Otherwise, returns null
+	 */
+	public DatabaseTable getTable(String tableName) {
+		Iterator i = this.tables.iterator();
+		while (i.hasNext())
+		{
+			DatabaseTable table = (DatabaseTable) i.next();
+			if (table.getName().equals(tableName))
+			{
+				return table;
+			}
+		}
+		// TODO: Throw exception instead
+		return null;
 	}
 
 	public DatabaseTable createTable(String tableName, ArrayList<String> schema) {
@@ -91,7 +114,7 @@ public class Database {
 
 		// Add the schema BEFORE we create the table
 		this.writeSchema(tableName, schema);
-		return new DatabaseTable(this, tableName);
+		return new DatabaseTable(tableName);
 	}
 
 	/**
@@ -105,8 +128,8 @@ public class Database {
 		write.lock();
 		try {
 			// The item has its own file in its table's folder
-			File file = new File(this.databaseFolder + "/"
-					+ item.getTable().getName() + "/" + item.getId());
+			File file = new File(this.databaseFolder + "/" + item.getTable().getName() + "/"
+					+ item.getId());
 
 			try {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(file));
@@ -143,8 +166,8 @@ public class Database {
 	public boolean removeFromTable(DatabaseItem item) {
 		write.lock();
 		try {
-			File file = new File(this.databaseFolder + "/"
-					+ item.getTable().getName() + "/" + item.getId());
+			File file = new File(this.databaseFolder + "/" + item.getTable().getName() + "/"
+					+ item.getId());
 			return file.delete();
 		} finally {
 			write.unlock();
@@ -177,16 +200,14 @@ public class Database {
 
 		read.lock();
 		try {
-			File tableFolder = new File(this.databaseFolder + "/"
-					+ table.getName());
+			File tableFolder = new File(this.databaseFolder + "/" + table.getName());
 			File[] itemFileList = tableFolder.listFiles();
 
 			for (File f : itemFileList) {
 				if (f.isFile() && !f.getName().equals("schema")) {
 
 					int id = Integer.parseInt(f.getName());
-					DatabaseItem item = new DatabaseItem(table, id,
-							this.readItem(table, id));
+					DatabaseItem item = new DatabaseItem(table, id, this.readItem(table, id));
 					result.add(item);
 				}
 			}
@@ -219,12 +240,10 @@ public class Database {
 
 		read.lock();
 		try {
-			File itemFile = new File(this.databaseFolder + "/"
-					+ table.getName() + "/" + itemId);
+			File itemFile = new File(this.databaseFolder + "/" + table.getName() + "/" + itemId);
 
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader(
-						itemFile));
+				BufferedReader reader = new BufferedReader(new FileReader(itemFile));
 				try {
 					// Each line in the item file is a defined value
 					String line = null;
@@ -247,19 +266,17 @@ public class Database {
 	}
 
 	/**
-	 * Read a table's schema to file.
+	 * Read a table's schema from its file.
 	 */
-	public ArrayList<String> readSchema(String tableName) {
+	public DatabaseTableSchema readSchema(String tableName) {
 		ArrayList<String> result = new ArrayList<String>();
 
 		read.lock();
 		try {
-			File schemaFile = new File(this.databaseFolder + "/" + tableName
-					+ "/schema");
+			File schemaFile = new File(this.databaseFolder + "/" + tableName + "/schema");
 
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader(
-						schemaFile));
+				BufferedReader reader = new BufferedReader(new FileReader(schemaFile));
 				try {
 					// Each line in the schema file is a defined column
 					String line = null;
@@ -287,8 +304,7 @@ public class Database {
 	public void writeSchema(String tableName, ArrayList<String> schema) {
 		write.lock();
 		try {
-			File file = new File(this.databaseFolder + "/" + tableName
-					+ "/schema");
+			File file = new File(this.databaseFolder + "/" + tableName + "/schema");
 
 			try {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(file));

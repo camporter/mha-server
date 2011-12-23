@@ -76,7 +76,10 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 				Client client = cm.getClient();
 				if (!client.getClosestNodeName().equals(lowestDeviceName)) {
 					// Move song playing to new node
-					nm.sendNodeCommand(NODE_PLAY, nm.getNodeByName(cm.getClient().getClosestNodeName()).getIpAddress(), client.getCurrentSong());
+					String nodeName = client.getClosestNodeName();
+					Node closeNode = nm.getNodeByName(nodeName);
+					String ipaddr = closeNode.getIpAddress();
+					nm.sendNodeCommand(NODE_PLAY, ipaddr, client.getCurrentSong());
 				}
 				client.setClosestNodeName(lowestDeviceName);
 				

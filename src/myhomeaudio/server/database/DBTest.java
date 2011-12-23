@@ -1,5 +1,7 @@
 package myhomeaudio.server.database;
 
+import java.util.ArrayList;
+
 public class DBTest {
 
 	/**
@@ -7,7 +9,9 @@ public class DBTest {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-			//Database db = new Database("db");
+			Database db = Database.getInstance();
+			ArrayList<DatabaseTable> tables = db.getTables();
+			System.out.println(tables);
 	}
 
 }
