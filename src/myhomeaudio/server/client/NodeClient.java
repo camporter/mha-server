@@ -55,7 +55,7 @@ public class NodeClient {
 	public static void main(String[] args) {
 		System.out.println("Starting...");
 		
-		String nodeName = "node";
+		String nodeName = "cams-lappy-0";
 		
 		if (args.length > 0) {
 			nodeName = args[0];
@@ -149,6 +149,10 @@ public class NodeClient {
 				FileOutputStream outFile = new FileOutputStream("song.mp3");
 				outFile.write(entityContent);
 				outFile.close();
+				String command2 = "killall mplayer";
+				Process child2 = Runtime.getRuntime().exec(command2);
+				String command = "mplayer song.mp3";
+				Process child = Runtime.getRuntime().exec(command);
 				
 			}
 		}
