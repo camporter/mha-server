@@ -100,7 +100,7 @@ public class Database {
 		return null;
 	}
 
-	public DatabaseTable createTable(String tableName, ArrayList<String> schema) {
+	public DatabaseTable createTable(String tableName, DatabaseTableSchema schema) {
 		write.lock();
 		try {
 			File tableFile = new File(this.databaseFolder + "/" + tableName);
@@ -295,13 +295,14 @@ public class Database {
 		} finally {
 			read.unlock();
 		}
-		return result;
+		return null;
+		//return result;
 	}
 
 	/**
 	 * Write a table's schema to file.
 	 */
-	public void writeSchema(String tableName, ArrayList<String> schema) {
+	public void writeSchema(String tableName, DatabaseTableSchema schema) {
 		write.lock();
 		try {
 			File file = new File(this.databaseFolder + "/" + tableName + "/schema");

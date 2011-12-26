@@ -8,13 +8,13 @@ package myhomeaudio.server.database.field;
  *
  */
 public class DatabaseField {
-	private String fieldName;
-	private Object fieldValue;
+	protected String fieldName;
+	protected Object fieldValue;
 	
 	public DatabaseField(String fieldName, Object fieldValue)
 	{
 		this.fieldName = fieldName;
-		this.fieldType = fieldType;
+		this.fieldValue = fieldValue;
 	}
 	
 	/**
@@ -24,5 +24,23 @@ public class DatabaseField {
 	public Class getType()
 	{
 		return this.fieldValue.getClass();
+	}
+	
+	/**
+	 * Get the value of the field.
+	 * 
+	 * @return The field's value as a string
+	 */
+	public String getFieldValue() {
+		return this.fieldValue.toString();
+	}
+	
+	/**
+	 * Get the name of the field.
+	 * 
+	 * @return The field's name
+	 */
+	public String getFieldName() {
+		return this.fieldName;
 	}
 }

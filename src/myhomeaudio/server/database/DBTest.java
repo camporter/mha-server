@@ -12,6 +12,8 @@ public class DBTest {
 			Database db = Database.getInstance();
 			ArrayList<DatabaseTable> tables = db.getTables();
 			System.out.println(tables);
+			
+			
 	}
 
 }
