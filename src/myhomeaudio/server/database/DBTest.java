@@ -11,6 +11,7 @@ public class DBTest {
 		// TODO Auto-generated method stub
 		Database db = Database.getInstance();
 		ArrayList<DatabaseTable> tables = db.getTables();
+		System.out.println(tables);
 
 	}
 }
