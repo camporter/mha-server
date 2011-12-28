@@ -7,11 +7,13 @@ import myhomeaudio.server.interfaces.StreamInterface;
 
 /**
  * @author Ryan Brown
- *
+ * 
  */
 public class StreamImpl implements StreamInterface {
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.StreamInterface#getArtist()
 	 */
 	@Override
@@ -20,7 +22,9 @@ public class StreamImpl implements StreamInterface {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.StreamInterface#getStreamName()
 	 */
 	@Override
@@ -29,7 +33,9 @@ public class StreamImpl implements StreamInterface {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.StreamInterface#getTitle()
 	 */
 	@Override
@@ -38,7 +44,9 @@ public class StreamImpl implements StreamInterface {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.StreamInterface#next()
 	 */
 	@Override
@@ -47,7 +55,9 @@ public class StreamImpl implements StreamInterface {
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.StreamInterface#pause()
 	 */
 	@Override
@@ -56,7 +66,9 @@ public class StreamImpl implements StreamInterface {
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.StreamInterface#play()
 	 */
 	@Override
@@ -65,7 +77,9 @@ public class StreamImpl implements StreamInterface {
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.StreamInterface#prev()
 	 */
 	@Override

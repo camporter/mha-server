@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import myhomeaudio.server.client.Client;
 
 public class ClientManager {
+
 	private static ClientManager instance = null;
 	private static int clientCount = 0;
 	private ArrayList<Client> clientList;
-	
+
 	protected ClientManager() {
 		clientList = new ArrayList<Client>();
 	}
@@ -19,14 +20,14 @@ public class ClientManager {
 		}
 		return instance;
 	}
-	
-	//TODO add remove
-	public synchronized void addClient(Client client){
-		
+
+	// TODO add remove
+	public synchronized void addClient(Client client) {
+
 		this.clientList.add(client);
 		clientCount++;
 	}
-	
+
 	public synchronized Client getClient() {
 		return clientList.get(0);
 	}

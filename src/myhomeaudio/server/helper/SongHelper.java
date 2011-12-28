@@ -35,13 +35,13 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 	public String getOutput(String uri, String data) {
 		String body = "";
 		ClientManager cm = ClientManager.getInstance();
-		
+
 		StringTokenizer tokenizedUri = new StringTokenizer(uri, "/");
 		tokenizedUri.nextToken(); // throw the first part away, throws /song
 									// away
 
 		if (tokenizedUri.hasMoreTokens()) {
-			
+
 			String method = tokenizedUri.nextToken(); // NoSuchElementException
 			if (method.equals("list")) {
 				// List the songs available
@@ -50,16 +50,16 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 
 				body = gson.toJson(songs.getSongList());
 				this.statusCode = HttpStatus.SC_OK;
-				
+
 			} else if (method.equals("play")) {
 				// Play a defined song
 				Gson gson = new Gson();
 				Hashtable hasht = gson.fromJson(data.trim(), Hashtable.class);
-				
+
 				// Make sure a song to play is actually given
 				if (hasht != null && hasht.containsKey("song")) {
 					this.statusCode = HttpStatus.SC_OK;
-					
+
 					NodeManager nm = NodeManager.getInstance();
 					// TODO: GET RID OF THIS UGLY
 					String songName = hasht.get("song").toString();
@@ -69,18 +69,18 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 					String ipaddr = node.getIpAddress();
 					nm.sendNodeCommand(NODE_PLAY, ipaddr, hasht.get("song").toString());
 					cm.getClient().setCurrentSong(songName);
-				}
-				else {
+				} else {
 					// No song given, send a bad request response
 					this.statusCode = HttpStatus.SC_BAD_REQUEST;
 				}
-				
+
 			} else if (method.equals("pause")) {
 				// Pause the song playing
 				this.statusCode = HttpStatus.SC_OK;
 				NodeManager nm = NodeManager.getInstance();
-				
-				nm.sendNodeCommand(NODE_PAUSE, nm.getNodeByName(cm.getClient().getClosestNodeName()).getIpAddress(), "");
+
+				nm.sendNodeCommand(NODE_PAUSE, nm
+						.getNodeByName(cm.getClient().getClosestNodeName()).getIpAddress(), "");
 			}
 
 		} else {
@@ -92,17 +92,17 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 	@Override
 	public void handle(HttpRequest request, HttpResponse response, HttpContext context)
 			throws HttpException, IOException {
-		
+
 		String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
-        if (!method.equals("GET") && !method.equals("POST")) {
-            throw new MethodNotSupportedException(method + " method not supported"); 
-        }
-        String requestData = "";
-        if (request instanceof HttpEntityEnclosingRequest) {
-            HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
-            requestData = EntityUtils.toString(entity);
-        }
-        
+		if (!method.equals("GET") && !method.equals("POST")) {
+			throw new MethodNotSupportedException(method + " method not supported");
+		}
+		String requestData = "";
+		if (request instanceof HttpEntityEnclosingRequest) {
+			HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
+			requestData = EntityUtils.toString(entity);
+		}
+
 		String uri = request.getRequestLine().getUri();
 		StringEntity body = new StringEntity(this.getOutput(uri, requestData));
 		response.setEntity(body);

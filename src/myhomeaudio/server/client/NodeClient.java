@@ -48,53 +48,53 @@ import org.apache.http.util.EntityUtils;
 //TODO create multiple clients automatically with threads
 
 public class NodeClient {
+
 	protected static int serverPort = 9090;
 	protected static int nodePort = 9091;
 	protected static String host = "192.168.10.101";
-	
+
 	public static void main(String[] args) {
 		System.out.println("Starting...");
-		
+
 		String nodeName = "cams-lappy-0";
-		
+
 		if (args.length > 0) {
 			nodeName = args[0];
 		} else {
 			System.err.println("A Node name must be provided!");
-			//System.exit(1);
+			// System.exit(1);
 		}
-		
+
 		doServerDiscovery();
 		try {
 			ServerSocket nodeSocket = new ServerSocket(NodeClient.nodePort);
-			
+
 			HttpParams params = new SyncBasicHttpParams();
 			params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000);
-			params.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8*1024);
+			params.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024);
 			params.setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
 			params.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true);
 			params.setParameter(CoreProtocolPNames.ORIGIN_SERVER, "HttpComponents/1.1");
-			
+
 			HttpProcessor httpProc = new ImmutableHttpProcessor(new HttpResponseInterceptor[] {
-					new ResponseDate(),
-					new ResponseServer(),
-					new ResponseContent(),
-					new ResponseConnControl(),
-			});
-			
+					new ResponseDate(), new ResponseServer(), new ResponseContent(),
+					new ResponseConnControl(), });
+
 			HttpRequestHandlerRegistry registry = new HttpRequestHandlerRegistry();
 			registry.register("play", new PlayRequestHandler());
 			registry.register("pause", new PauseRequestHandler());
 			registry.register("name", new NameRequestHandler(nodeName));
-			
-			HttpService httpService = new HttpService(httpProc, new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory(), registry, params);
-			
+
+			HttpService httpService = new HttpService(httpProc,
+					new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory(),
+					registry, params);
+
 			while (true) {
 				Socket serverSocket = nodeSocket.accept();
 				DefaultHttpServerConnection connection = new DefaultHttpServerConnection();
 				System.out.println("Incoming connection from " + serverSocket.getInetAddress());
 				connection.bind(serverSocket, params);
-				
+
 				HttpContext context = new BasicHttpContext(null);
 				try {
 					while (connection.isOpen()) {
@@ -117,8 +117,7 @@ public class NodeClient {
 	private static void doServerDiscovery() {
 		try {
 			System.out.println("Discovering server...");
-			Socket serverDiscovery = new Socket(NodeClient.host,
-					NodeClient.serverPort);
+			Socket serverDiscovery = new Socket(NodeClient.host, NodeClient.serverPort);
 			try {
 				Thread.sleep(250);
 			} catch (InterruptedException e) {
@@ -131,9 +130,11 @@ public class NodeClient {
 			e.printStackTrace();
 		}
 	}
-	
+
 	static class PlayRequestHandler implements HttpRequestHandler {
-		public void handle(final HttpRequest request, final HttpResponse response, final HttpContext context) throws HttpException, IOException {
+
+		public void handle(final HttpRequest request, final HttpResponse response,
+				final HttpContext context) throws HttpException, IOException {
 			String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
 			if (!method.equals("GET") && !method.equals("POST")) {
 				// Method is not GET or POST
@@ -145,7 +146,7 @@ public class NodeClient {
 				// Request has data, so we save it
 				HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
 				byte[] entityContent = EntityUtils.toByteArray(entity);
-				
+
 				FileOutputStream outFile = new FileOutputStream("song.mp3");
 				outFile.write(entityContent);
 				outFile.close();
@@ -153,45 +154,49 @@ public class NodeClient {
 				Process child2 = Runtime.getRuntime().exec(command2);
 				String command = "mplayer song.mp3";
 				Process child = Runtime.getRuntime().exec(command);
-				
+
 			}
 		}
 	}
-	
+
 	static class PauseRequestHandler implements HttpRequestHandler {
-		public void handle(final HttpRequest request, final HttpResponse response, final HttpContext context) throws HttpException, IOException {
+
+		public void handle(final HttpRequest request, final HttpResponse response,
+				final HttpContext context) throws HttpException, IOException {
 			String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
 			if (!method.equals("GET")) {
 				// Method is not a GET
 				throw new MethodNotSupportedException(method + " method not supported.");
 			}
-			
+
 			System.out.println("Pausing song...");
-			
+
 			response.setStatusCode(HttpStatus.SC_OK);
-			
+
 		}
 	}
-	
+
 	static class NameRequestHandler implements HttpRequestHandler {
+
 		private String nodeName;
-		
+
 		public NameRequestHandler(String nodeName) {
 			this.nodeName = nodeName;
 		}
-		
-		public void handle(final HttpRequest request, final HttpResponse response, final HttpContext context) throws HttpException, IOException {
+
+		public void handle(final HttpRequest request, final HttpResponse response,
+				final HttpContext context) throws HttpException, IOException {
 			String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
 			if (!method.equals("GET")) {
 				// Method is not a GET
 				throw new MethodNotSupportedException(method + " method not supported.");
 			}
-			
+
 			System.out.println("Sending name...");
 			// Send the name of the node as data
 			response.setEntity(new StringEntity(this.nodeName));
 			response.setStatusCode(HttpStatus.SC_OK);
-			
+
 		}
 	}
 }

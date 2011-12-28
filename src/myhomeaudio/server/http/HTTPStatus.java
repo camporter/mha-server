@@ -1,6 +1,7 @@
 package myhomeaudio.server.http;
 
 public interface HTTPStatus {
+
 	/** 2XX: generally "OK" */
 	public static final int HTTP_OK = 200;
 	public static final int HTTP_CREATED = 201;

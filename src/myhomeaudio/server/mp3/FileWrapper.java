@@ -5,12 +5,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class FileWrapper {
-	
+
 	protected File file;
 	protected String filename;
 	protected long length;
 	protected long lastModified;
-	
+
 	protected FileWrapper() {
 	}
 
@@ -23,10 +23,12 @@ public class FileWrapper {
 
 	private void init() throws IOException {
 		file = new File(filename);
-		if (!file.exists()) throw new FileNotFoundException("File not found " + filename);
-		if (!file.canRead()) throw new IOException("File not readable");
+		if (!file.exists())
+			throw new FileNotFoundException("File not found " + filename);
+		if (!file.canRead())
+			throw new IOException("File not readable");
 	}
-	
+
 	public String getFilename() {
 		return filename;
 	}

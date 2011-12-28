@@ -61,7 +61,7 @@ public class Server {
 			}
 		}
 	}
-	
+
 	/**
 	 * Starts up a new NodeHandler thread
 	 */
@@ -69,7 +69,7 @@ public class Server {
 		nodeHandler = new NodeHandler(NODE_PORT);
 		nodeHandler.start();
 	}
-	
+
 	/**
 	 * Starts up a new ClientHandler thread
 	 */

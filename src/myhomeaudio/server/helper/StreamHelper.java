@@ -1,18 +1,20 @@
 package myhomeaudio.server.helper;
 
 public class StreamHelper extends Helper implements HelperInterface {
-	
-	public boolean play(){
+
+	public boolean play() {
 		return false;
-		
+
 	}
-	public boolean pause(){
+
+	public boolean pause() {
 		return false;
-		
+
 	}
-	public boolean next(){
+
+	public boolean next() {
 		return false;
-		
+
 	}
 
 }

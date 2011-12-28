@@ -1,13 +1,13 @@
 package myhomeaudio.server.mp3;
 
 public class MutableInteger {
-	
+
 	private int value;
-	
+
 	public MutableInteger(int value) {
 		this.value = value;
 	}
-	
+
 	public void increment() {
 		value++;
 	}
@@ -19,12 +19,15 @@ public class MutableInteger {
 	public void setValue(int value) {
 		this.value = value;
 	}
-	
+
 	public boolean equals(Object obj) {
-		if (! (obj instanceof MutableInteger)) return false;
-		if (super.equals(obj)) return true;
+		if (!(obj instanceof MutableInteger))
+			return false;
+		if (super.equals(obj))
+			return true;
 		MutableInteger other = (MutableInteger) obj;
-		if (value != other.value) return false;
+		if (value != other.value)
+			return false;
 		return true;
 	}
 }

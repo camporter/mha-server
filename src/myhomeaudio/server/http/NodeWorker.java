@@ -47,8 +47,8 @@ import myhomeaudio.server.songs.SongFiles;
  * @author Cameron
  * 
  */
-public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
-		NodeCommands {
+public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType, NodeCommands {
+
 	int command = -1;
 	String ipAddress;
 	String data;
@@ -59,15 +59,15 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 
 	/**
 	 * Initializes NodeWorker to handle request to node
+	 * 
 	 * @param command
-	 * 		Command for server to execute to node
+	 *            Command for server to execute to node
 	 * @param ipAddress
-	 * 		Address of node
+	 *            Address of node
 	 * @param data
-	 * 		Data to be sent to the node
+	 *            Data to be sent to the node
 	 */
-	synchronized public void setRequestData(int command, String ipAddress,
-			String data) {
+	synchronized public void setRequestData(int command, String ipAddress, String data) {
 		this.command = command;
 		this.ipAddress = ipAddress;
 		this.data = data;
@@ -75,34 +75,30 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 	}
 
 	synchronized public void run() {
-		
+
 		NodeManager nm = NodeManager.getInstance();
-		
+
 		HttpParams httpParams = new SyncBasicHttpParams();
 		HttpProtocolParams.setVersion(httpParams, HttpVersion.HTTP_1_1);
 		HttpProtocolParams.setContentCharset(httpParams, "UTF-8");
 		HttpProtocolParams.setUserAgent(httpParams, "MyHomeAudio");
 		HttpProtocolParams.setUseExpectContinue(httpParams, true);
-		
+
 		HttpProcessor httpProcessor = new ImmutableHttpProcessor(new HttpRequestInterceptor[] {
-				new RequestContent(),
-				new RequestTargetHost(),
-				new RequestConnControl(),
-				new RequestUserAgent(),
-				new RequestExpectContinue()
-		});
-		
+				new RequestContent(), new RequestTargetHost(), new RequestConnControl(),
+				new RequestUserAgent(), new RequestExpectContinue() });
+
 		HttpRequestExecutor httpExecutor = new HttpRequestExecutor();
-		
+
 		HttpContext httpContext = new BasicHttpContext(null);
 		HttpHost host = new HttpHost(this.ipAddress, 9091);
-		
+
 		DefaultHttpClientConnection connection = new DefaultHttpClientConnection();
 		ConnectionReuseStrategy connStrategy = new DefaultConnectionReuseStrategy();
-		
+
 		httpContext.setAttribute(ExecutionContext.HTTP_CONNECTION, connection);
 		httpContext.setAttribute(ExecutionContext.HTTP_TARGET_HOST, host);
-		
+
 		if (this.command == -1) {
 			// request data hasn't been set yet
 			System.out.println("NodeWorker: Request data hasn't been set");
@@ -114,28 +110,28 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 			}
 		}
 		try {
-			
-			if (!connection.isOpen())
-			{
+
+			if (!connection.isOpen()) {
 				Socket socket = new Socket(this.ipAddress, 9091);
 				connection.bind(socket, httpParams);
 			}
-			
+
 			BasicHttpRequest getRequest;
 			BasicHttpEntityEnclosingRequest postRequest;
 			HttpResponse response;
 
 			switch (command) {
 			case NODE_PLAY:
-				SongFiles s = SongFiles.getInstance(); //Gets song list
+				SongFiles s = SongFiles.getInstance(); // Gets song list
 				System.out.println("Playing song " + this.data + " to node...");
-				byte[] songData = s.getSongData(this.data); //Gets byte[] of mp3 data
-				
+				byte[] songData = s.getSongData(this.data); // Gets byte[] of
+															// mp3 data
+
 				postRequest = new BasicHttpEntityEnclosingRequest("POST", "play");
 				postRequest.setParams(httpParams);
-				
+
 				postRequest.setEntity(new ByteArrayEntity(songData));
-				
+
 				try {
 					httpExecutor.preProcess(postRequest, httpProcessor, httpContext);
 					response = httpExecutor.execute(postRequest, connection, httpContext);
@@ -144,21 +140,22 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 				} catch (HttpException e) {
 					e.printStackTrace();
 				}
-				
+
 				/*
-				
-				outputStream.writeBytes(HTTPHeader.buildRequest("POST", "play", true,
-						MIME_MP3, songData.length));//Puts songdata in http request
-				
-				outputStream.write(songData);
-				*/
+				 * 
+				 * outputStream.writeBytes(HTTPHeader.buildRequest("POST",
+				 * "play", true, MIME_MP3, songData.length));//Puts songdata in
+				 * http request
+				 * 
+				 * outputStream.write(songData);
+				 */
 				break;
-				
+
 			case NODE_PAUSE:
 				System.out.println("Pausing song on node...");
 				getRequest = new BasicHttpRequest("GET", "pause");
 				getRequest.setParams(httpParams);
-				
+
 				try {
 					httpExecutor.preProcess(getRequest, httpProcessor, httpContext);
 					response = httpExecutor.execute(getRequest, connection, httpContext);
@@ -168,18 +165,18 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 					e.printStackTrace();
 				}
 				break;
-				
+
 			case NODE_NAME:
 				System.out.println("Asking for node's name...");
 				getRequest = new BasicHttpRequest("GET", "name");
 				getRequest.setParams(httpParams);
-				
+
 				try {
 					httpExecutor.preProcess(getRequest, httpProcessor, httpContext);
 					response = httpExecutor.execute(getRequest, connection, httpContext);
 					response.setParams(httpParams);
 					httpExecutor.postProcess(response, httpProcessor, httpContext);
-					
+
 					// Get the corresponding node
 					Node node = nm.getNodeByIpAddress(this.ipAddress);
 					if (node != null) {
@@ -192,7 +189,7 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType,
 					e.printStackTrace();
 				}
 				break;
-				
+
 			}
 			connection.close();
 

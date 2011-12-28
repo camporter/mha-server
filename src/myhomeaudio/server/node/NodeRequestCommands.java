@@ -1,6 +1,7 @@
 package myhomeaudio.server.node;
 
 public interface NodeRequestCommands {
+
 	final static int INIT = 0;
 	final static int PLAY = 1;
 	final static int SWITCH = 2;

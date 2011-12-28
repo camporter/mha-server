@@ -18,6 +18,7 @@ import java.util.StringTokenizer;
 import javax.swing.Timer;
 
 public class NodeRequest2 extends Thread implements NodeRequestCommands {
+
 	protected Socket tcpSocket = null;
 
 	final static int serverId = 10;
@@ -34,7 +35,7 @@ public class NodeRequest2 extends Thread implements NodeRequestCommands {
 
 	public NodeRequest2(Socket socket) {
 		this.tcpSocket = socket;
-		
+
 		// Open a stream for the mp3 so we can read it
 		try {
 			mp3Stream = new FileInputStream(mp3File);
@@ -51,15 +52,14 @@ public class NodeRequest2 extends Thread implements NodeRequestCommands {
 	 */
 	private int parseRequest(String requestLine) {
 		int request = -1;
-		
+
 		// Make sure request is not empty
 		if (requestLine == null) {
 			return request;
 		}
-		
-		StringTokenizer tokenizedRequestMessage = new StringTokenizer(
-				requestLine);
-		
+
+		StringTokenizer tokenizedRequestMessage = new StringTokenizer(requestLine);
+
 		String requestState;
 		try {
 			// Try getting the first string token
@@ -93,16 +93,17 @@ public class NodeRequest2 extends Thread implements NodeRequestCommands {
 		try {
 			this.inputStream = new BufferedReader(new InputStreamReader(
 					this.tcpSocket.getInputStream()));
-			this.outputStream = new DataOutputStream(
-					this.tcpSocket.getOutputStream());
+			this.outputStream = new DataOutputStream(this.tcpSocket.getOutputStream());
 
-			
 			boolean isReady = false; /*
 									 * Whether we are ready to respond to other
 									 * commands
 									 */
-			
-			/* Get the initial request from the client, should be an INIT request */
+
+			/*
+			 * Get the initial request from the client, should be an INIT
+			 * request
+			 */
 			while (!isReady) {
 				if (parseRequest(inputStream.readLine()) == INIT) {
 					isReady = true;
@@ -114,19 +115,17 @@ public class NodeRequest2 extends Thread implements NodeRequestCommands {
 				if (inputStream.ready()) {
 					// Ready to get any commands from the client
 					int requestCommand = parseRequest(inputStream.readLine());
-					
+
 					if (requestCommand == PLAY) {
 						isMP3Playing = true;
-					}
-					else if (requestCommand == STOP) {
-						isMP3Playing  = false;
-					}
-					else {
+					} else if (requestCommand == STOP) {
+						isMP3Playing = false;
+					} else {
 						// Something bad happened
 						return;
 					}
 				}
-				
+
 				if (isMP3Playing) {
 					sendResponse("MP3");
 					try {
@@ -159,11 +158,11 @@ public class NodeRequest2 extends Thread implements NodeRequestCommands {
 		}
 		// Server is sending MP3 data to the Node
 		else if (responseCommand.equals("MP3")) {
-			
+
 			int numberBytesRead = 0;
 			// Loop through reading 1024 bytes of mp3 data
 			while (numberBytesRead < 1023) {
-				int readByte = this.mp3Stream.read(); //  get the byte
+				int readByte = this.mp3Stream.read(); // get the byte
 				if (readByte == -1) {
 					// Didn't read a byte, we are at the end of the file
 					this.isMP3Playing = false; // Stop streaming
@@ -174,11 +173,11 @@ public class NodeRequest2 extends Thread implements NodeRequestCommands {
 				}
 				++numberBytesRead;
 			}
-			
+
 			// MP3
 			// <data>
-			//this.outputStream.writeBytes("MP3\r\n"); 
-			this.outputStream.write(mp3Buffer); 
+			// this.outputStream.writeBytes("MP3\r\n");
+			this.outputStream.write(mp3Buffer);
 		}
 	}
 }

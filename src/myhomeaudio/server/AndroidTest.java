@@ -16,31 +16,33 @@ import com.google.gson.Gson;
 import myhomeaudio.server.http.HTTPHeader;
 
 public class AndroidTest {
+
 	protected static int port = 8080;
 	protected static String host = "192.168.10.101";
 	private static Socket tcpSocket;
-	//static NodeClientConnect conn;
+	// static NodeClientConnect conn;
 	static String msg;
 	private static BufferedReader br;
 	private static BufferedWriter bw;
 	private static InputStream is;
 	private static OutputStream os;
 	private static String httpBody;
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
+
 		try {
 			System.out.println("Creating Connection");
 			tcpSocket = new Socket(host, port);
 			System.out.println("Android TCP Socket Created");
-			
+
 			is = tcpSocket.getInputStream();
 			os = tcpSocket.getOutputStream();
 			br = new BufferedReader(new InputStreamReader(is));
 			bw = new BufferedWriter(new OutputStreamWriter(os));
-			
+
 			String message = HTTPHeader.buildRequest("GET", "/song/list", false, "", 0);
 			System.out.println(message);
 			bw.write(message);
@@ -64,14 +66,11 @@ public class AndroidTest {
 				} while (message != null && message.length() != 0);
 
 			}
-			
+
 			System.out.println(httpBody);
 			Gson gson = new Gson();
 			ArrayList<String> songs = gson.fromJson(httpBody, ArrayList.class);
-			
-			
-			
-			
+
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -79,7 +78,7 @@ public class AndroidTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 }

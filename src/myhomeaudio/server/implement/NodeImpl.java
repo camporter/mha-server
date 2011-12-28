@@ -9,11 +9,13 @@ import myhomeaudio.server.interfaces.UserInterface;
 
 /**
  * @author Ryan Brown
- *
+ * 
  */
 public class NodeImpl implements NodeInterface {
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.NodeInterface#getName()
 	 */
 	@Override
@@ -22,7 +24,9 @@ public class NodeImpl implements NodeInterface {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.NodeInterface#getNodeStream()
 	 */
 	@Override
@@ -31,7 +35,9 @@ public class NodeImpl implements NodeInterface {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.NodeInterface#getUsers()
 	 */
 	@Override

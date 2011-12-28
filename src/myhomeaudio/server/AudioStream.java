@@ -15,21 +15,20 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  * 
  */
 public class AudioStream {
+
 	File fileName;
 	AudioInputStream audioInputStream;
 	int frameNumber; // current frame nb
 
-	private AudioFormat format; //format info for audio file
-	private long numFrames; //number of frames in audio file
-	private int frameSize;//size of frames in bytes
+	private AudioFormat format; // format info for audio file
+	private long numFrames; // number of frames in audio file
+	private int frameSize;// size of frames in bytes
 
 	// constructor
-	/* 
-	 * @param file 
-	 * 		Audio file to be placed in frames and streamed.
+	/*
+	 * @param file Audio file to be placed in frames and streamed.
 	 * 
 	 * @return
-	 * 
 	 */
 	public AudioStream(File file) {
 
@@ -39,8 +38,7 @@ public class AudioStream {
 		try {
 			audioInputStream = AudioSystem.getAudioInputStream(fileName);
 		} catch (UnsupportedAudioFileException e) {
-			System.out.println("The audio file " + fileName.getName()
-					+ " is not supported.");
+			System.out.println("The audio file " + fileName.getName() + " is not supported.");
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -50,15 +48,14 @@ public class AudioStream {
 		setFrameSize(audioInputStream.getFormat().getFrameSize());
 	}
 
-	/* NextFrame Getter
+	/*
+	 * NextFrame Getter
+	 * 
 	 * @param frame Byte stream to hold frames
 	 * 
-	 * @return nBytesRead 
-	 * 		Number of bytes read from audio input stream.
-	 * @return frame 
-	 * 		Byte stream holding audio frame data.
+	 * @return nBytesRead Number of bytes read from audio input stream.
 	 * 
-	 * 
+	 * @return frame Byte stream holding audio frame data.
 	 */
 	public int getNextFrame(byte[] frame) {
 		int nBytesRead = 0;
@@ -72,73 +69,67 @@ public class AudioStream {
 		return nBytesRead;
 	}
 
-	/* Format Setter
+	/*
+	 * Format Setter
 	 * 
-	 * @param format 
-	 * 		Set AudioFormat variable of instance.
+	 * @param format Set AudioFormat variable of instance.
 	 * 
 	 * @return
-	 * 
 	 */
 	public void setFormat(AudioFormat format) {
 		this.format = format;
 	}
 
-	/* Format Getter
+	/*
+	 * Format Getter
 	 * 
-	 * @param 
+	 * @param
 	 * 
-	 * @return format 
-	 * 		AudioFormat variable of instance.
-	 * 
+	 * @return format AudioFormat variable of instance.
 	 */
 	public AudioFormat getFormat() {
 		return format;
 	}
 
-	/* NumFrames Setter
+	/*
+	 * NumFrames Setter
 	 * 
-	 * @param numFrames 
-	 * 		Number of frames of audio file.
+	 * @param numFrames Number of frames of audio file.
 	 * 
 	 * @return
-	 * 
 	 */
 	public void setNumFrames(long numFrames) {
 		this.numFrames = numFrames;
 	}
 
-	/* NumFrames Getter
+	/*
+	 * NumFrames Getter
 	 * 
-	 * @param 
+	 * @param
 	 * 
-	 * @return numFrames 
-	 * 		Number of frames of audio file.
-	 * 
+	 * @return numFrames Number of frames of audio file.
 	 */
 	public long getNumFrames() {
 		return numFrames;
 	}
-	
-	/* FrameSize Setter
+
+	/*
+	 * FrameSize Setter
 	 * 
-	 * @param frameSize 
-	 * 		Size of audio frame.
+	 * @param frameSize Size of audio frame.
 	 * 
 	 * @return
-	 * 
 	 */
 	public void setFrameSize(int frameSize) {
 		this.frameSize = frameSize;
 	}
 
-	/* FrameSize Getter
+	/*
+	 * FrameSize Getter
 	 * 
-	 * @param 
+	 * @param
 	 * 
-	 * @return frameSize 
-	 * 		Frame of frame in bytes.
-	 * 
+	 * @return frameSize Frame of frame in bytes.
 	 */
 	public int getFrameSize() {
 		return frameSize;

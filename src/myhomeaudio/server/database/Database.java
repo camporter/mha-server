@@ -84,15 +84,14 @@ public class Database {
 	 * 
 	 * @param tableName
 	 *            The name of the table
-	 * @return The DatabaseTable representing the specified table. Otherwise, returns null
+	 * @return The DatabaseTable representing the specified table. Otherwise,
+	 *         returns null
 	 */
 	public DatabaseTable getTable(String tableName) {
 		Iterator i = this.tables.iterator();
-		while (i.hasNext())
-		{
+		while (i.hasNext()) {
 			DatabaseTable table = (DatabaseTable) i.next();
-			if (table.getName().equals(tableName))
-			{
+			if (table.getName().equals(tableName)) {
 				return table;
 			}
 		}
@@ -296,7 +295,7 @@ public class Database {
 			read.unlock();
 		}
 		return null;
-		//return result;
+		// return result;
 	}
 
 	/**

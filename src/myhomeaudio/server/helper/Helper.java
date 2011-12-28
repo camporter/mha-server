@@ -10,10 +10,10 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 
 public class Helper implements HelperInterface, HttpRequestHandler {
-	
+
 	// The HTTP status code to send back to the client
 	protected int statusCode = 0;
-	
+
 	@Override
 	public String getOutput(String uri, String data) {
 		// The default helper produces no output
@@ -22,10 +22,10 @@ public class Helper implements HelperInterface, HttpRequestHandler {
 	}
 
 	@Override
-	public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException,
-			IOException {
-		
+	public void handle(HttpRequest request, HttpResponse response, HttpContext context)
+			throws HttpException, IOException {
+
 		response.setStatusCode(this.statusCode);
-		
+
 	}
 }

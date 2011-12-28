@@ -14,16 +14,15 @@ import myhomeaudio.server.database.field.DatabaseField;
  * 
  */
 public class DatabaseTableSchema {
+
 	private Database database;
 	private DatabaseTable table;
-	
-	private Hashtable<String,DatabaseField> fields = new Hashtable<String,DatabaseField>();
-	
-	public DatabaseTableSchema(DatabaseTable table)
-	{
+
+	private Hashtable<String, DatabaseField> fields = new Hashtable<String, DatabaseField>();
+
+	public DatabaseTableSchema(DatabaseTable table) {
 		this.database = Database.getInstance();
 		this.table = table;
 	}
-	
-	
+
 }

@@ -21,19 +21,23 @@ import myhomeaudio.server.interfaces.UserInterface;
 
 /**
  * @author Ryan Brown
- *
+ * 
  */
 public class ServerImpl implements ServerInterface {
-	//Networking variables
+
+	// Networking variables
 	protected static int tcpPort = 9090;
 	protected static int udpPort = 9080;
 	protected InetAddress ipAddr;
 	protected InetAddress ipBroadcast;
 	private Socket tcpSocket;
-	
-	
-	/* (non-Javadoc)
-	 * @see myhomeaudio.server.interfaces.ServerInterface#addUser(myhomeaudio.server.interfaces.UserInterface)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * myhomeaudio.server.interfaces.ServerInterface#addUser(myhomeaudio.server
+	 * .interfaces.UserInterface)
 	 */
 	@Override
 	public boolean addUser(UserInterface u) {
@@ -41,28 +45,31 @@ public class ServerImpl implements ServerInterface {
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.ServerInterface#connect()
 	 */
 	@Override
 	public boolean connect() {
-		
+
 		try {
-			//Gets IP address, Uses the information to create a NetworkInterface that
-			//will create a broadcast IP address based on the IP of the host
-			//therefore the broadcast will stay within the network
+			// Gets IP address, Uses the information to create a
+			// NetworkInterface that
+			// will create a broadcast IP address based on the IP of the host
+			// therefore the broadcast will stay within the network
 			ipAddr = InetAddress.getLocalHost();
 			NetworkInterface networkInterface = NetworkInterface.getByInetAddress(ipAddr);
-			List<InterfaceAddress> interfaceAddrCollection = networkInterface.getInterfaceAddresses();
+			List<InterfaceAddress> interfaceAddrCollection = networkInterface
+					.getInterfaceAddresses();
 			InterfaceAddress interfaceAddr = interfaceAddrCollection.get(0);
 			ipBroadcast = interfaceAddr.getBroadcast();
 			System.out.println(ipBroadcast.getHostAddress());
-			//Create UDP packet and broadcast to network
+			// Create UDP packet and broadcast to network
 			DatagramSocket udpSocket = new DatagramSocket();
 			udpSocket.setSoTimeout(100);
-			byte[] buf = new byte[5];//empty data to be sent
-			DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, ipBroadcast,
-					udpPort);
+			byte[] buf = new byte[5];// empty data to be sent
+			DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, ipBroadcast, udpPort);
 			udpSocket.send(sendPacket);
 
 			// Receive reply back from server
@@ -94,8 +101,11 @@ public class ServerImpl implements ServerInterface {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see myhomeaudio.server.interfaces.ServerInterface#connect(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * myhomeaudio.server.interfaces.ServerInterface#connect(java.lang.String)
 	 */
 	@Override
 	public boolean connect(String ipAddress) {
@@ -105,12 +115,16 @@ public class ServerImpl implements ServerInterface {
 			e.printStackTrace();
 			return false;
 		}
-		
+
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see myhomeaudio.server.interfaces.ServerInterface#connectToNode(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * myhomeaudio.server.interfaces.ServerInterface#connectToNode(java.lang
+	 * .String)
 	 */
 	@Override
 	public NodeInterface connectToNode(String id) {
@@ -118,7 +132,9 @@ public class ServerImpl implements ServerInterface {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.ServerInterface#disconnect()
 	 */
 	@Override
@@ -127,7 +143,9 @@ public class ServerImpl implements ServerInterface {
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.ServerInterface#getAvailableStreams()
 	 */
 	@Override
@@ -136,7 +154,9 @@ public class ServerImpl implements ServerInterface {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.ServerInterface#listUsers()
 	 */
 	@Override
@@ -145,18 +165,25 @@ public class ServerImpl implements ServerInterface {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see myhomeaudio.server.interfaces.ServerInterface#login(java.lang.String, java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * myhomeaudio.server.interfaces.ServerInterface#login(java.lang.String,
+	 * java.lang.String, java.lang.String)
 	 */
 	@Override
-	public UserInterface login(String username, String deviceID,
-			String hashedPassword) {
+	public UserInterface login(String username, String deviceID, String hashedPassword) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see myhomeaudio.server.interfaces.ServerInterface#removeUser(myhomeaudio.server.interfaces.UserInterface)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * myhomeaudio.server.interfaces.ServerInterface#removeUser(myhomeaudio.
+	 * server.interfaces.UserInterface)
 	 */
 	@Override
 	public boolean removeUser(UserInterface u) {
@@ -164,34 +191,41 @@ public class ServerImpl implements ServerInterface {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see myhomeaudio.server.interfaces.ServerInterface#updateUser(myhomeaudio.server.interfaces.UserInterface)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * myhomeaudio.server.interfaces.ServerInterface#updateUser(myhomeaudio.
+	 * server.interfaces.UserInterface)
 	 */
 	@Override
 	public boolean updateUser(UserInterface u) {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
-	
-	/* Connects to the server
+
+	/*
+	 * Connects to the server
+	 * 
 	 * @param
+	 * 
 	 * @return true if successful connect
 	 */
-	public boolean attemptConnect(){
-		
-		//Creates TCP Connection for HTTP requests
+	public boolean attemptConnect() {
+
+		// Creates TCP Connection for HTTP requests
 		System.out.println("Creating Connection");
 		try {
 			this.tcpSocket = new Socket(ipAddr, tcpPort);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			//e.printStackTrace();
+			// e.printStackTrace();
 			return false;
 		}
 		System.out.println("Client TCP Socket Created");
 		return true;
 	}
+
 	private boolean datagramReceive(DatagramSocket udpSocket, DatagramPacket recvPacket) {
 		try {
 			udpSocket.receive(recvPacket);

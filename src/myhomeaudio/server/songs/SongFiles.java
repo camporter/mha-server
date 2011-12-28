@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 public class SongFiles {
+
 	private static SongFiles instance = null;
 	ArrayList<String> songList = new ArrayList<String>(); // List of available
 															// mp3 files
@@ -34,18 +35,18 @@ public class SongFiles {
 	 * Searches music directory and adds mp3 files to array list
 	 */
 	public void populateSongList() {
-		try{
+		try {
 			File songDirectory = new File("music");
-			
+
 			songList = null;
 			songList = new ArrayList<String>();
-			
+
 			for (String songFile : songDirectory.list()) {
 				this.songList.add(songFile);
 			}
-		}catch(NullPointerException e){
+		} catch (NullPointerException e) {
 			System.out.println("Null Pointer Exception SongFiles.populateSongList");
-			//e.printStackTrace();
+			// e.printStackTrace();
 		}
 		return;
 	}
@@ -61,7 +62,9 @@ public class SongFiles {
 
 	/*
 	 * Reads song data into a string buffer
+	 * 
 	 * @param songName name of the song to play
+	 * 
 	 * @return A byte array of the mp3 music data
 	 */
 	public byte[] getSongData(String songName) {
@@ -70,49 +73,49 @@ public class SongFiles {
 				File file = new File("music/" + songName);
 				InputStream input = new FileInputStream(file);
 				long length = file.length();
-	
+
 				byte[] bytes = new byte[(int) length];
-	
+
 				int offset = 0;
 				int numRead = 0;
 				while (offset < bytes.length
-						&& (numRead = input.read(bytes, offset, bytes.length
-								- offset)) >= 0) {
+						&& (numRead = input.read(bytes, offset, bytes.length - offset)) >= 0) {
 					offset += numRead;
 				}
-	
+
 				if (offset < bytes.length) {
 					throw new IOException("Didn't completely read file.");
 				}
-	
+
 				input.close();
 				return bytes;
 			}
 			return null;
 		} catch (IOException e) {
-			//e.printStackTrace();
-		} catch(NullPointerException e){
-			//e.printStackTrace();
+			// e.printStackTrace();
+		} catch (NullPointerException e) {
+			// e.printStackTrace();
 		}
 		return new byte[0];
 	}
-	
+
 	/**
 	 * Checks songList of available files to see if song is exists within list
+	 * 
 	 * @param songName
-	 * 		Name of song to check within list
-	 * @return
-	 * 		True if song is available to stream
+	 *            Name of song to check within list
+	 * @return True if song is available to stream
 	 */
 	public boolean songExists(String songName) {
-		this.populateSongList(); // Repopulate the list so we know it's up to date
-		
+		this.populateSongList(); // Repopulate the list so we know it's up to
+									// date
+
 		for (String song : this.songList) {
 			if (songName.equals(song)) {
 				return true;
 			}
 		}
 		return false;
-		
+
 	}
 }

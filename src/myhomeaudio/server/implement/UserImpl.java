@@ -8,11 +8,13 @@ import myhomeaudio.server.interfaces.UserInterface;
 
 /**
  * @author Ryan Brown
- *
+ * 
  */
 public class UserImpl implements UserInterface {
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.UserInterface#getPrefs()
 	 */
 	@Override
@@ -21,7 +23,9 @@ public class UserImpl implements UserInterface {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.UserInterface#getUsername()
 	 */
 	@Override
@@ -30,7 +34,9 @@ public class UserImpl implements UserInterface {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see myhomeaudio.server.interfaces.UserInterface#isSuperUser()
 	 */
 	@Override
@@ -39,8 +45,12 @@ public class UserImpl implements UserInterface {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see myhomeaudio.server.interfaces.UserInterface#setPrefs(myhomeaudio.server.interfaces.PrefsInterface)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * myhomeaudio.server.interfaces.UserInterface#setPrefs(myhomeaudio.server
+	 * .interfaces.PrefsInterface)
 	 */
 	@Override
 	public boolean setPrefs(PrefsInterface userPrefs) {

@@ -1,7 +1,7 @@
 package myhomeaudio.server.mp3;
 
 public class ID3v23Tag extends AbstractID3v2Tag {
-	
+
 	public static final String VERSION = "3.0";
 
 	public ID3v23Tag() {
@@ -9,10 +9,11 @@ public class ID3v23Tag extends AbstractID3v2Tag {
 		version = VERSION;
 	}
 
-	public ID3v23Tag(byte[] buffer) throws NoSuchTagException, UnsupportedTagException, InvalidDataException {
+	public ID3v23Tag(byte[] buffer) throws NoSuchTagException, UnsupportedTagException,
+			InvalidDataException {
 		super(buffer);
 	}
-	
+
 	protected void unpackFlags(byte[] buffer) {
 		unsynchronisation = BufferTools.checkBit(buffer[FLAGS_OFFSET], UNSYNCHRONISATION_BIT);
 		extendedHeader = BufferTools.checkBit(buffer[FLAGS_OFFSET], EXTENDED_HEADER_BIT);
@@ -20,8 +21,11 @@ public class ID3v23Tag extends AbstractID3v2Tag {
 	}
 
 	protected void packFlags(byte[] bytes, int offset) {
-		bytes[offset + FLAGS_OFFSET] = BufferTools.setBit(bytes[offset + FLAGS_OFFSET], UNSYNCHRONISATION_BIT, unsynchronisation);
-		bytes[offset + FLAGS_OFFSET] = BufferTools.setBit(bytes[offset + FLAGS_OFFSET], EXTENDED_HEADER_BIT, extendedHeader);
-		bytes[offset + FLAGS_OFFSET] = BufferTools.setBit(bytes[offset + FLAGS_OFFSET], EXPERIMENTAL_BIT, experimental);
+		bytes[offset + FLAGS_OFFSET] = BufferTools.setBit(bytes[offset + FLAGS_OFFSET],
+				UNSYNCHRONISATION_BIT, unsynchronisation);
+		bytes[offset + FLAGS_OFFSET] = BufferTools.setBit(bytes[offset + FLAGS_OFFSET],
+				EXTENDED_HEADER_BIT, extendedHeader);
+		bytes[offset + FLAGS_OFFSET] = BufferTools.setBit(bytes[offset + FLAGS_OFFSET],
+				EXPERIMENTAL_BIT, experimental);
 	}
 }
