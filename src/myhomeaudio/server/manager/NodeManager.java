@@ -73,7 +73,7 @@ public class NodeManager implements NodeCommands {
 
 	public boolean isValidNode(String bluetoothName) {
 		for (Node node : this.nodeList) {
-			if (node.getBluetoothName().equals(bluetoothName)) {
+			if (node.getName().equals(bluetoothName)) {
 				return true;
 			}
 		}
@@ -100,7 +100,7 @@ public class NodeManager implements NodeCommands {
 
 	public Node getNodeByName(String name) {
 		for (Node item : nodeList) {
-			if (item.getBluetoothName().equals(name)) {
+			if (item.getName().equals(name)) {
 				return item;
 			}
 		}

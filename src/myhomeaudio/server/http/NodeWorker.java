@@ -182,7 +182,7 @@ public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType, Node
 					if (node != null) {
 						// Change the bluetooth name for the node
 						String name = EntityUtils.toString(response.getEntity()).trim();
-						node.setBluetoothName(name);
+						node.setName(name);
 						System.out.println("Got name from node: " + name);
 					}
 				} catch (HttpException e) {

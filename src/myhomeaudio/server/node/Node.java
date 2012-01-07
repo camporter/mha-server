@@ -9,14 +9,14 @@ import myhomeaudio.server.Room;
  * 
  */
 public class Node {
-
+	private int id;
 	private Room room;
 	private String ipAddress;
-	private String bluetoothName;
+	private String name;
 
-	public Node(String ipAddress, String bluetoothName) {
+	public Node(String ipAddress, String name) {
 		this.ipAddress = ipAddress;
-		this.bluetoothName = bluetoothName;
+		this.name = name;
 		// this.nodeID = nodeCount;
 		// this.room = room;
 	}
@@ -30,12 +30,16 @@ public class Node {
 		return this.ipAddress;
 	}
 
-	public String getBluetoothName() {
-		return this.bluetoothName;
+	public String getName() {
+		return this.name;
 	}
 
-	public void setBluetoothName(String name) {
-		this.bluetoothName = name;
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public void setNodeId(int id) {
+		this.id = id;
 	}
 
 }
