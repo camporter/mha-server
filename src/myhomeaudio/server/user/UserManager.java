@@ -32,6 +32,8 @@ public class UserManager {
 	public static final int REGISTER_FAILED = 1;
 	public static final int REGISTER_BAD_PASSWORD = 2;
 	public static final int REGISTER_DUPLICATE_USERNAME = 3;
+	public static final int LOGIN_OK = 4;
+	public static final int LOGIN_FAILED = 5;
 
 	public UserManager() {
 		this.db = Database.getInstance();
@@ -135,13 +137,22 @@ public class UserManager {
 			return UserManager.REGISTER_OK;
 		}
 	}
-
-	public boolean loginUser(User user) {
-		return false;
-
+	
+	/**
+	 * Logs in a User to the server. 
+	 * @param user
+	 * @return Login status code. See static fields for UserManager.
+	 */
+	public int loginUser(User user) {
+		DatabaseUser dbUser = getMatchingUser(user);
+		if (dbUser != null) {
+			dbUser.setLoggedIn();
+			return UserManager.LOGIN_OK;
+		}
+		return UserManager.LOGIN_FAILED;
 	}
 
-	public boolean logoutUser(String username) {
+	public boolean logoutUser(User user) {
 		return false;
 
 	}
@@ -154,23 +165,34 @@ public class UserManager {
 	public ArrayList<DatabaseUser> getLoggedInUsers() {
 		return null;
 	}
+	
+	/**
+	 * Checks if the user information exists.
+	 * @param user
+	 * @return
+	 */
+	public boolean checkUser(User user) {
+		
+	}
 
 	/**
-	 * Gets the User object that resides in the userList which corresponds with
+	 * Gets the DatabaseUser object that resides in the userList which corresponds with
 	 * the User object being given.
 	 * 
 	 * @param user
+	 * @return The DatabaseUser, or null if not found.
 	 */
-	/*private getMatchingUser(User user) {
+	private DatabaseUser getMatchingUser(User user) {
 		for (Iterator<DatabaseUser> i = this.userList.iterator(); i.hasNext();) {
-			User nextUser = i.next();
+			DatabaseUser nextUser = i.next();
 			if (nextUser.getUsername().equals(user.getUsername())
 					&& nextUser.getPassword().equals(user.getPassword())) {
 				// Usernames match
 				return nextUser;
 			}
 		}
-	}*/
+		return null;
+	}
 
 	/**
 	 * Gets the User object associated with the given user id.
