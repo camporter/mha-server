@@ -33,26 +33,4 @@ public class NodeHelper extends Helper implements HelperInterface, NodeCommands 
 
 		return output;
 	}
-
-	@Override
-	public void handle(HttpRequest request, HttpResponse response, HttpContext context)
-			throws HttpException, IOException {
-
-		String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
-		if (!method.equals("GET") && !method.equals("POST")) {
-			throw new MethodNotSupportedException(method + " method not supported");
-		}
-		String requestData = "";
-		if (request instanceof HttpEntityEnclosingRequest) {
-			HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
-			requestData = EntityUtils.toString(entity);
-		}
-
-		String uri = request.getRequestLine().getUri();
-		StringEntity body = new StringEntity(this.getOutput(uri, requestData));
-		response.setEntity(body);
-		response.setStatusCode(this.statusCode);
-
-	}
-
 }

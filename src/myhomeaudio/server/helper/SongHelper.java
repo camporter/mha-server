@@ -1,8 +1,6 @@
 package myhomeaudio.server.helper;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -21,8 +19,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.MethodNotSupportedException;
-import org.apache.http.entity.ContentProducer;
-import org.apache.http.entity.EntityTemplate;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -88,26 +84,4 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 		}
 		return body;
 	}
-
-	@Override
-	public void handle(HttpRequest request, HttpResponse response, HttpContext context)
-			throws HttpException, IOException {
-
-		String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
-		if (!method.equals("GET") && !method.equals("POST")) {
-			throw new MethodNotSupportedException(method + " method not supported");
-		}
-		String requestData = "";
-		if (request instanceof HttpEntityEnclosingRequest) {
-			HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
-			requestData = EntityUtils.toString(entity);
-		}
-
-		String uri = request.getRequestLine().getUri();
-		StringEntity body = new StringEntity(this.getOutput(uri, requestData));
-		response.setEntity(body);
-		response.setStatusCode(this.statusCode);
-
-	}
-
 }

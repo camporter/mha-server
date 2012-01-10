@@ -1,4 +1,4 @@
-package myhomeaudio.server.user;
+package myhomeaudio.server.manager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import myhomeaudio.server.database.Database;
+import myhomeaudio.server.user.DatabaseUser;
+import myhomeaudio.server.user.User;
 
 /**
  * Stores and manages all of the users on the server. This object maintains the
@@ -18,7 +20,9 @@ import myhomeaudio.server.database.Database;
  * 
  */
 public class UserManager {
-
+	
+	private static UserManager instance = null;
+	
 	/*
 	 * The userList stores all the current users in memory. This should always
 	 * match what is in the database. ArrayList indexes DO NOT match the id of
@@ -35,7 +39,8 @@ public class UserManager {
 	public static final int LOGIN_OK = 4;
 	public static final int LOGIN_FAILED = 5;
 
-	public UserManager() {
+	protected UserManager() {
+		System.out.println("*** Starting UserManager...");
 		this.db = Database.getInstance();
 		this.userList = new ArrayList<DatabaseUser>();
 
@@ -44,6 +49,13 @@ public class UserManager {
 							// update?
 		}
 
+	}
+	
+	public static synchronized UserManager getInstance() {
+		if (instance == null) {
+			instance = new UserManager();
+		}
+		return instance;
 	}
 
 	private boolean checkUsersTable() {
@@ -158,21 +170,21 @@ public class UserManager {
 	}
 
 	/**
-	 * Get a list of users currently logged in.
+	 * Gets a list of users currently logged in.
 	 * 
 	 * @return
 	 */
 	public ArrayList<DatabaseUser> getLoggedInUsers() {
-		return null;
-	}
-	
-	/**
-	 * Checks if the user information exists.
-	 * @param user
-	 * @return
-	 */
-	public boolean checkUser(User user) {
+		ArrayList<DatabaseUser> result = new ArrayList<DatabaseUser>();
 		
+		// Iterate through userList, adding logged in users to the result ArrayList.
+		for (Iterator<DatabaseUser> i = this.userList.iterator(); i.hasNext();) {
+			DatabaseUser nextUser = i.next();
+			if (nextUser.isLoggedIn()) {
+				result.add(nextUser);
+			}
+		}
+		return result;
 	}
 
 	/**

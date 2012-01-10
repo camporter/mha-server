@@ -4,20 +4,15 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Locale;
-
 import myhomeaudio.server.helper.ClientHelper;
 import myhomeaudio.server.helper.NodeHelper;
 import myhomeaudio.server.helper.SongHelper;
+import myhomeaudio.server.helper.UserHelper;
 
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpServerConnection;
-import org.apache.http.HttpStatus;
-import org.apache.http.MethodNotSupportedException;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.DefaultHttpServerConnection;
@@ -28,7 +23,6 @@ import org.apache.http.params.SyncBasicHttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpProcessor;
-import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.apache.http.protocol.HttpService;
 import org.apache.http.protocol.ImmutableHttpProcessor;
@@ -72,6 +66,7 @@ public class ClientHandler extends Thread {
 		httpRequestRegistry.register("/song*", new SongHelper());
 		httpRequestRegistry.register("/node*", new NodeHelper());
 		httpRequestRegistry.register("/client*", new ClientHelper());
+		httpRequestRegistry.register("/user*", new UserHelper());
 		// TODO: Add other helpers to the request registry
 
 		this.httpService = new HttpService(httpProcessor, new DefaultConnectionReuseStrategy(),

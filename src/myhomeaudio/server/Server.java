@@ -1,10 +1,10 @@
 package myhomeaudio.server;
 
 import myhomeaudio.server.handler.ClientHandler;
-import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.handler.NodeHandler;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
+import myhomeaudio.server.manager.UserManager;
 import myhomeaudio.server.songs.SongFiles;
 
 public class Server {
@@ -29,16 +29,18 @@ public class Server {
 		// Create an instance of the ClientManager object, which keeps track of
 		// clients
 		ClientManager cm = ClientManager.getInstance();
+		
+		UserManager um = UserManager.getInstance();
 
 		SongFiles songs = SongFiles.getInstance();
 		songs.populateSongList();
 
 		// Handles node requests
-		System.out.println("Starting Node Handler");
+		System.out.println("*** Starting Node Handler...");
 		startNodeHandler();
 
 		// Handles client requests (android or iphone)
-		System.out.println("Starting Client Handler");
+		System.out.println("*** Starting Client Handler...");
 		startClientHandler();
 
 		while (true) {
