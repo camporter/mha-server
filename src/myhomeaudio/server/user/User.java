@@ -1,7 +1,7 @@
 package myhomeaudio.server.user;
 
 /**
- * A representation for a user of the server. This is the generic representation
+ * The representation for a user of the server. This is the generic representation
  * of a User, not tied to the database.
  * 
  * @author Cameron
@@ -18,8 +18,10 @@ public class User {
 	}
 
 	public User(User user) {
-		this.username = user.getUsername();
-		this.password = user.getPassword();
+		if (user != null) {
+			this.username = user.getUsername();
+			this.password = user.getPassword();
+		}
 	}
 
 	public String getUsername() {

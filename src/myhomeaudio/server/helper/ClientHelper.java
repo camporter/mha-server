@@ -9,9 +9,11 @@ import java.util.StringTokenizer;
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
+import myhomeaudio.server.manager.UserManager;
 import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
 import myhomeaudio.server.songs.SongFiles;
+import myhomeaudio.server.user.User;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -51,48 +53,75 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 
 		if (tokenizedUri.hasMoreTokens()) {
 
+			ClientManager cm = ClientManager.getInstance();
+			UserManager um = UserManager.getInstance();
+
 			String method = tokenizedUri.nextToken(); // NoSuchElementException
-			if (method.equals("rssi")) {
-				System.out.println("Getting rssi values from client");
-				Gson gson = new Gson();
 
-				JsonParser parser = new JsonParser();
-				JsonArray deviceArray = parser.parse(data).getAsJsonArray();
+			Gson gson = new Gson();
+			Hashtable hasht = gson.fromJson(data, Hashtable.class);
 
-				NodeManager nm = NodeManager.getInstance();
+			if (hasht == null) {
+				// hasht empty, request failed
+				body = "{\"status\":1}";
+			} else if (method.equals("rssi")) {
+				/*
+				 * System.out.println("Getting rssi values from client"); Gson
+				 * gson = new Gson();
+				 * 
+				 * JsonParser parser = new JsonParser(); JsonArray deviceArray =
+				 * parser.parse(data).getAsJsonArray();
+				 * 
+				 * NodeManager nm = NodeManager.getInstance();
+				 * 
+				 * String lowestDeviceName = ""; int lowestDeviceRSSI =
+				 * Integer.MIN_VALUE; for (JsonElement item : deviceArray) {
+				 * DeviceObject device = gson.fromJson(item,
+				 * DeviceObject.class); if (device != null &&
+				 * nm.isValidNode(device.name) && device.rssi >
+				 * lowestDeviceRSSI) { lowestDeviceName = device.name;
+				 * lowestDeviceRSSI = device.rssi; }
+				 * 
+				 * }
+				 * 
+				 * ClientManager cm = ClientManager.getInstance();
+				 * 
+				 * Client client = cm.getClient(); if
+				 * (!client.getClosestNodeName().equals(lowestDeviceName)) { //
+				 * Move song playing to new node String nodeName =
+				 * client.getClosestNodeName(); Node closeNode =
+				 * nm.getNodeByName(nodeName); String ipaddr =
+				 * closeNode.getIpAddress(); nm.sendNodeCommand(NODE_PLAY,
+				 * ipaddr, client.getCurrentSong()); }
+				 * client.setClosestNodeName(lowestDeviceName);
+				 * 
+				 * this.statusCode = HttpStatus.SC_OK;
+				 */
 
-				String lowestDeviceName = "";
-				int lowestDeviceRSSI = Integer.MIN_VALUE;
-				for (JsonElement item : deviceArray) {
-					DeviceObject device = gson.fromJson(item, DeviceObject.class);
-					if (device != null && nm.isValidNode(device.name)
-							&& device.rssi > lowestDeviceRSSI) {
-						lowestDeviceName = device.name;
-						lowestDeviceRSSI = device.rssi;
-					}
-
-				}
-
-				ClientManager cm = ClientManager.getInstance();
-
-				Client client = cm.getClient();
-				if (!client.getClosestNodeName().equals(lowestDeviceName)) {
-					// Move song playing to new node
-					String nodeName = client.getClosestNodeName();
-					Node closeNode = nm.getNodeByName(nodeName);
-					String ipaddr = closeNode.getIpAddress();
-					nm.sendNodeCommand(NODE_PLAY, ipaddr, client.getCurrentSong());
-				}
-				client.setClosestNodeName(lowestDeviceName);
-
-				this.statusCode = HttpStatus.SC_OK;
-
-			} else if (method.equals("start")) {
+			} else if (method.equals("login")) {
 				System.out.println("Getting start from client " + data);
-				ClientManager cm = ClientManager.getInstance();
-				Client client = new Client(data);
-				cm.addClient(client);
+
+				if (hasht.containsKey("username") && hasht.containsKey("password")
+						&& hasht.containsKey("ipaddress") && hasht.containsKey("macaddress")
+						&& hasht.containsKey("bluetoothname")) {
+					User lUser = new User((String) hasht.get("username"),
+							(String) hasht.get("password"));
+
+					if (um.loginUser(lUser) == UserManager.LOGIN_FAILED) {
+						body = "{\"status\":1}";
+					} else {
+						Client client = new Client(lUser, (String) hasht.get("macaddress"),
+								(String) hasht.get("ipaddress"),
+								(String) hasht.get("bluetoothname"));
+
+						cm.addClient(client);
+					}
+				} else {
+					// username and/or password not available, fail
+					body = "{\"status\":1}";
+				}
 				this.statusCode = HttpStatus.SC_OK;
+			} else if (method.equals("logout")) {
 
 			} else {
 				this.statusCode = HttpStatus.SC_BAD_REQUEST;

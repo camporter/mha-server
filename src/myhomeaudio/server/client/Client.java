@@ -1,38 +1,59 @@
 package myhomeaudio.server.client;
 
+import myhomeaudio.server.user.User;
+
+/**
+ * The representation for a client of the server.
+ * 
+ * @author Cameron
+ * 
+ */
 public class Client {
-
-	private String ipAddress; // IpAddress of client
+	
+	private String macAddress; 
+	private String ipAddress;
 	private String bluetoothName;
-	private String currentSong;
-
-	public Client(String ipAddress) {
+	private User user;
+	
+	public Client(User user, String macAddress, String ipAddress, String bluetoothName) {
+		this.user = new User(user);
+		this.macAddress = macAddress;
 		this.ipAddress = ipAddress;
-		this.bluetoothName = "";
+		this.bluetoothName = bluetoothName;
 	}
-
-	/*
-	 * public void setNodeIpAddress(String nodeIpAddress){ this.nodeIpAddress =
-	 * nodeIpAddress; }
-	 */
+	
+	public Client(String macAddress, String ipAddress, String bluetoothName) {
+		this.user = null;
+		this.macAddress = macAddress;
+		this.ipAddress = ipAddress;
+		this.bluetoothName = bluetoothName;
+	}
+	
+	public Client(Client client) {
+		this.user = client.getCurrentUser();
+		this.macAddress = client.getMacAddress();
+		this.ipAddress = client.getIpAddress();
+		this.bluetoothName = client.getBluetoothName();
+	}
 
 	public String getIpAddress() {
 		return this.ipAddress;
 	}
-
-	public String getClosestNodeName() {
+	
+	public String getMacAddress() {
+		return this.macAddress;
+	}
+	
+	public User getCurrentUser() {
+		if (user == null) return null;
+		return new User(user);
+	}
+	
+	public String getBluetoothName() {
 		return this.bluetoothName;
 	}
-
-	public void setClosestNodeName(String newBluetoothName) {
-		this.bluetoothName = newBluetoothName;
-	}
-
-	public String getCurrentSong() {
-		return this.currentSong;
-	}
-
-	public void setCurrentSong(String song) {
-		this.currentSong = song;
+	
+	public void setCurrentUser(User user) {
+		this.user = new User(user);
 	}
 }

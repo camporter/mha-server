@@ -3,14 +3,25 @@ package myhomeaudio.server.manager;
 import java.util.ArrayList;
 
 import myhomeaudio.server.client.Client;
+import myhomeaudio.server.database.Database;
 
+/**
+ * Stores and maintains all of the clients on the server. This object maintains
+ * the clients table in the database.
+ * 
+ * @author Cameron
+ * 
+ */
 public class ClientManager {
 
 	private static ClientManager instance = null;
-	private static int clientCount = 0;
+
 	private ArrayList<Client> clientList;
 
+	private Database db;
+
 	protected ClientManager() {
+		System.out.println("*** Starting ClientManager...");
 		clientList = new ArrayList<Client>();
 	}
 
@@ -25,7 +36,6 @@ public class ClientManager {
 	public synchronized void addClient(Client client) {
 
 		this.clientList.add(client);
-		clientCount++;
 	}
 
 	public synchronized Client getClient() {
