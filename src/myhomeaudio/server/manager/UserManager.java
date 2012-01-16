@@ -10,6 +10,7 @@ import java.util.Iterator;
 
 import myhomeaudio.server.database.Database;
 import myhomeaudio.server.database.object.DatabaseUser;
+import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.user.User;
 
 /**
@@ -19,7 +20,7 @@ import myhomeaudio.server.user.User;
  * @author Cameron
  * 
  */
-public class UserManager {
+public class UserManager implements StatusCode {
 
 	private static UserManager instance = null;
 
@@ -30,16 +31,6 @@ public class UserManager {
 	 */
 	private ArrayList<DatabaseUser> userList;
 	private Database db;
-
-	// Status codes for user registration
-	public static final int REGISTER_OK = 0;
-	public static final int REGISTER_FAILED = 1;
-	public static final int REGISTER_BAD_PASSWORD = 2;
-	public static final int REGISTER_DUPLICATE_USERNAME = 3;
-	public static final int LOGIN_OK = 4;
-	public static final int LOGIN_FAILED = 5;
-	public static final int LOGOUT_OK = 6;
-	public static final int LOGOUT_FAILED = 7;
 
 	protected UserManager() {
 		System.out.println("*** Starting UserManager...");
@@ -68,8 +59,9 @@ public class UserManager {
 		Connection conn = this.db.getConnection();
 		try {
 			Statement statement = conn.createStatement();
-			statement
-					.executeUpdate("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT);");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "users (id INTEGER PRIMARY KEY AUTOINCREMENT, " + "username TEXT UNIQUE, "
+					+ "password TEXT);");
 			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -110,17 +102,17 @@ public class UserManager {
 	 * 
 	 * @param user
 	 *            The User object representing the user to add.
-	 * @return Registration status code. See the static fields for UserManager.
+	 * @return Registration status code.
 	 */
 	public int registerUser(User user) {
 		if (getUser(user.getUsername()) != null) {
-			return UserManager.REGISTER_DUPLICATE_USERNAME;
+			return STATUS_REG_DUPLICATE;
 		} else if (user.getPassword().length() < 0) {
 			/*
 			 * TODO: Set password requirements somewhere sane and do further
 			 * checking here.
 			 */
-			return UserManager.REGISTER_BAD_PASSWORD;
+			return STATUS_FAILED;
 		} else {
 			int newId = -1;
 
@@ -142,13 +134,13 @@ public class UserManager {
 				newId = resultSet.getInt("id");
 			} catch (SQLException e) {
 				e.printStackTrace();
-				return UserManager.REGISTER_FAILED;
+				return STATUS_FAILED;
 			}
 			this.db.unlock();
 
 			// Add the registered user to the userList with their id
 			this.userList.add(new DatabaseUser(newId, user));
-			return UserManager.REGISTER_OK;
+			return STATUS_OK;
 		}
 	}
 
@@ -157,15 +149,15 @@ public class UserManager {
 	 * 
 	 * @param user
 	 *            User to log in
-	 * @return Login status code. See static fields for UserManager.
+	 * @return Login status code.
 	 */
 	public int loginUser(User user) {
 		DatabaseUser dbUser = getMatchingUser(user);
 		if (dbUser != null) {
 			dbUser.setLoggedIn();
-			return UserManager.LOGIN_OK;
+			return STATUS_OK;
 		}
-		return UserManager.LOGIN_FAILED;
+		return STATUS_FAILED;
 	}
 
 	/**
@@ -179,9 +171,9 @@ public class UserManager {
 		DatabaseUser dbUser = getMatchingUser(user);
 		if (dbUser != null) {
 			dbUser.setLoggedOut();
-			return UserManager.LOGOUT_OK;
+			return STATUS_OK;
 		}
-		return UserManager.LOGOUT_FAILED;
+		return STATUS_FAILED;
 
 	}
 
@@ -224,7 +216,7 @@ public class UserManager {
 	}
 
 	/**
-	 * Gets the User object associated with the given user id.
+	 * Gets the DatabaseUser object associated with the given user id.
 	 * 
 	 * @param id
 	 * @return Returns a DatabaseUser object, or null if the id doesn't match

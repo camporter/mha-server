@@ -18,12 +18,12 @@ import org.apache.http.util.EntityUtils;
 public class Helper implements HelperInterface, HttpRequestHandler {
 
 	// The HTTP status code to send back to the client
-	protected int statusCode = 0;
+	protected int httpStatus = 0;
 
 	@Override
 	public String getOutput(String uri, String data) {
 		// The default helper produces no output
-		this.statusCode = HttpStatus.SC_FORBIDDEN;
+		this.httpStatus = HttpStatus.SC_FORBIDDEN;
 		return "";
 	}
 
@@ -44,7 +44,7 @@ public class Helper implements HelperInterface, HttpRequestHandler {
 		String uri = request.getRequestLine().getUri();
 		StringEntity body = new StringEntity(this.getOutput(uri, requestData));
 		response.setEntity(body);
-		response.setStatusCode(this.statusCode);
+		response.setStatusCode(this.httpStatus);
 
 	}
 }

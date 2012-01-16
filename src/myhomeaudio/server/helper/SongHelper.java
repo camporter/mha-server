@@ -45,7 +45,7 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 				Gson gson = new Gson();
 
 				body = gson.toJson(songs.getSongList());
-				this.statusCode = HttpStatus.SC_OK;
+				this.httpStatus = HttpStatus.SC_OK;
 
 			} else if (method.equals("play")) {
 				// Play a defined song
@@ -54,9 +54,9 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 
 				// Make sure a song to play is actually given
 				if (hasht != null && hasht.containsKey("song")) {
-					this.statusCode = HttpStatus.SC_OK;
+					this.httpStatus = HttpStatus.SC_OK;
 
-					NodeManager nm = NodeManager.getInstance();
+					/*NodeManager nm = NodeManager.getInstance();
 					// TODO: GET RID OF THIS UGLY
 					String songName = hasht.get("song").toString();
 					Client client = cm.getClient();
@@ -65,18 +65,19 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands 
 					String ipaddr = node.getIpAddress();
 					nm.sendNodeCommand(NODE_PLAY, ipaddr, hasht.get("song").toString());
 					cm.getClient().setCurrentSong(songName);
+					*/
 				} else {
 					// No song given, send a bad request response
-					this.statusCode = HttpStatus.SC_BAD_REQUEST;
+					this.httpStatus = HttpStatus.SC_BAD_REQUEST;
 				}
 
 			} else if (method.equals("pause")) {
 				// Pause the song playing
-				this.statusCode = HttpStatus.SC_OK;
+				this.httpStatus = HttpStatus.SC_OK;
 				NodeManager nm = NodeManager.getInstance();
 
-				nm.sendNodeCommand(NODE_PAUSE, nm
-						.getNodeByName(cm.getClient().getClosestNodeName()).getIpAddress(), "");
+				//nm.sendNodeCommand(NODE_PAUSE, nm
+				//		.getNodeByName(cm.getClient().getClosestNodeName()).getIpAddress(), "");
 			}
 
 		} else {

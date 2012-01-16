@@ -1,18 +1,15 @@
 package myhomeaudio.server.helper;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
 import myhomeaudio.server.client.Client;
+import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.manager.ClientManager;
-import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.manager.UserManager;
-import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
-import myhomeaudio.server.songs.SongFiles;
 import myhomeaudio.server.user.User;
 
 import org.apache.http.HttpEntity;
@@ -27,11 +24,8 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
-public class ClientHelper extends Helper implements HelperInterface, NodeCommands {
+public class ClientHelper extends Helper implements HelperInterface, NodeCommands, StatusCode {
 
 	class DeviceObject {
 
@@ -63,7 +57,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 
 			if (hasht == null) {
 				// hasht empty, request failed
-				body = "{\"status\":1}";
+				body = "{\"status\":"+STATUS_FAILED+"}";
 			} else if (method.equals("rssi")) {
 				/*
 				 * System.out.println("Getting rssi values from client"); Gson
@@ -107,24 +101,24 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 					User lUser = new User((String) hasht.get("username"),
 							(String) hasht.get("password"));
 
-					if (um.loginUser(lUser) == UserManager.LOGIN_FAILED) {
-						body = "{\"status\":1}";
+					if (um.loginUser(lUser) == STATUS_FAILED) {
+						body = "{\"status\":"+STATUS_FAILED+"}";
 					} else {
 						Client client = new Client(lUser, (String) hasht.get("macaddress"),
 								(String) hasht.get("ipaddress"),
 								(String) hasht.get("bluetoothname"));
-
+						
 						cm.addClient(client);
 					}
 				} else {
 					// username and/or password not available, fail
-					body = "{\"status\":1}";
+					body = "{\"status\":"+STATUS_FAILED+"}";
 				}
-				this.statusCode = HttpStatus.SC_OK;
+				this.httpStatus = HttpStatus.SC_OK;
 			} else if (method.equals("logout")) {
 
 			} else {
-				this.statusCode = HttpStatus.SC_BAD_REQUEST;
+				this.httpStatus = HttpStatus.SC_BAD_REQUEST;
 			}
 
 		} else {
@@ -153,7 +147,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 		String uri = request.getRequestLine().getUri();
 		StringEntity body = new StringEntity(this.getOutput(uri, requestData));
 		response.setEntity(body);
-		response.setStatusCode(this.statusCode);
+		response.setStatusCode(this.httpStatus);
 
 	}
 
