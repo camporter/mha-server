@@ -1,4 +1,4 @@
-package myhomeaudio.server.helper;
+package myhomeaudio.server.http.helper;
 
 /**
  * Helper Interface defines the basic operations of each helper

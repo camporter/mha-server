@@ -1,5 +1,6 @@
 package myhomeaudio.server;
 
+import myhomeaudio.server.discovery.DiscoveryService;
 import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.handler.NodeHandler;
 import myhomeaudio.server.manager.ClientManager;
@@ -16,6 +17,7 @@ public class Server {
 
 	static NodeHandler nodeHandler;
 	static ClientHandler clientHandler;
+	static DiscoveryService discoveryService;
 
 	/**
 	 * @param args
@@ -42,6 +44,8 @@ public class Server {
 		// Handles client requests (android or iphone)
 		System.out.println("*** Starting Client Handler...");
 		startClientHandler();
+		
+		startDiscoveryService();
 
 		while (true) {
 			try {
@@ -57,6 +61,11 @@ public class Server {
 					System.out.println("Unable to listen for new clients");
 					startClientHandler();
 				}
+				if (!discoveryService.isAlive()) {
+					System.out.println("Discovery Service Thread Dead !");
+					System.out.println("Attempting to restart DiscoveryService...");
+					startDiscoveryService();
+				}
 			} catch (InterruptedException e) {
 				System.out.println("Exception: Server Exiting");
 				System.exit(0);
@@ -69,6 +78,7 @@ public class Server {
 	 */
 	public static void startNodeHandler() {
 		nodeHandler = new NodeHandler(NODE_PORT);
+		nodeHandler.setName("NodeHandler");
 		nodeHandler.start();
 	}
 
@@ -77,6 +87,13 @@ public class Server {
 	 */
 	public static void startClientHandler() {
 		clientHandler = new ClientHandler(CLIENT_PORT);
+		clientHandler.setName("ClientHandler");
 		clientHandler.start();
+	}
+	
+	public static void startDiscoveryService() {
+		discoveryService = new DiscoveryService();
+		discoveryService.setName("DiscoveryService");
+		discoveryService.start();
 	}
 }

@@ -7,9 +7,9 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import myhomeaudio.server.helper.Helper;
-import myhomeaudio.server.helper.NodeHelper;
-import myhomeaudio.server.helper.SongHelper;
+import myhomeaudio.server.http.helper.Helper;
+import myhomeaudio.server.http.helper.NodeHelper;
+import myhomeaudio.server.http.helper.SongHelper;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;

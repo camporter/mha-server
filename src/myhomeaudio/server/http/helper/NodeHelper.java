@@ -1,4 +1,4 @@
-package myhomeaudio.server.helper;
+package myhomeaudio.server.http.helper;
 
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.node.NodeCommands;

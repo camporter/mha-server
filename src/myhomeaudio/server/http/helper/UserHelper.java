@@ -1,7 +1,7 @@
 /**
  * 
  */
-package myhomeaudio.server.helper;
+package myhomeaudio.server.http.helper;
 
 import java.util.Hashtable;
 import java.util.StringTokenizer;

@@ -1,4 +1,4 @@
-package myhomeaudio.server.helper;
+package myhomeaudio.server.http.helper;
 
 import java.io.IOException;
 import java.util.Locale;

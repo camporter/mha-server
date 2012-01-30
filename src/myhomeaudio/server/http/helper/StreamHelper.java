@@ -1,4 +1,4 @@
-package myhomeaudio.server.helper;
+package myhomeaudio.server.http.helper;
 
 public class StreamHelper extends Helper implements HelperInterface {
 

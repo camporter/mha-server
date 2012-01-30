@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import myhomeaudio.server.helper.ClientHelper;
-import myhomeaudio.server.helper.NodeHelper;
-import myhomeaudio.server.helper.SongHelper;
-import myhomeaudio.server.helper.UserHelper;
+
+import myhomeaudio.server.http.helper.ClientHelper;
+import myhomeaudio.server.http.helper.NodeHelper;
+import myhomeaudio.server.http.helper.SongHelper;
+import myhomeaudio.server.http.helper.UserHelper;
 
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;
