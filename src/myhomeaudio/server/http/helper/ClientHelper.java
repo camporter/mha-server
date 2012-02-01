@@ -93,7 +93,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 				 */
 
 			} else if (method.equals("login")) {
-				System.out.println("Getting start from client " + data);
+				System.out.println("Getting login from client");
 
 				if (hasht.containsKey("username") && hasht.containsKey("password")
 						&& hasht.containsKey("ipaddress") && hasht.containsKey("macaddress")
@@ -108,7 +108,8 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 								(String) hasht.get("ipaddress"),
 								(String) hasht.get("bluetoothname"));
 						
-						cm.addClient(client);
+						String sessionId = cm.addClient(client);
+						body = "{\"status\":"+STATUS_OK+",\"session\":\""+sessionId+"\"}";
 					}
 				} else {
 					// username and/or password not available, fail
@@ -116,7 +117,8 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 				}
 				this.httpStatus = HttpStatus.SC_OK;
 			} else if (method.equals("logout")) {
-
+				System.out.println("Getting logout from client");
+				
 			} else {
 				this.httpStatus = HttpStatus.SC_BAD_REQUEST;
 			}

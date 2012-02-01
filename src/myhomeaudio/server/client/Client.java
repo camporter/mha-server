@@ -14,6 +14,7 @@ public class Client {
 	private String ipAddress;
 	private String bluetoothName;
 	private User user;
+	private String sessionId;
 	
 	public Client(User user, String macAddress, String ipAddress, String bluetoothName) {
 		this.user = new User(user);

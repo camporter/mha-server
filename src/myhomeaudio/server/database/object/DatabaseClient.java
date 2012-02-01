@@ -4,14 +4,26 @@ import myhomeaudio.server.client.Client;
 import myhomeaudio.server.user.User;
 
 public class DatabaseClient extends DatabaseObject<Client> {
-
-	public DatabaseClient(int id, Client client) {
+	
+	private String sessionId;
+	
+	public DatabaseClient(int id, Client client, String sessionId) {
 		super(id, new Client(client));
+		this.sessionId = sessionId;
 	}
 
 	public DatabaseClient(DatabaseClient dbClient) {
 		super(dbClient.getId(), new Client(dbClient.getCurrentUser(), dbClient.getMacAddress(),
 				dbClient.getIpAddress(), dbClient.getBluetoothName()));
+		this.sessionId = dbClient.getSessionId();
+	}
+	
+	public String getSessionId() {
+		return this.sessionId;
+	}
+	
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 
 	public String getIpAddress() {

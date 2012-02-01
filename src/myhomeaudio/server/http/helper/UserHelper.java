@@ -38,36 +38,7 @@ public class UserHelper extends Helper implements HelperInterface, NodeCommands,
 
 			if (hasht == null) {
 				// We don't have any data, go ahead and fail
-			} else if (method.equals("login")) {
-				// Login the user
-				if (hasht.containsKey("username") && hasht.containsKey("password")) {
-					User loginUser = new User((String) hasht.get("username"),
-							(String) hasht.get("password"));
-
-					int result = um.loginUser(loginUser);
-					switch (result) {
-					case STATUS_OK:
-						body = "\"ok\"";
-						break;
-					case STATUS_FAILED:
-						body = "\"failed\"";
-						break;
-					}
-				}
-				this.httpStatus = HttpStatus.SC_OK;
-
-			} else if (method.equals("logout")) {
-				// Logout the user
-				if (hasht.containsKey("username") && hasht.containsKey("password")) {
-					User logoutUser = new User((String) hasht.get("username"),
-							(String) hasht.get("password"));
-
-					int result = um.logoutUser(logoutUser);
-
-					body = "{\"status\":" + result + "}";
-				}
-				this.httpStatus = HttpStatus.SC_OK;
-
+				this.httpStatus = HttpStatus.SC_BAD_REQUEST;
 			} else if (method.equals("register")) {
 				// Register a new user
 				if (hasht.containsKey("username") && hasht.containsKey("password")) {
@@ -80,6 +51,7 @@ public class UserHelper extends Helper implements HelperInterface, NodeCommands,
 				}
 				this.httpStatus = HttpStatus.SC_OK;
 			} else {
+				this.httpStatus = HttpStatus.SC_BAD_REQUEST;
 			}
 		}
 		return body;
