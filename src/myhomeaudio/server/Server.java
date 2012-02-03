@@ -8,6 +8,14 @@ import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.manager.UserManager;
 import myhomeaudio.server.songs.SongFiles;
 
+/**
+ * Entry point for the My Home Audio Server.
+ * 
+ * We create a number of different threads from this class, which manage 
+ * 
+ * @author Cameron
+ *
+ */
 public class Server {
 
 	// port that nodes will open a socket on

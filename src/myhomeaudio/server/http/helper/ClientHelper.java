@@ -1,11 +1,13 @@
 package myhomeaudio.server.http.helper;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
 import myhomeaudio.server.client.Client;
+import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.UserManager;
@@ -22,8 +24,8 @@ import org.apache.http.MethodNotSupportedException;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-
-import com.google.gson.Gson;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 public class ClientHelper extends Helper implements HelperInterface, NodeCommands, StatusCode {
 
@@ -38,119 +40,58 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 		}
 	}
 
-	public String getOutput(String uri, String data) {
-		String body = "";
+	public String getOutput(ArrayList<String> uriSegments, String data) {
 
-		StringTokenizer tokenizedUri = new StringTokenizer(uri, "/");
-		tokenizedUri.nextToken(); // throw the first part away, throws /song
-									// away
+		// Set the content-type
+		this.contentType = HTTPMimeType.MIME_JSON;
+		this.httpStatus = HttpStatus.SC_BAD_REQUEST;
 
-		if (tokenizedUri.hasMoreTokens()) {
+		// Create the JSON object to represent the response
+		JSONObject body = new JSONObject();
+		body.put("status", STATUS_FAILED);
 
-			ClientManager cm = ClientManager.getInstance();
-			UserManager um = UserManager.getInstance();
+		ClientManager cm = ClientManager.getInstance();
+		UserManager um = UserManager.getInstance();
 
-			String method = tokenizedUri.nextToken(); // NoSuchElementException
+		try {
+			// Convert the request into a JSON object
+			JSONObject jsonRequest = (JSONObject) JSONValue.parse(data);
 
-			Gson gson = new Gson();
-			Hashtable hasht = gson.fromJson(data, Hashtable.class);
-
-			if (hasht == null) {
-				// hasht empty, request failed
-				body = "{\"status\":"+STATUS_FAILED+"}";
-			} else if (method.equals("rssi")) {
-				/*
-				 * System.out.println("Getting rssi values from client"); Gson
-				 * gson = new Gson();
-				 * 
-				 * JsonParser parser = new JsonParser(); JsonArray deviceArray =
-				 * parser.parse(data).getAsJsonArray();
-				 * 
-				 * NodeManager nm = NodeManager.getInstance();
-				 * 
-				 * String lowestDeviceName = ""; int lowestDeviceRSSI =
-				 * Integer.MIN_VALUE; for (JsonElement item : deviceArray) {
-				 * DeviceObject device = gson.fromJson(item,
-				 * DeviceObject.class); if (device != null &&
-				 * nm.isValidNode(device.name) && device.rssi >
-				 * lowestDeviceRSSI) { lowestDeviceName = device.name;
-				 * lowestDeviceRSSI = device.rssi; }
-				 * 
-				 * }
-				 * 
-				 * ClientManager cm = ClientManager.getInstance();
-				 * 
-				 * Client client = cm.getClient(); if
-				 * (!client.getClosestNodeName().equals(lowestDeviceName)) { //
-				 * Move song playing to new node String nodeName =
-				 * client.getClosestNodeName(); Node closeNode =
-				 * nm.getNodeByName(nodeName); String ipaddr =
-				 * closeNode.getIpAddress(); nm.sendNodeCommand(NODE_PLAY,
-				 * ipaddr, client.getCurrentSong()); }
-				 * client.setClosestNodeName(lowestDeviceName);
-				 * 
-				 * this.statusCode = HttpStatus.SC_OK;
-				 */
-
-			} else if (method.equals("login")) {
+			if (uriSegments.get(1).equals("login")) {
 				System.out.println("Getting login from client");
 
-				if (hasht.containsKey("username") && hasht.containsKey("password")
-						&& hasht.containsKey("ipaddress") && hasht.containsKey("macaddress")
-						&& hasht.containsKey("bluetoothname")) {
-					User lUser = new User((String) hasht.get("username"),
-							(String) hasht.get("password"));
+				// Make sure we have all the required fields
+				if (jsonRequest.containsKey("username") && jsonRequest.containsKey("password")
+						&& jsonRequest.containsKey("ipaddress")
+						&& jsonRequest.containsKey("macaddress")
+						&& jsonRequest.containsKey("bluetoothname")) {
+					User lUser = new User((String) jsonRequest.get("username"),
+							(String) jsonRequest.get("password"));
 
-					if (um.loginUser(lUser) == STATUS_FAILED) {
-						body = "{\"status\":"+STATUS_FAILED+"}";
-					} else {
-						Client client = new Client(lUser, (String) hasht.get("macaddress"),
-								(String) hasht.get("ipaddress"),
-								(String) hasht.get("bluetoothname"));
+					// Check that the login succeeded
+					if (um.loginUser(lUser) == STATUS_OK) {
+						Client lClient = new Client(lUser, (String) jsonRequest.get("macaddress"),
+								(String) jsonRequest.get("ipaddress"),
+								(String) jsonRequest.get("bluetoothname"));
+
+						String sessionId = cm.addClient(lClient);
+
+						body.put("status", STATUS_OK);
+						body.put("session", sessionId);
 						
-						String sessionId = cm.addClient(client);
-						body = "{\"status\":"+STATUS_OK+",\"session\":\""+sessionId+"\"}";
+						this.httpStatus = HttpStatus.SC_OK;
 					}
-				} else {
-					// username and/or password not available, fail
-					body = "{\"status\":"+STATUS_FAILED+"}";
 				}
-				this.httpStatus = HttpStatus.SC_OK;
-			} else if (method.equals("logout")) {
+
+			} else if (uriSegments.get(1).equals("logout")) {
 				System.out.println("Getting logout from client");
-				
-			} else {
-				this.httpStatus = HttpStatus.SC_BAD_REQUEST;
+
 			}
-
-		} else {
-
+		} catch (Exception e) {
+			// Do nothing for now
 		}
 
-		return body;
+		return body.toString();
 	}
-
-	@Override
-	public void handle(HttpRequest request, HttpResponse response, HttpContext context)
-			throws HttpException, IOException {
-
-		String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
-
-		if (!method.equals("GET") && !method.equals("POST")) {
-			throw new MethodNotSupportedException(method + " method not supported");
-		}
-
-		String requestData = "";
-		if (request instanceof HttpEntityEnclosingRequest) {
-			HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
-			requestData = EntityUtils.toString(entity);
-		}
-
-		String uri = request.getRequestLine().getUri();
-		StringEntity body = new StringEntity(this.getOutput(uri, requestData));
-		response.setEntity(body);
-		response.setStatusCode(this.httpStatus);
-
-	}
-
+	
 }

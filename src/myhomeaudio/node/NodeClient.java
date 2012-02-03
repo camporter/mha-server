@@ -1,4 +1,4 @@
-package myhomeaudio.server.client;
+package myhomeaudio.node;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -51,7 +51,7 @@ public class NodeClient {
 
 	protected static int serverPort = 9090;
 	protected static int nodePort = 9091;
-	protected static String host = "255.255.255.255";
+	protected static String host = "192.168.10.102";
 
 	public static void main(String[] args) {
 		System.out.println("Starting...");

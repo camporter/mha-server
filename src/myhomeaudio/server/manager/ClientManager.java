@@ -39,6 +39,11 @@ public class ClientManager {
 		}
 	}
 
+	/**
+	 * Retrieve an instance of the ClientManager.
+	 * 
+	 * @return The ClientManager.
+	 */
 	public static synchronized ClientManager getInstance() {
 		if (instance == null) {
 			instance = new ClientManager();
@@ -88,7 +93,7 @@ public class ClientManager {
 	 * @return Returns a DatabaseClient object, or null if the id doesn't match
 	 *         any existing client.
 	 */
-	public synchronized DatabaseClient getClient(int id) {
+	private synchronized DatabaseClient getClient(int id) {
 		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
 			DatabaseClient nextClient = i.next();
 			if (nextClient.getId() == id) {
@@ -99,8 +104,28 @@ public class ClientManager {
 	}
 
 	/**
-	 * Creates a session id that will be unique to a specific client using
-	 * SHA-512. It also uses the current timestamp.
+	 * Gets the DatabaseClient object associated with the given session id.
+	 * 
+	 * @param sessionId
+	 *            Session id for a client assigned by the ClientManager.
+	 * @return Returns a DatabaseClient object, or null if the session id
+	 *         doesn't match any existing client.
+	 */
+	public synchronized DatabaseClient getClient(String sessionId) {
+		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
+			DatabaseClient nextClient = i.next();
+			if (nextClient.getSessionId().equals(sessionId)) {
+				return new DatabaseClient(nextClient);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Creates a session id that will be unique to a specific client.
+	 * <p>
+	 * It uses the SHA-512 hash function on certain fileds of the Client. It
+	 * also uses the current timestamp.
 	 * 
 	 * @param client
 	 *            The client to generate the session id for.

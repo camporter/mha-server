@@ -3,16 +3,17 @@
  */
 package myhomeaudio.server.http.helper;
 
-import java.util.Hashtable;
-import java.util.StringTokenizer;
+import java.util.ArrayList;
 
-import org.apache.http.HttpStatus;
-import com.google.gson.Gson;
-
+import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.manager.UserManager;
 import myhomeaudio.server.node.NodeCommands;
 import myhomeaudio.server.user.User;
+
+import org.apache.http.HttpStatus;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 /**
  * @author grimmjow
@@ -21,39 +22,39 @@ import myhomeaudio.server.user.User;
 public class UserHelper extends Helper implements HelperInterface, NodeCommands, StatusCode {
 
 	@Override
-	public String getOutput(String uri, String data) {
-		String body = "{\"status\":" + STATUS_FAILED + "}";
+	public String getOutput(ArrayList<String> uriSegments, String data) {
 
-		StringTokenizer tokenizedUri = new StringTokenizer(uri, "/");
-		tokenizedUri.nextToken(); // throw the first part away
+		// Set the content-type
+		this.contentType = HTTPMimeType.MIME_JSON;
+		this.httpStatus = HttpStatus.SC_BAD_REQUEST;
 
-		if (tokenizedUri.hasMoreTokens()) {
+		// Create the JSON object to represent the response
+		JSONObject body = new JSONObject();
+		body.put("status", STATUS_FAILED);
 
-			UserManager um = UserManager.getInstance();
+		UserManager um = UserManager.getInstance();
 
-			String method = tokenizedUri.nextToken();
+		try {
+			// Convert the request into a JSON object
+			JSONObject jsonRequest = (JSONObject) JSONValue.parse(data);
 
-			Gson gson = new Gson();
-			Hashtable hasht = gson.fromJson(data, Hashtable.class);
-
-			if (hasht == null) {
-				// We don't have any data, go ahead and fail
-				this.httpStatus = HttpStatus.SC_BAD_REQUEST;
-			} else if (method.equals("register")) {
+			if (uriSegments.get(1).equals("register")) {
 				// Register a new user
-				if (hasht.containsKey("username") && hasht.containsKey("password")) {
-					User newUser = new User((String) hasht.get("username"),
-							(String) hasht.get("password"));
+				if (jsonRequest.containsKey("username") && jsonRequest.containsKey("password")) {
+					User newUser = new User((String) jsonRequest.get("username"),
+							(String) jsonRequest.get("password"));
 
 					int result = um.registerUser(newUser);
 
-					body = "{\"status\":" + result + "}";
+					body.put("status", result);
 				}
 				this.httpStatus = HttpStatus.SC_OK;
-			} else {
-				this.httpStatus = HttpStatus.SC_BAD_REQUEST;
 			}
+
+		} catch (Exception e) {
+
 		}
-		return body;
+
+		return body.toString();
 	}
 }

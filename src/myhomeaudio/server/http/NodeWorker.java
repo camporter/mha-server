@@ -47,7 +47,7 @@ import myhomeaudio.server.songs.SongFiles;
  * @author Cameron
  * 
  */
-public class NodeWorker extends Thread implements HTTPStatus, HTTPMimeType, NodeCommands {
+public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 
 	int command = -1;
 	String ipAddress;

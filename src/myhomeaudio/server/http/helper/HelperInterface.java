@@ -1,7 +1,9 @@
 package myhomeaudio.server.http.helper;
 
+import java.util.ArrayList;
+
 /**
- * Helper Interface defines the basic operations of each helper
+ * Defines the basic operations of a helper.
  * 
  * @author Cameron
  * 
@@ -13,5 +15,5 @@ public interface HelperInterface {
 	 * 
 	 * @return The HTTP output to be sent back to the client.
 	 */
-	public String getOutput(String uri, String data);
+	public String getOutput(ArrayList<String> uriSegments, String data);
 }
