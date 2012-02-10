@@ -51,7 +51,8 @@ public class NodeClient {
 
 	protected static int serverPort = 9090;
 	protected static int nodePort = 9091;
-	protected static String host = "192.168.10.102";
+	//protected static String host = "192.168.10.102";
+	protected static String host = "156.26.189.235";
 
 	public static void main(String[] args) {
 		System.out.println("Starting...");
