@@ -48,10 +48,12 @@ public class NodeManager implements NodeCommands {
 	}
 
 	/**
-	 * Sends commands from the server the node
+	 * Sends commands from the server to the node
 	 * 
 	 * @param command
-	 *            The command the server wants to send to the node
+	 *            The command the server wants to send to the node\
+	 * @param ipAddress
+	 *            The IP address of the node to send the command to
 	 * @param data
 	 *            Necessary data the node would need to execute the command
 	 */
@@ -64,13 +66,21 @@ public class NodeManager implements NodeCommands {
 	}
 
 	/**
-	 * 
-	 * @return nodeCount Number of nodes under NodeManager management
+	 * Returns the current number of nodes under NodeManager management
+	 * @return nodeCount
+	 * 	 		Number of nodes
 	 */
 	public synchronized int getNodeCount() {
 		return nodeCount;
 	}
 
+	/**
+	 * Verifies that a node with the given name exists within the node manager
+	 * 
+	 * @param bluetoothName
+	 * 			Name of the node 			
+	 * @return True if the node exists
+	 */
 	public boolean isValidNode(String bluetoothName) {
 		for (Node node : this.nodeList) {
 			if (node.getName().equals(bluetoothName)) {
@@ -85,9 +95,9 @@ public class NodeManager implements NodeCommands {
 	 * Get a Node object with the given IP address
 	 * 
 	 * @param ipAddress
-	 *            The IP address of the node to return.
-	 * @return The Node with the corresponding IP. If no nodes match, return
-	 *         null.
+	 *          The IP address of the node to return.
+	 * @return The node with the corresponding IP. Returns null if no node with the
+	 * 			corresponding IP address is found.
 	 */
 	public Node getNodeByIpAddress(String ipAddress) {
 		for (Node item : nodeList) {
@@ -98,7 +108,15 @@ public class NodeManager implements NodeCommands {
 		return null;
 	}
 
+	/**
+	 * Get aNode object with the given node name
+	 *  
+	 * @param name
+	 * 			The name of the node to be searched for.
+	 * @return The node with the matching name. Returns null if not node is found.
+	 */
 	public Node getNodeByName(String name) {
+		//loops through nodeList loooking for node with matching name
 		for (Node item : nodeList) {
 			if (item.getName().equals(name)) {
 				return item;
@@ -107,3 +125,4 @@ public class NodeManager implements NodeCommands {
 		return null;
 	}
 }
+
