@@ -10,7 +10,7 @@ import myhomeaudio.server.user.User;
  */
 public class Client {
 	
-	private String macAddress; 
+	private String macAddress;
 	private String ipAddress;
 	private String bluetoothName;
 	private User user;
