@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Locale;
+
+import myhomeaudio.server.discovery.DiscoverySearch;
+
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -42,8 +45,7 @@ public class NodeClient {
 
 	protected static int serverPort = 9090;
 	protected static int nodePort = 9091;
-	//protected static String host = "192.168.10.102";
-	protected static String host = "156.26.189.235";
+	protected static String host = "";
 
 	public static void main(String[] args) {
 		System.out.println("Starting...");
@@ -56,8 +58,17 @@ public class NodeClient {
 			System.err.println("A Node name must be provided!");
 			// System.exit(1);
 		}
-
-		doServerDiscovery();
+		
+		// Do the server discovery 
+		ServerDiscovery sd = new ServerDiscovery();
+		if (!sd.doDiscovery()) {
+			System.err.println("Unable to discover server.");
+			System.exit(1);
+		}
+		
+		host = sd.getAddress().getHostAddress();
+		serverPort = sd.getPort();
+		
 		try {
 			ServerSocket nodeSocket = new ServerSocket(NodeClient.nodePort);
 
@@ -100,23 +111,6 @@ public class NodeClient {
 					connection.shutdown();
 				}
 			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static void doServerDiscovery() {
-		try {
-			System.out.println("Discovering server...");
-			Socket serverDiscovery = new Socket(NodeClient.host, NodeClient.serverPort);
-			try {
-				Thread.sleep(250);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			serverDiscovery.close();
-			System.out.println("Server discovery complete.");
 
 		} catch (IOException e) {
 			e.printStackTrace();

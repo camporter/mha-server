@@ -16,11 +16,11 @@ import javax.jmdns.JmmDNS;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.impl.JmmDNSImpl;
 
-public class DiscoveryService extends Thread {
+public class MDNSDiscoveryService extends Thread {
 
 	public static final String DISCOVERY_TYPE = "_myhomeaudio._tcp.local.";
 
-	public DiscoveryService() {
+	public MDNSDiscoveryService() {
 
 	}
 	
