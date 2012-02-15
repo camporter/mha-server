@@ -67,7 +67,7 @@ public class NodeClient {
 		}
 		
 		host = sd.getAddress().getHostAddress();
-		serverPort = sd.getPort();
+		serverPort = sd.getNodePort();
 		
 		try {
 			ServerSocket nodeSocket = new ServerSocket(NodeClient.nodePort);

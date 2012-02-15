@@ -192,9 +192,9 @@ public final class DiscoverySearch implements Runnable {
 
 		StringTokenizer tokens = new StringTokenizer(dataStr.substring(15 + getEncodedServiceName()
 				.length()));
-		if (tokens.countTokens() == 3) {
+		if (tokens.countTokens() == 4) {
 			return DiscoveryDescription.parse(tokens.nextToken(), tokens.nextToken(),
-					tokens.nextToken());
+					tokens.nextToken(), tokens.nextToken());
 		} else {
 			return null;
 		}

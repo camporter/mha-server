@@ -15,10 +15,10 @@ import myhomeaudio.server.manager.UserManager;
 /**
  * Entry point for the My Home Audio Server.
  * 
- * We create a number of different threads from this class, which manage 
+ * We create a number of different threads from this class, which manage
  * 
  * @author Cameron
- *
+ * 
  */
 public class Server {
 
@@ -27,9 +27,9 @@ public class Server {
 	// port that clients (phones) will open a socket on
 	protected static int CLIENT_PORT = 8080;
 
-	static NodeHandler nodeHandler;
-	static ClientHandler clientHandler;
-	static MDNSDiscoveryService discoveryService;
+	protected static NodeHandler nodeHandler;
+	protected static ClientHandler clientHandler;
+	protected static DiscoveryResponder discoveryResponder;
 
 	/**
 	 * @param args
@@ -43,11 +43,11 @@ public class Server {
 		// Create an instance of the ClientManager object, which keeps track of
 		// clients
 		ClientManager cm = ClientManager.getInstance();
-		
+
 		UserManager um = UserManager.getInstance();
 
-		//SongFiles songs = SongFiles.getInstance();
-		//songs.populateSongList();
+		// SongFiles songs = SongFiles.getInstance();
+		// songs.populateSongList();
 
 		// Handles node requests
 		System.out.println("*** Starting Node Handler...");
@@ -56,49 +56,49 @@ public class Server {
 		// Handles client requests (android or iphone)
 		System.out.println("*** Starting Client Handler...");
 		startClientHandler();
-		
-		//startDiscoveryService();
-		startNodeDiscoveryService();
+
+		// startDiscoveryService();
+		startDiscoveryService();
 
 		while (true) {
 			try {
 				// Checks that threads are still alive every so often
 				Thread.sleep(10000);
 				if (!nodeHandler.isAlive()) {
-					System.out.println("Node Handler Thread Dead !");
+					System.err.println("Node Handler Thread Dead !");
 					System.out.println("Attempting to restart NodeHandler..");
 					startNodeHandler();
 				}
 				if (!clientHandler.isAlive()) {
-					System.out.println("Client Handler Thread Dead !");
+					System.err.println("Client Handler Thread Dead !");
 					System.out.println("Unable to listen for new clients");
 					startClientHandler();
 				}
-				/*if (!discoveryService.isAlive()) {
-					System.out.println("Discovery Service Thread Dead !");
-					System.out.println("Attempting to restart MDNSDiscoveryService...");
-					startDiscoveryService();
-				}*/
+				if (!discoveryResponder.isAlive()) {
+					System.err.println("Discovery Thread Dead !");
+					System.out.println("Attempting to restart discovery...");
+					discoveryResponder.startResponder();
+				}
 			} catch (InterruptedException e) {
-				System.out.println("Exception: Server Exiting");
+				System.err.println("Exception: Server Exiting");
 				System.exit(0);
 			}
 		}
 	}
 
-	private static void startNodeDiscoveryService() {
+	private static void startDiscoveryService() {
 		try {
-			DiscoveryDescription descriptor = new DiscoveryDescription();
-			descriptor.setAddress(InetAddress.getLocalHost());
-			descriptor.setPort(NODE_PORT);
-			descriptor.setInstanceName("myhomeaudioinstance");
-			
-			DiscoveryResponder responder = new DiscoveryResponder("myhomeaudio");
-			responder.setDescriptor(descriptor);
-			responder.addShutdownHandler();
-			responder.startResponder();
+			System.out.println("** Starting discovery services...");
+			DiscoveryDescription descriptor = new DiscoveryDescription("myhomeaudio", CLIENT_PORT,
+					NODE_PORT, InetAddress.getLocalHost());
+			discoveryResponder = new DiscoveryResponder("myhomeaudio", descriptor);
+			discoveryResponder.addShutdownHandler();
+			discoveryResponder.startResponder();
+
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
+			System.err.println("Exception: Unable to determine IP Address!");
+			System.exit(1);
 		}
 	}
 
@@ -119,10 +119,10 @@ public class Server {
 		clientHandler.setName("ClientHandler");
 		clientHandler.start();
 	}
-	
-	public static void startDiscoveryService() {
-		discoveryService = new MDNSDiscoveryService();
-		discoveryService.setName("MDNSDiscoveryService");
-		discoveryService.start();
-	}
+
+	/*
+	 * public static void startDiscoveryService() { discoveryService = new
+	 * MDNSDiscoveryService(); discoveryService.setName("MDNSDiscoveryService");
+	 * discoveryService.start(); }
+	 */
 }

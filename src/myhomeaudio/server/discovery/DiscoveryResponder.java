@@ -32,8 +32,9 @@ public final class DiscoveryResponder implements Runnable {
 	protected DatagramPacket receivedPacket;
 	protected Thread responderThread;
 
-	public DiscoveryResponder(String serviceName) {
+	public DiscoveryResponder(String serviceName, DiscoveryDescription descriptor) {
 		this.serviceName = serviceName;
+		this.descriptor = descriptor;
 		try {
 			socket = new MulticastSocket(multicastPort);
 			socket.joinGroup(multicastAddress);
@@ -43,9 +44,9 @@ public final class DiscoveryResponder implements Runnable {
 			ioe.printStackTrace();
 		}
 	}
-
-	public void setDescriptor(DiscoveryDescription descriptor) {
-		this.descriptor = descriptor;
+	
+	public boolean isAlive() {
+		return continueThread;
 	}
 
 	public String getServiceName() {
@@ -58,10 +59,6 @@ public final class DiscoveryResponder implements Runnable {
 		} catch (UnsupportedEncodingException uee) {
 			return null;
 		}
-	}
-
-	public void setServiceName(String serviceName) {
-		this.serviceName = serviceName;
 	}
 
 	public void startResponder() {

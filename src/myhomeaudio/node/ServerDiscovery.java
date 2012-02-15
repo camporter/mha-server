@@ -40,9 +40,9 @@ public class ServerDiscovery implements DiscoverySearchListener {
 		}
 	}
 	
-	public int getPort() {
+	public int getNodePort() {
 		if (descriptor != null)
-			return descriptor.getPort();
+			return descriptor.getNodePort();
 		else
 			return -1;
 	}
