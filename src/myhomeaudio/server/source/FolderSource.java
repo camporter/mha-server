@@ -44,6 +44,12 @@ public class FolderSource extends BaseSource implements Source {
 		return null;
 	}
 	
+	/**
+	 * Loads media file data into a byte array
+	 * 
+	 * @param mediaFileName File of media file to open
+	 * @return Byte array of the media data
+	 */
 	public byte[] getMediaData(String mediaFileName) {
 		try {
 			File mediaFile = new File(folderLocation + mediaFileName);
