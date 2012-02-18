@@ -1,7 +1,10 @@
 package myhomeaudio.server.source.youtube;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import myhomeaudio.server.source.BaseSource;
@@ -14,9 +17,19 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * YouTube Interface for aggregation and compilation
+ * 
+ * Usage: 
+ * 	1. Set search criteria or leave default ie maxResults, orderBy, or exactMatch
+ * 	2. Call feedSearch() with search terms
+ * 	3. Call getMediaList() to retrieve results
+ * 
  * @author Ryan
  *
  */
@@ -24,9 +37,12 @@ public class YouTubeSource extends BaseSource implements Source {
 	private static final String baseUri = "http://gdata.youtube.com/feeds/api/videos?";
 	private static final String alt = "json";
 	
-	private int maxResults = 5;
+	private String searchTerms = null;
+	private int maxResults = 1;
 	private String orderBy = OrderBy.RELEVANCE;
 	private boolean exactMatch = false; //for determining to include quotations around search terms
+	
+	private JSONArray searchResults;
 	
 
 	/**
@@ -34,35 +50,18 @@ public class YouTubeSource extends BaseSource implements Source {
 	 */
 	//TODO Youtube only necessary for streaming audio or allow users to login to their account
 	public YouTubeSource(){
+		searchResults = new JSONArray();
 	}
 	
 
-	public int feedSearch(String terms){
-		
-		System.out.println("Generating YouTube URL");
-		
-		//Format Search Terms to be URL friendly
-		terms.replace('\"','\0');
-		terms = terms.replace(' ', '+');
-		
-		if(exactMatch){
-			terms = "%22" + terms + "%22"; //exact search
+	public void feedSearch(String terms){
+		//Checks that search terms not null
+		if(terms.isEmpty()){
+			return;
 		}
 		
-		//Construct YouTube request uri
-		String uri = baseUri;
-		
-		//Appends Search Terms
-		uri += "q=" + terms;
-		
-		//Appends OrderBy Parameter
-		uri += "&orderby=" + orderBy;
-		
-		//Appends Max Results Return
-		uri += "&max-results=" + maxResults;
-		
-		//Appends Alt Parameter
-		uri += "&alt=" + alt;
+		searchTerms = terms;
+		String uri = generateUri();
 		
 		System.out.println("Fetching Feed From:");
 		System.out.println(uri);
@@ -75,18 +74,114 @@ public class YouTubeSource extends BaseSource implements Source {
 			HttpEntity entity = response.getEntity();
 			if(entity != null){
 				String result = EntityUtils.toString(entity);
-				System.out.println("Success: Results Returned");
-				System.out.println(result);
+				parseJSON(result);
+
 			}
 		} catch (ClientProtocolException e) {
-			System.out.println("Failure: No Results Returned");
+			System.out.println("Failure: " + e.getMessage());
 		} catch (IOException e) {
-			System.out.println("Failure: No Results Returned");
+			System.out.println("Failure: " + e.getMessage());
 		}
 
-		return 0;
+		return;
 	}
 
+	private void parseJSON(String result){
+		JSONParser jParse = new JSONParser();
+		JSONObject returnedResults=  new JSONObject();
+		JSONObject jResults = new JSONObject();
+		try {
+			returnedResults = (JSONObject)jParse.parse(result);
+			
+			/* Keys from initial JSON Object
+			 * logo = .gif, link = schemas, openSearch$totalResults = int value of totalResults
+			 * xmlns$media = yahoo.com/mrss, xmlns = w3.org/2005/atom, xmlns$app = atom/app
+			 * id = feeds/api/videos, xmlns$openSearch = spec/opensearchrss/1.0/, author = youtube
+			 * xmlns$gd = schemas.google.com/g/2005, category = scheme, title = query term match
+			 * openSearch$startIndex = start index, updated = timestamp, xmlns$yt = gdata.youtube.com/schemas
+			 * openSearch$itemsPerPage = number of items per page, generator = data api
+			 * 
+			 */
+			
+			//Parses feed key from json
+			//Result Entry data returned within feed.entry JSONArray
+			returnedResults = (JSONObject)returnedResults.get("feed");
+			System.out.println(returnedResults.keySet().toString());
+			JSONArray entryResults = (JSONArray)returnedResults.get("entry");
+			
+			//Creates an array of entries
+			// = (JSONArray)jParse.parse(returnedResults.toString());
+			
+			/* Keys from feed.entry
+			 * app$control = syndication and restriction, link = some link, yt$statistics = counts, id = gdata/feeds/api stuff
+			 * author = uploaders, category = schema, updated = timestamp
+			 * gd$rating = #raters and rating, published = published date, gd$comments = countHits, title = title
+			 * media$group has some information
+			 * 
+			 */
+			
+			System.out.println(((JSONObject)(entryResults.get(0))).keySet().toString());
+			
+
+	 
+			
+
+			
+			//logo, link, openSearch$totalResults, xmlns$media, xmlns, xmlns$app, id, 
+			//xmlns$openSearch, author, xmlns$gd, category, title, openSearch$startIndex, 
+			//updated, xmlns$yt, openSearch$itemsPerPage, entry, generator]
+			
+			
+			//System.out.println("has href?" + w.containsValue("url"));
+			//System.out.println("has href?" + w2.containsValue("href"));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return;
+		
+	}
+	private String generateUri(){
+		System.out.println("Generating YouTube URL");
+		
+		//Construct YouTube request uri
+		String uri = baseUri;
+		
+		//Appends Search Terms
+		uri += "q=" + formatSearchTerms();
+		
+		//Appends OrderBy Parameter
+		uri += "&orderby=" + orderBy;
+		
+		//Appends Max Results Return
+		uri += "&max-results=" + maxResults;
+		
+		//Appends Alt Parameter
+		uri += "&alt=" + alt;
+		
+		return uri;
+	}
+	
+	
+	private String formatSearchTerms(){
+		//Format Search Terms to be URL friendly
+		//Reserved chars : / ? # [ ] @ ! $ & ' ( ) * + , ; =
+		//Unreserved chars  ALPHA DIGIT - . _ ~
+
+		char[] reserved = ":/?#[]@!$&'()*+,;=".toCharArray();
+		for(char i : reserved){
+			searchTerms.replace(i, '\0');
+		}
+		searchTerms = searchTerms.replace(' ', '+');
+		
+		if(exactMatch){
+			searchTerms = "%22" + searchTerms + "%22"; //exact search
+		}
+		return searchTerms;
+	}
+	
+	
 	
 	@Override
 	public ArrayList<String> getMediaList() {
