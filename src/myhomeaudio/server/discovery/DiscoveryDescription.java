@@ -6,6 +6,15 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 
+/**
+ * Stores and provides the information that represents a server's presence on
+ * the network. Since the node and clients need to know the IP address of the
+ * server and which ports are used for communication, we include that data in
+ * this object to be transmitted.
+ * 
+ * @author Cameron
+ * 
+ */
 public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 
 	private String instanceName;
@@ -13,13 +22,14 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 	private int nodePort;
 	private InetAddress address;
 
-	public DiscoveryDescription(String instanceName, int clientPort, int nodePort, InetAddress address) {
+	public DiscoveryDescription(String instanceName, int clientPort, int nodePort,
+			InetAddress address) {
 		this.instanceName = instanceName;
 		this.clientPort = clientPort;
 		this.nodePort = nodePort;
 		this.address = address;
 	}
-	
+
 	public DiscoveryDescription() {
 	}
 
@@ -39,6 +49,12 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 		this.instanceName = serviceDescription;
 	}
 
+	/**
+	 * Makes the string URl encoded, which makes it easier to deal with in
+	 * transit.
+	 * 
+	 * @return
+	 */
 	protected String getEncodedInstanceName() {
 		try {
 			return URLEncoder.encode(getInstanceName(), "UTF-8");
@@ -46,10 +62,21 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 			return null;
 		}
 	}
-	
+
+	/**
+	 * Gets the port that clients should make requests to.
+	 * 
+	 * @return
+	 */
 	public int getClientPort() {
 		return clientPort;
 	}
+
+	/**
+	 * Gets the port that nodes should make requests to.
+	 * 
+	 * @return
+	 */
 	public int getNodePort() {
 		return nodePort;
 	}
@@ -57,14 +84,17 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 	public void setClientPort(int clientPort) {
 		this.clientPort = clientPort;
 	}
+
 	public void setNodePort(int nodePort) {
 		this.nodePort = nodePort;
 	}
-	
+
 	/**
-	 * Get the string representation of the description.
+	 * Get the string representation of the description. When we want to
+	 * transmit this data to another client or node, we send it in the format
+	 * defined by this method.
 	 * 
-	 * @return Concatenated string with all the properties.
+	 * @return Concatenated string with all of the description's properties.
 	 */
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
@@ -104,6 +134,23 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 		return getInstanceName().compareTo(sd.getInstanceName());
 	}
 
+	/**
+	 * When we get a packet that should contain the string-based properties
+	 * included in a DiscoveryDescription object, we make sure that it follows
+	 * the same format used in the toString method.
+	 * 
+	 * @param encodedInstanceName
+	 *            Instance name for the server that is URL encoded.
+	 * @param addressAsString
+	 *            The IP address of the server.
+	 * @param clientPortAsString
+	 *            The client port for the server.
+	 * @param nodePortAsString
+	 *            The node port for the server.
+	 * @return A new DiscoveryDescription object that represents the data from
+	 *         the given strings.
+	 * @see DiscoveryDescription#toString()
+	 */
 	public static DiscoveryDescription parse(String encodedInstanceName, String addressAsString,
 			String clientPortAsString, String nodePortAsString) {
 

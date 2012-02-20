@@ -52,75 +52,76 @@ import org.json.simple.parser.JSONParser;
 
 /**
  * YouTube Interface for aggregation and compilation
+ * 
  * @author Ryan
- *
+ * 
  */
 public class YouTubeSource extends BaseSource implements Source {
+
 	private String baseUri = "http://gdata.youtube.com/feeds/api/videos?";
 	private int maxResults = 5;
 	private String orderBy = "relevance";
 	private String alt = "json";
-	
+
 	String ipAddress;
-	
 
 	/**
 	 * Constructor for YouTube source
 	 */
-	//TODO Youtube only necessary for streaming audio or allow users to login to their account
-	public YouTubeSource(){
-		 try{
-			  InetAddress ownIP=InetAddress.getLocalHost();
-			  ipAddress = ownIP.getHostAddress();
-			  System.out.println("IP of my system is = " + ipAddress);
-			  }catch (Exception e){
-			  System.out.println("Exception caught ="+e.getMessage());
-			  }
+	// TODO Youtube only necessary for streaming audio or allow users to login
+	// to their account
+	public YouTubeSource() {
+		try {
+			InetAddress ownIP = InetAddress.getLocalHost();
+			ipAddress = ownIP.getHostAddress();
+			System.out.println("IP of my system is = " + ipAddress);
+		} catch (Exception e) {
+			System.out.println("Exception caught =" + e.getMessage());
+		}
 	}
-	
-	public int feedSearch(String terms){
-		
+
+	public int feedSearch(String terms) {
+
 		// Set the content-type
 		String contentType = HTTPMimeType.MIME_JSON;
 		int httpStatus = HttpStatus.SC_BAD_REQUEST;
-		
+
 		System.out.println(terms);
-		terms.replace('\"','\0');
+		terms.replace('\"', '\0');
 		System.out.println(terms);
 		StringTokenizer tokenizer = new StringTokenizer(terms);
 		terms = terms.replace(' ', '+');
 		System.out.println(terms);
-		terms = "%22" + terms + "%22"; //exact search
+		terms = "%22" + terms + "%22"; // exact search
 		System.out.println(terms);
-	
-		
-		//Construct YouTube request uri
+
+		// Construct YouTube request uri
 		String uri = baseUri;
-		
-		//Appends Search Terms
+
+		// Appends Search Terms
 		uri += "q=" + terms;
-		
-		//Appends OrderBy Parameter
+
+		// Appends OrderBy Parameter
 		uri += "&orderby=" + orderBy;
-		
-		//Appends Max Results Return
+
+		// Appends Max Results Return
 		uri += "&max-results=" + maxResults;
-		
-		//Appends Alt Parameter
+
+		// Appends Alt Parameter
 		uri += "&alt=" + alt;
-		
+
 		System.out.println(uri);
-		
+
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpGet httpget = new HttpGet(uri);
 
-        try {
+		try {
 			HttpResponse response = httpClient.execute(httpget);
 			HttpEntity entity = response.getEntity();
-			if(entity != null){
+			if (entity != null) {
 				String result = EntityUtils.toString(entity);
-				JSONArray jArray = new JSONArray();			
-				
+				JSONArray jArray = new JSONArray();
+
 				System.out.println(result);
 			}
 		} catch (ClientProtocolException e) {
@@ -131,39 +132,36 @@ public class YouTubeSource extends BaseSource implements Source {
 			e.printStackTrace();
 		}
 
-		
-		
-
 		return 0;
 	}
-	
-	public static String convertInputStreamToString(InputStream inStream){
+
+	public static String convertInputStreamToString(InputStream inStream) {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
 		StringBuilder sb = new StringBuilder();
-		
+
 		String line = null;
-		try{
-			while((line = reader.readLine()) != null){
-				sb.append(line+"\n");
+		try {
+			while ((line = reader.readLine()) != null) {
+				sb.append(line + "\n");
 			}
-		}catch(IOException e){
+		} catch (IOException e) {
 			System.err.println(e.getMessage());
-		
-		} finally{
-			try{
+
+		} finally {
+			try {
 				inStream.close();
-			}catch(IOException e){
+			} catch (IOException e) {
 				System.err.println(e.getMessage());
 			}
 		}
 		return sb.toString();
 	}
-	
+
 	@Override
 	public ArrayList<String> getMediaList() {
 		ArrayList<String> mediaList = new ArrayList<String>();
 		File folder = null;
-		
+
 		for (String mediaFileName : folder.list()) {
 			mediaList.add(mediaFileName);
 		}

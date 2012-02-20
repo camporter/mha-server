@@ -9,6 +9,13 @@ import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 
+/**
+ * This Runnable responds to discovery searches with replies and the description
+ * of the server's important information, stored in a DiscoveryDescription. 
+ * 
+ * @author Cameron
+ * 
+ */
 public final class DiscoveryResponder implements Runnable {
 
 	protected static InetAddress multicastAddress;
@@ -44,7 +51,7 @@ public final class DiscoveryResponder implements Runnable {
 			ioe.printStackTrace();
 		}
 	}
-	
+
 	public boolean isAlive() {
 		return continueThread;
 	}
