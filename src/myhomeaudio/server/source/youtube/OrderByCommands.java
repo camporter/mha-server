@@ -1,6 +1,6 @@
 package myhomeaudio.server.source.youtube;
 
-public interface OrderBy {
+public interface OrderByCommands {
 		public static final String RELEVANCE = "relevance";
 		public static final String PUBLISHED = "published";
 		public static final String VIEW_COUNT = "viewCount";

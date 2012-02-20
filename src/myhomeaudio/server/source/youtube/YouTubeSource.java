@@ -38,11 +38,11 @@ public class YouTubeSource extends BaseSource implements Source {
 	private static final String alt = "json";
 	
 	private String searchTerms = null;
-	private int maxResults = 1;
-	private String orderBy = OrderBy.RELEVANCE;
+	private int maxResults = 5;
+	private String orderBy = OrderByCommands.RELEVANCE;
 	private boolean exactMatch = false; //for determining to include quotations around search terms
 	
-	private JSONArray searchResults;
+	ArrayList<VideoMetaData> resultsArray;
 	
 
 	/**
@@ -50,7 +50,8 @@ public class YouTubeSource extends BaseSource implements Source {
 	 */
 	//TODO Youtube only necessary for streaming audio or allow users to login to their account
 	public YouTubeSource(){
-		searchResults = new JSONArray();
+		resultsArray = new ArrayList<VideoMetaData>();
+
 	}
 	
 
@@ -89,7 +90,7 @@ public class YouTubeSource extends BaseSource implements Source {
 	private void parseJSON(String result){
 		JSONParser jParse = new JSONParser();
 		JSONObject returnedResults=  new JSONObject();
-		JSONObject jResults = new JSONObject();
+
 		try {
 			returnedResults = (JSONObject)jParse.parse(result);
 			
@@ -106,7 +107,7 @@ public class YouTubeSource extends BaseSource implements Source {
 			//Parses feed key from json
 			//Result Entry data returned within feed.entry JSONArray
 			returnedResults = (JSONObject)returnedResults.get("feed");
-			System.out.println(returnedResults.keySet().toString());
+			//System.out.println(returnedResults.keySet().toString());
 			JSONArray entryResults = (JSONArray)returnedResults.get("entry");
 			
 			//Creates an array of entries
@@ -120,20 +121,15 @@ public class YouTubeSource extends BaseSource implements Source {
 			 * 
 			 */
 			
-			System.out.println(((JSONObject)(entryResults.get(0))).keySet().toString());
 			
-
-	 
-			
-
-			
-			//logo, link, openSearch$totalResults, xmlns$media, xmlns, xmlns$app, id, 
-			//xmlns$openSearch, author, xmlns$gd, category, title, openSearch$startIndex, 
-			//updated, xmlns$yt, openSearch$itemsPerPage, entry, generator]
+			for(int i = 0; i < maxResults; i++){
+				VideoMetaData mediaResult = new VideoMetaData((JSONObject)entryResults.get(i));
+				this.resultsArray.add(mediaResult);
+				//System.out.println(i + " " + mediaResult.toString());
+				
+			}
 			
 			
-			//System.out.println("has href?" + w.containsValue("url"));
-			//System.out.println("has href?" + w2.containsValue("href"));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
