@@ -55,7 +55,12 @@ public class YouTubeSource extends BaseSource implements Source {
 
 	}
 	
-
+	/**
+	 * feedSearch()
+	 * 	Searches youtube for results using the given search terms
+	 * 
+	 * @param terms Youtube video search terms
+	 */
 	public void feedSearch(String terms){
 		//Checks that search terms not null
 		if(terms.isEmpty()){
@@ -63,7 +68,7 @@ public class YouTubeSource extends BaseSource implements Source {
 		}
 		
 		searchTerms = terms;
-		String url = generateUrl();
+		String url = generateUrl();//constructs search url
 		
 		System.out.println("Fetching Feed From:");
 		System.out.println(url);
@@ -72,12 +77,16 @@ public class YouTubeSource extends BaseSource implements Source {
 		HttpGet httpget = new HttpGet(url);
 
         try {
-			HttpResponse response = httpClient.execute(httpget);
+			HttpResponse response = httpClient.execute(httpget);//executes url and waits for response
 			HttpEntity entity = response.getEntity();
+			
+			//checks response is not empty
 			if(entity != null){
 				parseJsoncResponse(EntityUtils.toString(entity));
 
 			}
+			
+
 		} catch (ClientProtocolException e) {
 			System.out.println("Failure: " + e.getMessage());
 		} catch (IOException e) {
@@ -87,6 +96,11 @@ public class YouTubeSource extends BaseSource implements Source {
 		return;
 	}
 
+	/**
+	 * parseJsoncResponse()
+	 * 
+	 * @param result JSONC response string returned by youtube
+	 */
 	private void parseJsoncResponse(String result){
 		try{
 			resultsObject  = new ResponseMetaData(result);
@@ -115,7 +129,7 @@ public class YouTubeSource extends BaseSource implements Source {
 			url += "&orderby=" + orderBy;
 		}
 		
-		//Appends Max Results Return
+		//Appends Max Results Returned
 		if(maxResults != 0){
 			url += "&max-results=" + maxResults;
 		}
@@ -132,9 +146,8 @@ public class YouTubeSource extends BaseSource implements Source {
 		//Reserved chars : / ? # [ ] @ ! $ & ' ( ) * + , ; =
 		//Unreserved chars  ALPHA DIGIT - . _ ~
 
+		//Illegal characters for url
 		char[] reserved = ":/?#[]@!$&'()*+,;=%^[]\\|".toCharArray();
-		//System.out.println(searchTerms);
-		//System.out.println(searchTerms.replaceAll("^[a-zA-Z0-9]*$", "e"));
 		
 		//Exchanges illegal url characters for spaces
 		for(char i : reserved){
@@ -150,8 +163,10 @@ public class YouTubeSource extends BaseSource implements Source {
 		
 		//Converts spaces into search appending '+'
 		searchTerms = searchTerms.replace(' ', '+');
-		System.out.println(searchTerms);
 		
+		//System.out.println(searchTerms);
+		
+		//If exact match search, append \" or %22 to beginning and end of string
 		if(exactMatch){
 			searchTerms = "%22" + searchTerms + "%22"; //exact search
 		}

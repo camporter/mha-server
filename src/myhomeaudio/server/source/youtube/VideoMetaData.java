@@ -30,20 +30,37 @@ public class VideoMetaData {
 	
 	private String jsonString = null;
 
+	/**
+	 * VideoMetaData
+	 * 	Default Constructor
+	 */
 	public VideoMetaData(){
 		
 	}
 	
+	/**
+	 * VideoMetaData Constructor
+	 * 
+	 * @param data JSONC string of data.items
+	 */
 	public VideoMetaData(String data){
 		this.jsonString = data;
 		this.tags = new ArrayList<String>();
 		parseJsoncObject();
 	}
 	
+	/**
+	 * parseJsoncObject
+	 * 
+	 * Parses the json data.items object and populates 
+	 * 	VideoMetaData field
+	 */
 	private void parseJsoncObject(){
 		JSONParser jParser = new JSONParser();
 		try {
 			JSONObject jData = (JSONObject)jParser.parse(jsonString);
+			
+			//Retrieves entry fields from object and sets class variables
 			this.id = jData.keySet().toString().contains("id") ? (String)jData.get("id") : id;
 			buildUrl();
 			this.uploaded = jData.keySet().toString().contains("uploaded") ? (String)jData.get("uploaded") : uploaded;
@@ -52,9 +69,11 @@ public class VideoMetaData {
 			this.category = jData.keySet().toString().contains("category") ? (String)jData.get("category") : category;
 			this.description = jData.keySet().toString().contains("description") ? (String)jData.get("description") : description;
 			
-			if(jData.keySet().toString().contains("tags")){
-				JSONArray jArray = (JSONArray)jData.get("tags");
 			
+			if(jData.keySet().toString().contains("tags")){
+				JSONArray jArray = (JSONArray)jData.get("tags");//create json array of tag results
+			
+				//Places each string tag into tags arrayList
 				for(int i = 0; i < jArray.size(); i++){
 					this.tags.add(jArray.get(i).toString());
 				}
@@ -67,12 +86,14 @@ public class VideoMetaData {
 				}
 			}
 
+			//checks that keyset contains thumbnail, then that subKeyset contains sqDefault
 			if(jData.keySet().toString().contains("thumbnail")){
 				if(((JSONObject)jData.get("thumbnail")).keySet().toString().contains("sqDefault")){
 					this.thumbnailMobileUrl = (String)((JSONObject)jData.get("thumbnail")).get("sqDefault");
 				}
 			}
 
+			//Retrieves the rest of the information from the jsonc object
 			this.duration = jData.keySet().toString().contains("duration") ? ResponseMetaData.parseInteger(jData.get("duration").toString()) : duration;
 			this.aspectRatio = jData.keySet().toString().contains("aspectRatio") ? (String)jData.get("aspectRatio") : aspectRatio;
 			this.likeCount = jData.keySet().toString().contains("likeCount") ? ResponseMetaData.parseInteger(jData.get("likeCount").toString()) : likeCount;
@@ -91,8 +112,15 @@ public class VideoMetaData {
 		}
 	}
 	
+	/**
+	 * buildUrl
+	 * 
+	 * Builds url of the video based on the video id
+	 * 
+	 */
 	private void buildUrl(){
 		String baseUrl = "http://www.youtube.com/watch?v=";
+		//String baseUrl = "http://www.youtube.com/get_video?video_id=";
 		this.url = baseUrl+id;
 		return;
 	}
