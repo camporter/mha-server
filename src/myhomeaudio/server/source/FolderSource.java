@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * @author Cameron
  * 
  */
-public class FolderSource extends BaseSource implements Source {
+public class FolderSource extends SourceBase implements Source {
 
 	protected String folderLocation;
 	protected File folder;

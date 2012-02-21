@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import myhomeaudio.server.source.BaseSource;
+import myhomeaudio.server.source.SourceBase;
 import myhomeaudio.server.source.Source;
 
 import org.apache.http.HttpEntity;
@@ -33,7 +33,7 @@ import org.json.simple.parser.ParseException;
  * @author Ryan
  *
  */
-public class YouTubeSource extends BaseSource implements Source {
+public class YouTubeSource extends SourceBase implements Source {
 	private static final String baseUri = "http://gdata.youtube.com/feeds/api/videos?";
 	private static final String alt = "json";
 	

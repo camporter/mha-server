@@ -4,6 +4,6 @@ package myhomeaudio.server.source;
  * 
  *
  */
-public abstract class BaseSource {
+public abstract class SourceBase {
 
 }
