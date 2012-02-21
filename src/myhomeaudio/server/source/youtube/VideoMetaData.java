@@ -1,5 +1,5 @@
 package myhomeaudio.server.source.youtube;
-
+//TODO need to check key is available
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -59,17 +59,24 @@ public class VideoMetaData {
 
 			this.thumbnailDefaultUrl = (String)((JSONObject)jData.get("thumbnail")).get("hqDefault");
 			this.thumbnailMobileUrl = (String)((JSONObject)jData.get("thumbnail")).get("sqDefault");
-			this.duration = Integer.parseInt(jData.get("duration").toString());
+			this.duration = ResponseMetaData.parseInteger(jData.get("duration").toString());
 			this.aspectRatio = (String)jData.get("aspectRatio");
-			this.likeCount = Integer.parseInt(jData.get("likeCount").toString());
-			this.rating = Double.parseDouble(jData.get("rating").toString());
-			this.ratingCount = Integer.parseInt(jData.get("ratingCount").toString());
-			this.viewCount = Integer.parseInt(jData.get("viewCount").toString());
-			this.favoriteCount = Integer.parseInt(jData.get("favoriteCount").toString());
-			this.commentCount = Integer.parseInt(jData.get("commentCount").toString());
+			this.likeCount = ResponseMetaData.parseInteger(jData.get("likeCount").toString());
+			this.rating = ResponseMetaData.parseDouble(jData.get("rating").toString());
+			this.ratingCount = ResponseMetaData.parseInteger(jData.get("ratingCount").toString());
+			this.viewCount = ResponseMetaData.parseInteger(jData.get("viewCount").toString());
+			this.favoriteCount = ResponseMetaData.parseInteger(jData.get("favoriteCount").toString());
+			//System.out.println("ddd");
+			System.out.println(jData.get("commentCount").toString());
+			//System.out.println("dqw");
+			this.commentCount = ResponseMetaData.parseInteger(jData.get("commentCount").toString());
+			
+			
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch(NumberFormatException e) {
+			e.getMessage();
 		}
 	}
 	
@@ -275,7 +282,7 @@ public class VideoMetaData {
 	/**
 	 * @param rating the rating to set
 	 */
-	public synchronized void setRating(float rating) {
+	public synchronized void setRating(double rating) {
 		this.rating = rating;
 	}
 
@@ -333,6 +340,20 @@ public class VideoMetaData {
 	 */
 	public synchronized void setCommentCount(int commentCount) {
 		this.commentCount = commentCount;
+	}
+
+	/**
+	 * @return the url
+	 */
+	public synchronized String getUrl() {
+		return url;
+	}
+
+	/**
+	 * @param url the url to set
+	 */
+	public synchronized void setUrl(String url) {
+		this.url = url;
 	}
 
 	/**

@@ -36,13 +36,14 @@ import org.json.simple.parser.ParseException;
 public class YouTubeSource extends BaseSource implements Source {
 	private static final String baseUrl = "http://gdata.youtube.com/feeds/api/videos?";
 	private static final String alt = "jsonc";
+	private static final double version = 2.1;
 	
 	private String searchTerms = null;
 	private int maxResults = 5;
 	private String orderBy = OrderByCommands.RELEVANCE;
-	private double version = 2.1;
 	private boolean exactMatch = false; //for determining to include quotations around search terms
 	
+	//Need to format in standard way as FolderSource
 	ResponseMetaData resultsObject = null;
 	
 
@@ -131,11 +132,25 @@ public class YouTubeSource extends BaseSource implements Source {
 		//Reserved chars : / ? # [ ] @ ! $ & ' ( ) * + , ; =
 		//Unreserved chars  ALPHA DIGIT - . _ ~
 
-		char[] reserved = ":/?#[]@!$&'()*+,;=".toCharArray();
+		char[] reserved = ":/?#[]@!$&'()*+,;=%^[]\\|".toCharArray();
+		//System.out.println(searchTerms);
+		//System.out.println(searchTerms.replaceAll("^[a-zA-Z0-9]*$", "e"));
+		
+		//Exchanges illegal url characters for spaces
 		for(char i : reserved){
-			searchTerms.replace(i, '\0');
+			//System.out.println(i+ " " + searchTerms);
+			searchTerms = searchTerms.replace(i, ' ');
 		}
+		
+		//Removes multiple consecutive spaces
+		for(int i=0; i < searchTerms.length(); i++){
+			//System.out.println(" " + searchTerms);
+			searchTerms = searchTerms.replace("  ", " ");
+		}
+		
+		//Converts spaces into search appending '+'
 		searchTerms = searchTerms.replace(' ', '+');
+		System.out.println(searchTerms);
 		
 		if(exactMatch){
 			searchTerms = "%22" + searchTerms + "%22"; //exact search
@@ -159,22 +174,30 @@ public class YouTubeSource extends BaseSource implements Source {
 	/**
 	 * @param maxResults the maxResults to set
 	 */
-	public void setMaxResults(int maxResults) {
+	public synchronized void setMaxResults(int maxResults) {
 		this.maxResults = maxResults;
 	}
 
 	/**
 	 * @param orderBy the orderBy to set
 	 */
-	public void setOrderBy(String orderBy) {
+	public synchronized void setOrderBy(String orderBy) {
 		this.orderBy = orderBy;
 	}
 
 	/**
 	 * @param exactMatch the exactMatch to set
 	 */
-	public void setExactMatch(boolean exactMatch) {
+	public synchronized void setExactMatch(boolean exactMatch) {
 		this.exactMatch = exactMatch;
+	}
+
+
+	/**
+	 * @return the resultsObject
+	 */
+	public synchronized ResponseMetaData getResultsObject() {
+		return resultsObject;
 	}
 
 }

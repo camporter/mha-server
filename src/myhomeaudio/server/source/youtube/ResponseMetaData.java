@@ -8,11 +8,12 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class ResponseMetaData {
-	String updated = null;
-	int totalItems = 0;
-	int startIndex = 0;
-	int itemsPerPage = 0;
-	ArrayList<VideoMetaData> items = new ArrayList<VideoMetaData>();
+	protected static final int INVALID = -1;
+	private String updated = null;
+	private int totalItems = -1;
+	private int startIndex = -1;
+	private int itemsPerPage = -1;
+	private ArrayList<VideoMetaData> items = new ArrayList<VideoMetaData>();
 	
 
 
@@ -41,9 +42,14 @@ public class ResponseMetaData {
 			
 			JSONObject data = (JSONObject)jObject.get("data");
 			this.updated = (String)data.get("updated");
-			this.totalItems = Integer.parseInt(data.get("totalItems").toString());
-			this.startIndex = Integer.parseInt(data.get("startIndex").toString());
-			this.itemsPerPage = Integer.parseInt(data.get("itemsPerPage").toString());
+			this.totalItems = parseInteger(data.get("totalItems").toString());
+			this.startIndex = parseInteger(data.get("startIndex").toString());
+			this.itemsPerPage = parseInteger(data.get("itemsPerPage").toString());
+			
+			if(totalItems == 0){
+				return;
+			}
+			
 			JSONArray jItemArray = (JSONArray)data.get("items");
 			
 			for(int i = 0; i < itemsPerPage; i++){
@@ -65,6 +71,24 @@ public class ResponseMetaData {
 				+ totalItems + ", startIndex=" + startIndex + ", itemsPerPage="
 				+ itemsPerPage + ", items=" + items + "]";
 	}
+	
+	protected static int parseInteger(String integer){
+		try{
+			System.out.println(integer);
+			return Integer.parseInt(integer);
+		}catch(NumberFormatException e){
+			return ResponseMetaData.INVALID;
+		}
+	}
+	
+	protected static double parseDouble(String integer){
+		try{
+			return Double.parseDouble(integer);
+		}catch(NumberFormatException e){
+			return ResponseMetaData.INVALID;
+		}
+	}
+	
 	/**
 	 * @return the updated
 	 */
