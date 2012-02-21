@@ -74,6 +74,10 @@ public class ClientHandler extends Thread {
 				new DefaultHttpResponseFactory(), httpRequestRegistry, this.httpParameters);
 	}
 
+	/**
+	 * Executes when the ClientHandler thread starts. Get the socket open that
+	 * we want to receive clients on, and setup an HTTP server.
+	 */
 	public void run() {
 
 		// Open the port we want to listen on

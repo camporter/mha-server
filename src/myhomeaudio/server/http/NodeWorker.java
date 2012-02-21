@@ -1,14 +1,10 @@
 package myhomeaudio.server.http;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
 import org.apache.http.ConnectionReuseStrategy;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequestInterceptor;
@@ -38,7 +34,6 @@ import org.apache.http.util.EntityUtils;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
-import myhomeaudio.server.songs.SongFiles;
 
 /**
  * NodeWorker is a thread that sends commands to nodes and receives
@@ -122,10 +117,12 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 
 			switch (command) {
 			case NODE_PLAY:
-				SongFiles s = SongFiles.getInstance(); // Gets song list
-				System.out.println("Playing song " + this.data + " to node...");
-				byte[] songData = s.getSongData(this.data); // Gets byte[] of
-															// mp3 data
+				// TODO: Fix for new stream stuff
+				// SongFiles s = SongFiles.getInstance(); // Gets song list
+				// System.out.println("Playing song " + this.data +
+				// " to node...");
+				byte[] songData = new byte[0];// s.getSongData(this.data); //
+												// Gets byte[] of mp3 data
 
 				postRequest = new BasicHttpEntityEnclosingRequest("POST", "play");
 				postRequest.setParams(httpParams);
@@ -141,14 +138,6 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 					e.printStackTrace();
 				}
 
-				/*
-				 * 
-				 * outputStream.writeBytes(HTTPHeader.buildRequest("POST",
-				 * "play", true, MIME_MP3, songData.length));//Puts songdata in
-				 * http request
-				 * 
-				 * outputStream.write(songData);
-				 */
 				break;
 
 			case NODE_PAUSE:

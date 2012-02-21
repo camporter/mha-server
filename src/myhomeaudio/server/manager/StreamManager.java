@@ -2,6 +2,7 @@ package myhomeaudio.server.manager;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -16,6 +17,8 @@ import myhomeaudio.server.stream.StreamBase;
  *
  */
 public class StreamManager implements StatusCode {
+	
+	// stream types: 0 dataStream, 1 otherStream
 	
 	private static StreamManager instance = null;
 	
@@ -54,6 +57,31 @@ public class StreamManager implements StatusCode {
 			e.printStackTrace();
 		}
 		this.db.unlock();
+		return result;
+	}
+	
+	private boolean updateStreamsFromDB() {
+		boolean result = false;
+		
+		this.db.lock();
+		Connection conn = this.db.getConnection();
+		try {
+			Statement statement = conn.createStatement();
+			
+			ResultSet streamResults = statement.executeQuery("SELECT * FROM streams;");
+			while (streamResults.next()) {
+				switch(streamResults.getInt("type")) {
+				case 0:
+				default:
+					break;
+				}
+				
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		this.db.unlock();
+		
 		return result;
 	}
 	

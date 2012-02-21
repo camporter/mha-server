@@ -10,7 +10,9 @@ import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.handler.NodeHandler;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
+import myhomeaudio.server.manager.StreamManager;
 import myhomeaudio.server.manager.UserManager;
+import myhomeaudio.server.stream.StreamThread;
 
 /**
  * Entry point for the My Home Audio Server.
@@ -30,6 +32,7 @@ public class Server {
 	protected static NodeHandler nodeHandler;
 	protected static ClientHandler clientHandler;
 	protected static DiscoveryResponder discoveryResponder;
+	protected static StreamThread streamThread;
 
 	/**
 	 * @param args
@@ -39,12 +42,10 @@ public class Server {
 
 		// Create an instance of the NodeManager object, which keeps track of
 		// nodes
-		NodeManager nm = NodeManager.getInstance();
-		// Create an instance of the ClientManager object, which keeps track of
-		// clients
-		ClientManager cm = ClientManager.getInstance();
-
-		UserManager um = UserManager.getInstance();
+		NodeManager.getInstance();
+		ClientManager.getInstance();
+		UserManager.getInstance();
+		StreamManager.getInstance();
 
 		// SongFiles songs = SongFiles.getInstance();
 		// songs.populateSongList();
@@ -59,6 +60,8 @@ public class Server {
 
 		// startDiscoveryService();
 		startDiscoveryService();
+
+		startStreamThread();
 
 		while (true) {
 			try {
@@ -78,6 +81,10 @@ public class Server {
 					System.err.println("Discovery Thread Dead !");
 					System.out.println("Attempting to restart discovery...");
 					discoveryResponder.startResponder();
+				}
+				if (!streamThread.isAlive()) {
+					System.err.println("Stream Thread dead !");
+					System.exit(1); // 
 				}
 			} catch (InterruptedException e) {
 				System.err.println("Exception: Server Exiting");
@@ -100,6 +107,13 @@ public class Server {
 			System.err.println("Exception: Unable to determine IP Address!");
 			System.exit(1);
 		}
+	}
+
+	public static void startStreamThread() {
+		streamThread = new StreamThread();
+		streamThread.setName("StreamThread");
+		streamThread.start();
+
 	}
 
 	/**

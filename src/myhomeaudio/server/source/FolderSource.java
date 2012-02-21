@@ -60,11 +60,13 @@ public class FolderSource extends SourceBase implements Source {
 			
 			int offset = 0;
 			int numRead = 0;
+			// Read each individual byte from the file
 			while(offset < bytes.length && (numRead = fileInput.read(bytes, offset, bytes.length - offset)) >= 0) {
 				offset += numRead;
 			}
 			
 			if (offset < bytes.length) {
+				// Didn't completely read the file.
 				// Do nothing for now..
 			}
 			
@@ -77,6 +79,4 @@ public class FolderSource extends SourceBase implements Source {
 		}
 		return new byte[0];
 	}
-	
-
 }

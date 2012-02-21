@@ -31,7 +31,7 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands,
 			
 			JSONObject jsonRequest = (JSONObject) JSONValue.parse(data);
 			
-			if (uriSegments.get(1).equals("list")) {
+			/*if (uriSegments.get(1).equals("list")) {
 				// List the songs available
 				SongFiles songs = SongFiles.getInstance();
 				
@@ -39,7 +39,7 @@ public class SongHelper extends Helper implements HelperInterface, NodeCommands,
 				body.put("songs", songs.getSongList());
 				this.httpStatus = HttpStatus.SC_OK;
 
-			} else if (uriSegments.get(1).equals("play")) {
+			} else */ if (uriSegments.get(1).equals("play")) {
 				// Play a defined song
 				
 
