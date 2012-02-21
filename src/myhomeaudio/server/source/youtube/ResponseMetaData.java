@@ -37,25 +37,34 @@ public class ResponseMetaData {
 			JSONObject jObject = (JSONObject)jParser.parse(jsonString);
 			
 			if(jObject.containsKey("error")){
+				//Error searching
+				System.out.println("Error Returned: " + jObject.get("error").toString());
 				throw new Exception();
 			}
+
+			if(jObject.keySet().toString().contains("data")){
+				JSONObject data = (JSONObject)jObject.get("data");
+				this.updated = data.keySet().toString().contains("updated") ? (String)data.get("updated") : updated;
+				//this.totalItems = data.keySet().toString().contains("totalItems") ? parseInteger(data.get("totalItems").toString()) : totalItems;
+				//this.startIndex = data.keySet().toString().contains("startIndex") ? parseInteger(data.get("startIndex").toString()) : startIndex;
+				//this.itemsPerPage = data.keySet().toString().contains("itemsPerPage") ? parseInteger(data.get("itemsPerPage").toString()) : itemsPerPage;
 			
-			JSONObject data = (JSONObject)jObject.get("data");
-			this.updated = (String)data.get("updated");
-			this.totalItems = parseInteger(data.get("totalItems").toString());
-			this.startIndex = parseInteger(data.get("startIndex").toString());
-			this.itemsPerPage = parseInteger(data.get("itemsPerPage").toString());
-			
-			if(totalItems == 0){
-				return;
+				this.totalItems = data.keySet().toString().contains("totalItems") ? parseInteger(data.get("totalItems").toString()) : totalItems;
+				this.startIndex = data.keySet().toString().contains("startIndex") ? parseInteger(data.get("startIndex").toString()) : startIndex;
+				this.itemsPerPage = data.keySet().toString().contains("itemsPerPage") ? parseInteger(data.get("itemsPerPage").toString()) : itemsPerPage;
+				
+				if(totalItems == 0){
+					return;
+				}
+				
+				JSONArray jItemArray = (JSONArray)data.get("items");
+				
+				for(int i = 0; i < itemsPerPage; i++){
+					jObject = (JSONObject)jItemArray.get(i);
+					this.items.add(new VideoMetaData(jObject.toJSONString()));
+				}
 			}
 			
-			JSONArray jItemArray = (JSONArray)data.get("items");
-			
-			for(int i = 0; i < itemsPerPage; i++){
-				jObject = (JSONObject)jItemArray.get(i);
-				this.items.add(new VideoMetaData(jObject.toJSONString()));
-			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

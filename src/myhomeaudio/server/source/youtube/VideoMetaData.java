@@ -1,5 +1,5 @@
 package myhomeaudio.server.source.youtube;
-//TODO need to check key is available
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -21,12 +21,12 @@ public class VideoMetaData {
 	private String thumbnailMobileUrl = null;
 	private int duration = 0; //seconds
 	private String aspectRatio = null;
-	private int likeCount = 0;
-	private double rating = 0;
-	private int ratingCount = 0;
-	private int viewCount = 0;
-	private int favoriteCount = 0;
-	private int commentCount;
+	private int likeCount = -1;
+	private double rating = -1;
+	private int ratingCount = -1;
+	private int viewCount = -1;
+	private int favoriteCount = -1;
+	private int commentCount = -1;
 	
 	private String jsonString = null;
 
@@ -44,32 +44,43 @@ public class VideoMetaData {
 		JSONParser jParser = new JSONParser();
 		try {
 			JSONObject jData = (JSONObject)jParser.parse(jsonString);
-			this.id = (String)jData.get("id");
+			this.id = jData.keySet().toString().contains("id") ? (String)jData.get("id") : id;
 			buildUrl();
-			this.uploaded = (String)jData.get("uploaded");
-			this.uploader = (String)jData.get("uploader");
-			this.title = (String)jData.get("title");
-			this.category = (String)jData.get("category");
-			this.description = (String)jData.get("description");
-			JSONArray jArray = (JSONArray)jData.get("tags");
-		
-			for(int i = 0; i < jArray.size(); i++){
-				this.tags.add(jArray.get(i).toString());
+			this.uploaded = jData.keySet().toString().contains("uploaded") ? (String)jData.get("uploaded") : uploaded;
+			this.uploader = jData.keySet().toString().contains("uploader") ? (String)jData.get("uploader") : uploader;
+			this.title = jData.keySet().toString().contains("title") ? (String)jData.get("title") : title;
+			this.category = jData.keySet().toString().contains("category") ? (String)jData.get("category") : category;
+			this.description = jData.keySet().toString().contains("description") ? (String)jData.get("description") : description;
+			
+			if(jData.keySet().toString().contains("tags")){
+				JSONArray jArray = (JSONArray)jData.get("tags");
+			
+				for(int i = 0; i < jArray.size(); i++){
+					this.tags.add(jArray.get(i).toString());
+				}
+			}
+			
+			//checks that keyset contains thumbnail, then that subKeyset contains hdDefault
+			if(jData.keySet().toString().contains("thumbnail")){
+				if(((JSONObject)jData.get("thumbnail")).keySet().toString().contains("hdDefault")){
+					this.thumbnailDefaultUrl = (String)((JSONObject)jData.get("thumbnail")).get("hqDefault");
+				}
 			}
 
-			this.thumbnailDefaultUrl = (String)((JSONObject)jData.get("thumbnail")).get("hqDefault");
-			this.thumbnailMobileUrl = (String)((JSONObject)jData.get("thumbnail")).get("sqDefault");
-			this.duration = ResponseMetaData.parseInteger(jData.get("duration").toString());
-			this.aspectRatio = (String)jData.get("aspectRatio");
-			this.likeCount = ResponseMetaData.parseInteger(jData.get("likeCount").toString());
-			this.rating = ResponseMetaData.parseDouble(jData.get("rating").toString());
-			this.ratingCount = ResponseMetaData.parseInteger(jData.get("ratingCount").toString());
-			this.viewCount = ResponseMetaData.parseInteger(jData.get("viewCount").toString());
-			this.favoriteCount = ResponseMetaData.parseInteger(jData.get("favoriteCount").toString());
-			//System.out.println("ddd");
-			System.out.println(jData.get("commentCount").toString());
-			//System.out.println("dqw");
-			this.commentCount = ResponseMetaData.parseInteger(jData.get("commentCount").toString());
+			if(jData.keySet().toString().contains("thumbnail")){
+				if(((JSONObject)jData.get("thumbnail")).keySet().toString().contains("sqDefault")){
+					this.thumbnailMobileUrl = (String)((JSONObject)jData.get("thumbnail")).get("sqDefault");
+				}
+			}
+
+			this.duration = jData.keySet().toString().contains("duration") ? ResponseMetaData.parseInteger(jData.get("duration").toString()) : duration;
+			this.aspectRatio = jData.keySet().toString().contains("aspectRatio") ? (String)jData.get("aspectRatio") : aspectRatio;
+			this.likeCount = jData.keySet().toString().contains("likeCount") ? ResponseMetaData.parseInteger(jData.get("likeCount").toString()) : likeCount;
+			this.rating = jData.keySet().toString().contains("rating") ? ResponseMetaData.parseDouble(jData.get("rating").toString()) : rating;
+			this.ratingCount = jData.keySet().toString().contains("ratingCount") ? ResponseMetaData.parseInteger(jData.get("ratingCount").toString()) : ratingCount;
+			this.viewCount = jData.keySet().toString().contains("viewCount") ? ResponseMetaData.parseInteger(jData.get("viewCount").toString()) : viewCount;
+			this.favoriteCount = jData.keySet().toString().contains("favoriteCount") ? ResponseMetaData.parseInteger(jData.get("favoriteCount").toString()) : favoriteCount;
+			this.commentCount = jData.keySet().toString().contains("commentCount") ? ResponseMetaData.parseInteger(jData.get("commentCount").toString()) : commentCount;
 			
 			
 		} catch (ParseException e) {
