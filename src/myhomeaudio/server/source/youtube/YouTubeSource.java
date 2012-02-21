@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import myhomeaudio.server.source.SourceBase;
+import myhomeaudio.server.source.BaseSource;
 import myhomeaudio.server.source.Source;
 
 import org.apache.http.HttpEntity;
@@ -33,16 +33,17 @@ import org.json.simple.parser.ParseException;
  * @author Ryan
  *
  */
-public class YouTubeSource extends SourceBase implements Source {
-	private static final String baseUri = "http://gdata.youtube.com/feeds/api/videos?";
-	private static final String alt = "json";
+public class YouTubeSource extends BaseSource implements Source {
+	private static final String baseUrl = "http://gdata.youtube.com/feeds/api/videos?";
+	private static final String alt = "jsonc";
 	
 	private String searchTerms = null;
 	private int maxResults = 5;
 	private String orderBy = OrderByCommands.RELEVANCE;
+	private double version = 2.1;
 	private boolean exactMatch = false; //for determining to include quotations around search terms
 	
-	ArrayList<VideoMetaData> resultsArray;
+	ResponseMetaData resultsObject = null;
 	
 
 	/**
@@ -50,7 +51,6 @@ public class YouTubeSource extends SourceBase implements Source {
 	 */
 	//TODO Youtube only necessary for streaming audio or allow users to login to their account
 	public YouTubeSource(){
-		resultsArray = new ArrayList<VideoMetaData>();
 
 	}
 	
@@ -62,20 +62,19 @@ public class YouTubeSource extends SourceBase implements Source {
 		}
 		
 		searchTerms = terms;
-		String uri = generateUri();
+		String url = generateUrl();
 		
 		System.out.println("Fetching Feed From:");
-		System.out.println(uri);
+		System.out.println(url);
 		
 		HttpClient httpClient = new DefaultHttpClient();
-		HttpGet httpget = new HttpGet(uri);
+		HttpGet httpget = new HttpGet(url);
 
         try {
 			HttpResponse response = httpClient.execute(httpget);
 			HttpEntity entity = response.getEntity();
 			if(entity != null){
-				String result = EntityUtils.toString(entity);
-				parseJSON(result);
+				parseJsoncResponse(EntityUtils.toString(entity));
 
 			}
 		} catch (ClientProtocolException e) {
@@ -83,80 +82,47 @@ public class YouTubeSource extends SourceBase implements Source {
 		} catch (IOException e) {
 			System.out.println("Failure: " + e.getMessage());
 		}
-
+	
 		return;
 	}
 
-	private void parseJSON(String result){
-		JSONParser jParse = new JSONParser();
-		JSONObject returnedResults=  new JSONObject();
-
-		try {
-			returnedResults = (JSONObject)jParse.parse(result);
-			
-			/* Keys from initial JSON Object
-			 * logo = .gif, link = schemas, openSearch$totalResults = int value of totalResults
-			 * xmlns$media = yahoo.com/mrss, xmlns = w3.org/2005/atom, xmlns$app = atom/app
-			 * id = feeds/api/videos, xmlns$openSearch = spec/opensearchrss/1.0/, author = youtube
-			 * xmlns$gd = schemas.google.com/g/2005, category = scheme, title = query term match
-			 * openSearch$startIndex = start index, updated = timestamp, xmlns$yt = gdata.youtube.com/schemas
-			 * openSearch$itemsPerPage = number of items per page, generator = data api
-			 * 
-			 */
-			
-			//Parses feed key from json
-			//Result Entry data returned within feed.entry JSONArray
-			returnedResults = (JSONObject)returnedResults.get("feed");
-			//System.out.println(returnedResults.keySet().toString());
-			JSONArray entryResults = (JSONArray)returnedResults.get("entry");
-			
-			//Creates an array of entries
-			// = (JSONArray)jParse.parse(returnedResults.toString());
-			
-			/* Keys from feed.entry
-			 * app$control = syndication and restriction, link = some link, yt$statistics = counts, id = gdata/feeds/api stuff
-			 * author = uploaders, category = schema, updated = timestamp
-			 * gd$rating = #raters and rating, published = published date, gd$comments = countHits, title = title
-			 * media$group has some information
-			 * 
-			 */
-			
-			
-			for(int i = 0; i < maxResults; i++){
-				VideoMetaData mediaResult = new VideoMetaData((JSONObject)entryResults.get(i));
-				this.resultsArray.add(mediaResult);
-				//System.out.println(i + " " + mediaResult.toString());
-				
-			}
-			
-			
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	private void parseJsoncResponse(String result){
+		try{
+			resultsObject  = new ResponseMetaData(result);
+			System.out.println(resultsObject.toString());
+		}catch(Exception e){
+			e.getMessage();
 		}
 		
 		return;
-		
 	}
-	private String generateUri(){
+	
+	private String generateUrl(){
 		System.out.println("Generating YouTube URL");
 		
-		//Construct YouTube request uri
-		String uri = baseUri;
+		//Construct YouTube request url
+		String url = baseUrl;
 		
 		//Appends Search Terms
-		uri += "q=" + formatSearchTerms();
+		url += "q=" + formatSearchTerms();
+		
+		//Appends version number
+		url += "&v=" + version;
 		
 		//Appends OrderBy Parameter
-		uri += "&orderby=" + orderBy;
+		if(!orderBy.isEmpty()){
+			url += "&orderby=" + orderBy;
+		}
 		
 		//Appends Max Results Return
-		uri += "&max-results=" + maxResults;
+		if(maxResults != 0){
+			url += "&max-results=" + maxResults;
+		}
 		
 		//Appends Alt Parameter
-		uri += "&alt=" + alt;
+		url += "&alt=" + alt;
 		
-		return uri;
+		return url;
 	}
 	
 	
@@ -212,3 +178,6 @@ public class YouTubeSource extends SourceBase implements Source {
 	}
 
 }
+
+
+
