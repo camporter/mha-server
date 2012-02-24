@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import myhomeaudio.server.database.Database;
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.stream.StreamBase;
+import myhomeaudio.server.stream.StreamThread;
 
 /**
  * Manages all the streams existing on the server.
@@ -25,19 +26,21 @@ public class StreamManager implements StatusCode {
 	private ArrayList<StreamBase> streamList;
 	private Database db;
 	
-	protected StreamManager() {
+	protected StreamManager(StreamThread thread) {
 		System.out.println("*** Starting StreamManager...");
 		this.db = Database.getInstance();
 		this.streamList = new ArrayList<StreamBase>();
 		
-		if (!checkStreamsTable()) {
+		if (!checkStreamsTable() && !updateStreamsFromDB()) {
 			System.exit(1); // Exit is there's a problem with the database.
 		}
+		
+		thread.setStreamList(streamList); // Pass off the stream list to the StreamThread
 	}
 	
-	public static synchronized StreamManager getInstance() {
+	public static synchronized StreamManager getInstance(StreamThread thread) {
 		if (instance == null) {
-			instance = new StreamManager();
+			instance = new StreamManager(thread);
 		}
 		return instance;
 	}
@@ -51,7 +54,7 @@ public class StreamManager implements StatusCode {
 		try {
 			Statement statement = conn.createStatement();
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
-					+ "streams (id INTEGER PRIMARY KEY AUTOINCREMENT)");
+					+ "streams (id INTEGER PRIMARY KEY AUTOINCREMENT, type INTEGER, )");
 			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -77,6 +80,7 @@ public class StreamManager implements StatusCode {
 				}
 				
 			}
+			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -84,5 +88,6 @@ public class StreamManager implements StatusCode {
 		
 		return result;
 	}
+	
 	
 }

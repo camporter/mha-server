@@ -6,8 +6,6 @@ import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.NodeCommands;
-import myhomeaudio.server.songs.SongFiles;
-
 import org.apache.http.HttpStatus;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
