@@ -1,14 +1,11 @@
 package myhomeaudio.server.source.youtube;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import myhomeaudio.server.source.BaseSource;
 import myhomeaudio.server.source.Source;
+import myhomeaudio.server.source.SourceBase;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -17,10 +14,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 /**
  * YouTube Interface for aggregation and compilation
@@ -33,7 +26,7 @@ import org.json.simple.parser.ParseException;
  * @author Ryan
  *
  */
-public class YouTubeSource extends BaseSource implements Source {
+public class YouTubeSource extends SourceBase implements Source {
 	private static final String baseUrl = "http://gdata.youtube.com/feeds/api/videos?";
 	private static final String alt = "jsonc";
 	private static final double version = 2.1;
