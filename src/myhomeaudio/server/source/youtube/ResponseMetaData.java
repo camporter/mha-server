@@ -15,50 +15,65 @@ public class ResponseMetaData {
 	private int itemsPerPage = -1;
 	private ArrayList<VideoMetaData> items = new ArrayList<VideoMetaData>();
 	
-
-
 	String jsonString = null;
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
+	/**
+	 * Default ResponseMetaData Constructor
 	 */
-
 	public ResponseMetaData(){
 		
 	}
+	
+	/**
+	 * ResponseMetaData Constructor
+	 * 
+	 * @param results JSONC response string returned from youtube
+	 * @throws Exception Throws Exception if youtube returns an error message
+	 */
 	public ResponseMetaData(String results) throws Exception{
 		this.jsonString = results;
 		parseJsoncObject();
 	}
+	
+	/**
+	 * parseJsoncObject
+	 * 
+	 * Parses the jsonc response object and populates ResponseMetaData fields
+	 * 
+	 * @throws Exception Throws Exception if youtube returns an error message
+	 */
 	private void parseJsoncObject() throws Exception{
 		JSONParser jParser = new JSONParser();
 
 		try {
-			JSONObject jObject = (JSONObject)jParser.parse(jsonString);
+			JSONObject jObject = (JSONObject)jParser.parse(jsonString);//parse string into json object
 			
+			//Checks if youtube returned an error
 			if(jObject.containsKey("error")){
 				//Error searching
 				System.out.println("Error Returned: " + jObject.get("error").toString());
 				throw new Exception();
 			}
 
+			//Checks if youtube returned data
 			if(jObject.keySet().toString().contains("data")){
 				JSONObject data = (JSONObject)jObject.get("data");
-				this.updated = data.keySet().toString().contains("updated") ? (String)data.get("updated") : updated;
-				//this.totalItems = data.keySet().toString().contains("totalItems") ? parseInteger(data.get("totalItems").toString()) : totalItems;
-				//this.startIndex = data.keySet().toString().contains("startIndex") ? parseInteger(data.get("startIndex").toString()) : startIndex;
-				//this.itemsPerPage = data.keySet().toString().contains("itemsPerPage") ? parseInteger(data.get("itemsPerPage").toString()) : itemsPerPage;
-			
+				
+				//if statements to check that youtube returned a given field before attempting to retrieve the data
+				this.updated = data.keySet().toString().contains("updated") ? (String)data.get("updated") : updated;		
 				this.totalItems = data.keySet().toString().contains("totalItems") ? parseInteger(data.get("totalItems").toString()) : totalItems;
 				this.startIndex = data.keySet().toString().contains("startIndex") ? parseInteger(data.get("startIndex").toString()) : startIndex;
 				this.itemsPerPage = data.keySet().toString().contains("itemsPerPage") ? parseInteger(data.get("itemsPerPage").toString()) : itemsPerPage;
 				
+				//Exit if search returned zero results
 				if(totalItems == 0){
 					return;
 				}
 				
-				JSONArray jItemArray = (JSONArray)data.get("items");
+
+				JSONArray jItemArray = (JSONArray)data.get("items");//create json array of item results
 				
+				//Create VideoMetaData object for each result and add to arrayList
 				for(int i = 0; i < itemsPerPage; i++){
 					jObject = (JSONObject)jItemArray.get(i);
 					this.items.add(new VideoMetaData(jObject.toJSONString()));
@@ -71,8 +86,10 @@ public class ResponseMetaData {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
+
+	/**
+	 * toString
+	 * 		Override
 	 */
 	@Override
 	public String toString() {
@@ -81,18 +98,29 @@ public class ResponseMetaData {
 				+ itemsPerPage + ", items=" + items + "]";
 	}
 	
+	/**
+	 * parseInteger
+	 * 	Parses a string into an integer
+	 * @param integer String to be converted
+	 * @return Returns integer value of the string, ResponseMetaData.INVALID = -1, if exception is thrown
+	 */
 	protected static int parseInteger(String integer){
 		try{
-			System.out.println(integer);
 			return Integer.parseInt(integer);
 		}catch(NumberFormatException e){
 			return ResponseMetaData.INVALID;
 		}
 	}
 	
-	protected static double parseDouble(String integer){
+	/**
+	 * parseDouble
+	 * 	Parses a string into a double
+	 * @param doubleValue String to be converted
+	 * @return Returns double value of the string, ResponseMetaData.INVALID = -1, if exception is thrown
+	 */
+	protected static double parseDouble(String doubleValue){
 		try{
-			return Double.parseDouble(integer);
+			return Double.parseDouble(doubleValue);
 		}catch(NumberFormatException e){
 			return ResponseMetaData.INVALID;
 		}
