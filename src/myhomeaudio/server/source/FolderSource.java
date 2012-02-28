@@ -33,7 +33,6 @@ public class FolderSource extends SourceBase implements Source {
 		}
 	}
 	
-	@Override
 	public ArrayList<String> getMediaList() {
 
 		ArrayList<String> mediaList = new ArrayList<String>();

@@ -1,6 +1,5 @@
 package myhomeaudio.server.manager;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -54,7 +53,7 @@ public class StreamManager implements StatusCode {
 		try {
 			Statement statement = conn.createStatement();
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
-					+ "streams (id INTEGER PRIMARY KEY AUTOINCREMENT, type INTEGER, )");
+					+ "streams (id INTEGER PRIMARY KEY AUTOINCREMENT, type INTEGER );");
 			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();

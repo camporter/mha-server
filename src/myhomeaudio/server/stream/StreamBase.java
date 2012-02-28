@@ -3,7 +3,7 @@ package myhomeaudio.server.stream;
 import java.util.ArrayList;
 import java.util.Date;
 
-import myhomeaudio.server.media.MediaDescriptor;
+import myhomeaudio.server.media.descriptor.MediaDescriptor;
 import myhomeaudio.server.node.Node;
 import myhomeaudio.server.source.Source;
 
