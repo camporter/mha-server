@@ -3,38 +3,33 @@ package myhomeaudio.server.discovery;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.net.MulticastSocket;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 /**
  * This Runnable responds to discovery searches with replies and the description
- * of the server's important information, stored in a DiscoveryDescription. 
+ * of the server's important information, stored in a DiscoveryDescription.
  * 
  * @author Cameron
  * 
  */
 public final class DiscoveryResponder implements Runnable {
 
-	protected static InetAddress multicastAddress;
-	protected static int multicastPort;
-
-	static {
-		try {
-			multicastAddress = InetAddress.getByName(DiscoveryConstants.MULTICAST_ADDRESS);
-			multicastPort = DiscoveryConstants.MULTICAST_PORT;
-		} catch (UnknownHostException uhe) {
-			System.err.println("Unexpected exception: " + uhe);
-			uhe.printStackTrace();
-		}
-	}
+	protected InetAddress broadcastAddress;
+	protected int broadcastPort;
 
 	protected String serviceName;
 	protected DiscoveryDescription descriptor;
 	protected boolean continueThread = true;
-	protected MulticastSocket socket;
+	protected DatagramSocket socket;
 	protected DatagramPacket queuedPacket;
 	protected DatagramPacket receivedPacket;
 	protected Thread responderThread;
@@ -42,13 +37,18 @@ public final class DiscoveryResponder implements Runnable {
 	public DiscoveryResponder(String serviceName, DiscoveryDescription descriptor) {
 		this.serviceName = serviceName;
 		this.descriptor = descriptor;
+		
+		this.broadcastPort = DiscoveryConstants.BROADCAST_PORT;
+		this.broadcastAddress = getBroadcastAddress();
+		if (broadcastAddress == null)
+			System.exit(1);
+		
 		try {
-			socket = new MulticastSocket(multicastPort);
-			socket.joinGroup(multicastAddress);
-			socket.setSoTimeout(DiscoveryConstants.RESPONDER_SOCKET_TIMEOUT);
-
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
+			this.socket = new DatagramSocket(broadcastPort);
+			this.socket.setBroadcast(true);
+		} catch (SocketException e) {
+			e.printStackTrace();
+			System.exit(1);
 		}
 	}
 
@@ -117,6 +117,7 @@ public final class DiscoveryResponder implements Runnable {
 			}
 
 		}
+		socket.close();
 	}
 
 	protected boolean isQueryPacket() {
@@ -149,8 +150,8 @@ public final class DiscoveryResponder implements Runnable {
 
 		byte[] bytes = buf.toString().getBytes();
 		DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
-		packet.setAddress(multicastAddress);
-		packet.setPort(multicastPort);
+		packet.setAddress(broadcastAddress);
+		packet.setPort(broadcastPort);
 
 		return packet;
 	}
@@ -162,6 +163,34 @@ public final class DiscoveryResponder implements Runnable {
 				stopResponder();
 			}
 		});
+	}
+
+	/**
+	 * Tries to get the local broadcast address from the network interfaces we
+	 * want, so that we can listen on it for discovery packets.
+	 * 
+	 * @return
+	 */
+	protected InetAddress getBroadcastAddress() {
+		try {
+			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+			while (interfaces.hasMoreElements()) {
+				NetworkInterface networkInterface = interfaces.nextElement();
+				if (networkInterface.isLoopback())
+					continue;
+				if (!networkInterface.isUp())
+					continue;
+				for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+					InetAddress broadcastAddress = interfaceAddress.getBroadcast();
+					if (broadcastAddress == null)
+						continue;
+					return broadcastAddress;
+				}
+			}
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

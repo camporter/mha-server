@@ -3,11 +3,16 @@ package myhomeaudio.server.discovery;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.net.MulticastSocket;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -15,13 +20,13 @@ import java.util.Vector;
 
 public final class DiscoverySearch implements Runnable {
 
-	protected static InetAddress multicastAddress;
-	protected static int multicastPort;
+	protected static InetAddress broadcastAddress;
+	protected int broadcastPort;
 
 	static {
 		try {
-			multicastAddress = InetAddress.getByName(DiscoveryConstants.MULTICAST_ADDRESS);
-			multicastPort = DiscoveryConstants.MULTICAST_PORT;
+			//multicastA;//InetAddress.getByName(DiscoveryConstants.MULTICAST_ADDRESS);
+			//multicastPort = DiscoveryConstants.MULTICAST_PORT;
 		} catch (UnknownHostException uhe) {
 			uhe.printStackTrace();
 		}
@@ -29,7 +34,7 @@ public final class DiscoverySearch implements Runnable {
 
 	protected String serviceName;
 	protected boolean shouldRun = true;
-	protected MulticastSocket socket;
+	protected DatagramSocket socket;
 	protected DatagramPacket queuedPacket;
 	protected DatagramPacket receivedPacket;
 	protected Vector<DiscoverySearchListener> listeners;
@@ -37,15 +42,17 @@ public final class DiscoverySearch implements Runnable {
 	protected Timer myTimer;
 
 	public DiscoverySearch() {
-
+		
+		broadcastPort = DiscoveryConstants.BROADCAST_PORT;
+		broadcastAddress = getBroadcastAddress();
+		if (broadcastAddress == null)
+			System.exit(1);
+		
 		try {
-			socket = new MulticastSocket(multicastPort);
-			socket.joinGroup(multicastAddress);
-			socket.setSoTimeout(DiscoveryConstants.SEARCH_SOCKET_TIMEOUT);
-			
-		} catch (IOException ioe) {
-			System.err.println("Unexpected exception: " + ioe);
-			ioe.printStackTrace();
+			this.socket = new DatagramSocket(broadcastPort);
+			this.socket.setBroadcast(true);
+		} catch (SocketException e) {
+			e.printStackTrace();
 			System.exit(1);
 		}
 
@@ -206,7 +213,7 @@ public final class DiscoverySearch implements Runnable {
 
 		byte[] bytes = buf.toString().getBytes();
 		DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
-		packet.setAddress(multicastAddress);
+		packet.setAddress(broadcastAddress);
 		packet.setPort(multicastPort);
 
 		return packet;
@@ -220,5 +227,27 @@ public final class DiscoverySearch implements Runnable {
 				queuedPacket = packet;
 			}
 		}
+	}
+	
+	protected InetAddress getBroadcastAddress() {
+		try {
+			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+			while (interfaces.hasMoreElements()) {
+				NetworkInterface networkInterface = interfaces.nextElement();
+				if (networkInterface.isLoopback())
+					continue;
+				if (!networkInterface.isUp())
+					continue;
+				for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+					InetAddress broadcastAddress = interfaceAddress.getBroadcast();
+					if (broadcastAddress == null)
+						continue;
+					return broadcastAddress;
+				}
+			}
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

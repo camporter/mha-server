@@ -2,8 +2,8 @@ package myhomeaudio.server.discovery;
 
 public class DiscoveryConstants {
 
-	public static final String MULTICAST_ADDRESS = "230.0.0.1";
-	public static final int MULTICAST_PORT = 6808;
+	//public static final String MULTICAST_ADDRESS = "230.0.0.1";
+	public static final int BROADCAST_PORT = 6808;
 	public static final int DATAGRAM_LENGTH = 1024;
 
 	public static final int RESPONDER_SOCKET_TIMEOUT = 250;

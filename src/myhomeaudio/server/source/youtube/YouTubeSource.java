@@ -1,8 +1,6 @@
 package myhomeaudio.server.source.youtube;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import myhomeaudio.server.source.LocationSource;
 
@@ -168,7 +166,7 @@ public class YouTubeSource extends LocationSource {
 		return searchTerms;
 	}
 
-	public ArrayList<String> getMediaList() {
+	/*public ArrayList<String> getMediaList() {
 		ArrayList<String> mediaList = new ArrayList<String>();
 		File folder = null;
 
@@ -176,7 +174,7 @@ public class YouTubeSource extends LocationSource {
 			mediaList.add(mediaFileName);
 		}
 		return null;
-	}
+	}*/
 
 	/**
 	 * @param maxResults
