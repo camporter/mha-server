@@ -242,7 +242,7 @@ public class YouTubeSource extends LocationSource {
 		
 		while(!videoMetaData.isEmpty()){
 			data = videoMetaData.remove(0);
-			mediaDesc.add(new MediaDescriptor(0,data.getTitle(),null,null,null,data.getUrl()));
+			mediaDesc.add(new MediaDescriptor(0,data.getTitle(),"","","",data.getUrl()));
 		}
 		return mediaDesc;
 	}
