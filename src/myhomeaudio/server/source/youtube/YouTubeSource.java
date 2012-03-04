@@ -1,7 +1,9 @@
 package myhomeaudio.server.source.youtube;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
+import myhomeaudio.server.media.descriptor.MediaDescriptor;
 import myhomeaudio.server.source.LocationSource;
 
 import org.apache.http.HttpEntity;
@@ -15,11 +17,9 @@ import org.apache.http.util.EntityUtils;
 /**
  * YouTube Interface for aggregation and compilation
  * 
- * Usage: 1. Set search criteria or leave default ie maxResults, orderBy, or
- * exactMatch 2. Call feedSearch() with search terms 3. Call getMediaList() to
- * retrieve results
  * 
  * @author Ryan
+ * 
  * 
  */
 public class YouTubeSource extends LocationSource {
@@ -27,15 +27,21 @@ public class YouTubeSource extends LocationSource {
 	private static final String BASE_URL = "http://gdata.youtube.com/feeds/api/videos?";
 	private static final String alt = "jsonc";
 	private static final double version = 2.1;
+	
+	//Default search values
+	private static final int defaultMaxResults = 5;
+	private static final boolean defaultExactMatch = false;
+	private static final String defaultOrderBy = OrderByCommands.RELEVANCE;
 
 	private String searchTerms = null;
-	private int maxResults = 5;
-	private String orderBy = OrderByCommands.RELEVANCE;
-	private boolean exactMatch = false; // for determining to include quotations
+	private int maxResults;
+	private String orderBy;
+	private boolean exactMatch; // for determining to include quotations
 										// around search terms
 
 	// Need to format in standard way as FolderSource
 	ResponseMetaData resultsObject = null;
+	
 
 	/**
 	 * Constructor for YouTube source
@@ -43,7 +49,55 @@ public class YouTubeSource extends LocationSource {
 	// TODO Youtube only necessary for streaming audio or allow users to login
 	// to their account
 	public YouTubeSource() {
-
+		this.maxResults = defaultMaxResults;
+		this.orderBy = defaultOrderBy;
+		this.exactMatch = defaultExactMatch;
+	}
+	
+	public YouTubeSource(int maxResults, String orderBy, boolean exactMatch){
+		this.maxResults = maxResults;
+		this.orderBy = orderBy;
+		this.exactMatch = exactMatch;
+	}
+	
+	public YouTubeSource(int maxResults, String orderBy){
+		this.maxResults = maxResults;
+		this.orderBy = orderBy;
+		this.exactMatch = defaultExactMatch;
+		
+	}
+	
+	public YouTubeSource(int maxResults, boolean exactMatch){
+		this.maxResults = maxResults;
+		this.orderBy = defaultOrderBy;
+		this.exactMatch = exactMatch;
+		
+	}
+	
+	public YouTubeSource(String orderBy, boolean exactMatch){
+		this.maxResults = defaultMaxResults;
+		this.orderBy = orderBy;
+		this.exactMatch = exactMatch;
+		
+	}
+	
+	public YouTubeSource(int maxResults){
+		this.maxResults = maxResults;
+		this.orderBy = defaultOrderBy;
+		this.exactMatch = defaultExactMatch;
+		
+	}
+	
+	public YouTubeSource(String orderBy){
+		this.maxResults = defaultMaxResults;
+		this.orderBy = orderBy;
+		this.exactMatch = defaultExactMatch;
+	}
+	
+	public YouTubeSource(boolean exactMatch){
+		this.maxResults = defaultMaxResults;
+		this.orderBy = defaultOrderBy;
+		this.exactMatch = exactMatch;
 	}
 
 	/**
@@ -52,7 +106,7 @@ public class YouTubeSource extends LocationSource {
 	 * @param terms
 	 *            Youtube video search terms
 	 */
-	public void feedSearch(String terms) {
+	private void feedSearch(String terms) {
 		// Checks that search terms not null
 		if (terms.isEmpty()) {
 			return;
@@ -156,13 +210,12 @@ public class YouTubeSource extends LocationSource {
 		// Converts spaces into search appending '+'
 		searchTerms = searchTerms.replace(' ', '+');
 
-		// System.out.println(searchTerms);
-
 		// If exact match search, append \" or %22 to beginning and end of
 		// string
 		if (exactMatch) {
 			searchTerms = "%22" + searchTerms + "%22"; // exact search
 		}
+		
 		return searchTerms;
 	}
 
@@ -175,36 +228,23 @@ public class YouTubeSource extends LocationSource {
 		}
 		return null;
 	}*/
-
-	/**
-	 * @param maxResults
-	 *            the maxResults to set
-	 */
-	public synchronized void setMaxResults(int maxResults) {
-		this.maxResults = maxResults;
+	
+	
+	public ArrayList<MediaDescriptor> searchMedia(String search) {
+		feedSearch(search);
+		return createMediaDescriptor();
 	}
-
-	/**
-	 * @param orderBy
-	 *            the orderBy to set
-	 */
-	public synchronized void setOrderBy(String orderBy) {
-		this.orderBy = orderBy;
-	}
-
-	/**
-	 * @param exactMatch
-	 *            the exactMatch to set
-	 */
-	public synchronized void setExactMatch(boolean exactMatch) {
-		this.exactMatch = exactMatch;
-	}
-
-	/**
-	 * @return the resultsObject
-	 */
-	public synchronized ResponseMetaData getResultsObject() {
-		return resultsObject;
+	
+	private ArrayList<MediaDescriptor> createMediaDescriptor(){
+		ArrayList<VideoMetaData> videoMetaData = resultsObject.getItems();
+		ArrayList<MediaDescriptor> mediaDesc = new ArrayList<MediaDescriptor>();
+		VideoMetaData data = null;
+		
+		while(!videoMetaData.isEmpty()){
+			data = videoMetaData.remove(0);
+			mediaDesc.add(new MediaDescriptor(0,data.getTitle(),null,null,null,data.getUrl()));
+		}
+		return mediaDesc;
 	}
 
 }
