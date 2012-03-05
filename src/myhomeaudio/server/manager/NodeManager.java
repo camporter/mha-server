@@ -6,6 +6,13 @@ import myhomeaudio.server.http.NodeWorker;
 import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
 
+/**
+ * Maintains a list of nodes and allows the rest of the server to send commands
+ * to any of them.
+ * 
+ * @author cameron
+ * 
+ */
 public class NodeManager implements NodeCommands {
 
 	private static NodeManager instance = null;

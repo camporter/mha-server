@@ -1,37 +1,45 @@
 package myhomeaudio.server.media.descriptor;
 
-
+/**
+ * Acts as a container for all the media included on the system. Typically, a
+ * Source will generate them and then they will be passed off to the
+ * ClientHandler and NodeManager.
+ * 
+ * @author cameron
+ * 
+ */
 public class MediaDescriptor {
-	
+
 	private final int id;
 	private final String title;
 	private final String artist;
 	private final String album;
 	private final String genre;
 	private final String location;
-	private final byte[] mediaData; 
-	
-	
-	public MediaDescriptor(int id, String title, String artist, String album, String genre, String location) {
+	private final byte[] byteData;
+
+	public MediaDescriptor(int id, String title, String artist, String album,
+			String genre, String location) {
 		this.id = id;
 		this.title = title;
 		this.artist = artist;
 		this.album = album;
 		this.genre = genre;
 		this.location = location;
-		this.mediaData = null;
+		this.byteData = null;
 	}
-	
-	public MediaDescriptor(int id, String title, String artist, String album, String genre, byte[] mediaData) {
+
+	public MediaDescriptor(int id, String title, String artist, String album,
+			String genre, byte[] byteData) {
 		this.id = id;
 		this.title = title;
 		this.artist = artist;
 		this.album = album;
 		this.genre = genre;
-		this.mediaData = mediaData;
+		this.byteData = byteData;
 		this.location = null;
 	}
-	
+
 	public MediaDescriptor(int id) {
 		this.id = id;
 		this.title = null;
@@ -39,38 +47,48 @@ public class MediaDescriptor {
 		this.album = null;
 		this.genre = null;
 		this.location = null;
-		this.mediaData = null;
+		this.byteData = null;
 	}
-	
+
 	public int id() {
 		return id;
 	}
-	
+
 	public String title() {
 		return title;
 	}
-	
+
 	public String artist() {
 		return artist;
 	}
-	
+
 	public String album() {
 		return album;
 	}
-	
+
 	public String genre() {
 		return genre;
 	}
-	
-	public String location(){
+
+	public String location() {
 		return location;
 	}
-	
-	public byte[] mediaData(){
-		return mediaData;
+
+	public byte[] byteData() {
+		return byteData;
 	}
 
-	/* (non-Javadoc)
+	public boolean isLocationDescriptor() {
+		return (location != null) && (!location.trim().equals(""));
+	}
+
+	public boolean isByteDescriptor() {
+		return (byteData != null);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
