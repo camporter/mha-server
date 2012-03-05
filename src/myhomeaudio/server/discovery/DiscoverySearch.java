@@ -133,10 +133,10 @@ public final class DiscoverySearch implements Runnable {
 				receivedPacket = new DatagramPacket(buf, buf.length);
 				System.out.println("Waiting to receive...");
 				socket.receive(receivedPacket); // note timeout in effect
-				
+
 				System.out.println("Found a packet");
 				if (isReplyPacket()) {
-					
+
 					DiscoveryDescription descriptor;
 					descriptor = getReplyDescriptor();
 					if (descriptor != null) {

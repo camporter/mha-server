@@ -36,17 +36,19 @@ public class Database extends ReentrantLock {
 			System.err.println("SQLite library not found!");
 			System.exit(1);
 		}
-		
+
 		connect();
 	}
-	
+
 	private void connect() {
 		try {
-			this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.databaseName);
+			this.connection = DriverManager.getConnection("jdbc:sqlite:"
+					+ this.databaseName);
 		} catch (SQLException e) {
 			// Can't access the database!
 			e.printStackTrace();
-			System.err.println("Unable to access the database file: " + this.databaseName);
+			System.err.println("Unable to access the database file: "
+					+ this.databaseName);
 			System.exit(1);
 		}
 	}
