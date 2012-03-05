@@ -17,8 +17,8 @@ public class ByteMediaDescriptor extends MediaDescriptor {
 		this.mediaData = data;
 	}
 
-	public ByteMediaDescriptor(int id, byte[] data, String title, String artist, String album,
-			String genre) {
+	public ByteMediaDescriptor(int id, byte[] data, String title,
+			String artist, String album, String genre) {
 		super(id, title, artist, album, genre);
 		this.mediaData = data;
 	}
