@@ -65,18 +65,15 @@ public class ResponseMetaData {
 				this.startIndex = data.keySet().toString().contains("startIndex") ? parseInteger(data.get("startIndex").toString()) : startIndex;
 				this.itemsPerPage = data.keySet().toString().contains("itemsPerPage") ? parseInteger(data.get("itemsPerPage").toString()) : itemsPerPage;
 				
-				//Exit if search returned zero results
-				if(totalItems == 0){
-					return;
-				}
-				
-
-				JSONArray jItemArray = (JSONArray)data.get("items");//create json array of item results
-				
-				//Create VideoMetaData object for each result and add to arrayList
-				for(int i = 0; i < itemsPerPage; i++){
-					jObject = (JSONObject)jItemArray.get(i);
-					this.items.add(new VideoMetaData(jObject.toJSONString()));
+				//Results returned from youtube
+				if(totalItems != 0){
+					JSONArray jItemArray = (JSONArray)data.get("items");//create json array of item results
+					
+					//Create VideoMetaData object for each result and add to arrayList
+					for(int i = 0; i < itemsPerPage; i++){
+						jObject = (JSONObject)jItemArray.get(i);
+						this.items.add(new VideoMetaData(jObject.toJSONString()));
+					}
 				}
 			}
 			

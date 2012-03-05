@@ -6,6 +6,8 @@ package myhomeaudio.server.media.descriptor;
  * TODO: We need to use a more specific class for the location instead of a
  * String.
  * 
+ * TODO merge into one with byte
+ * 
  * @author Cameron
  * 
  */
