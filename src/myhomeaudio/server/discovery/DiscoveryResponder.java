@@ -34,15 +34,16 @@ public final class DiscoveryResponder implements Runnable {
 	protected DatagramPacket receivedPacket;
 	protected Thread responderThread;
 
-	public DiscoveryResponder(String serviceName, DiscoveryDescription descriptor) {
+	public DiscoveryResponder(String serviceName,
+			DiscoveryDescription descriptor) {
 		this.serviceName = serviceName;
 		this.descriptor = descriptor;
-		
-		this.broadcastPort = DiscoveryConstants.BROADCAST_PORT;
+
+		this.broadcastPort = DiscoveryConstants.RESPONDER_BROADCAST_PORT;
 		this.broadcastAddress = getBroadcastAddress();
 		if (broadcastAddress == null)
 			System.exit(1);
-		
+
 		try {
 			this.socket = new DatagramSocket(broadcastPort);
 			this.socket.setBroadcast(true);
@@ -131,7 +132,8 @@ public final class DiscoveryResponder implements Runnable {
 			dataStr = dataStr.substring(0, pos);
 		}
 
-		if (dataStr.startsWith(DiscoveryConstants.SEARCH_HEADER + getEncodedServiceName())) {
+		if (dataStr.startsWith(DiscoveryConstants.SEARCH_HEADER
+				+ getEncodedServiceName())) {
 			return true;
 		}
 
@@ -141,7 +143,8 @@ public final class DiscoveryResponder implements Runnable {
 	protected DatagramPacket getReplyPacket() {
 		StringBuffer buf = new StringBuffer();
 		try {
-			buf.append(DiscoveryConstants.REPLY_HEADER + getEncodedServiceName() + " ");
+			buf.append(DiscoveryConstants.REPLY_HEADER
+					+ getEncodedServiceName() + " ");
 			buf.append(descriptor.toString());
 		} catch (NullPointerException npe) {
 			npe.printStackTrace();
@@ -151,7 +154,7 @@ public final class DiscoveryResponder implements Runnable {
 		byte[] bytes = buf.toString().getBytes();
 		DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
 		packet.setAddress(broadcastAddress);
-		packet.setPort(broadcastPort);
+		packet.setPort(DiscoveryConstants.SEARCH_BROADCAST_PORT);
 
 		return packet;
 	}
@@ -173,15 +176,18 @@ public final class DiscoveryResponder implements Runnable {
 	 */
 	protected InetAddress getBroadcastAddress() {
 		try {
-			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+			Enumeration<NetworkInterface> interfaces = NetworkInterface
+					.getNetworkInterfaces();
 			while (interfaces.hasMoreElements()) {
 				NetworkInterface networkInterface = interfaces.nextElement();
 				if (networkInterface.isLoopback())
 					continue;
 				if (!networkInterface.isUp())
 					continue;
-				for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
-					InetAddress broadcastAddress = interfaceAddress.getBroadcast();
+				for (InterfaceAddress interfaceAddress : networkInterface
+						.getInterfaceAddresses()) {
+					InetAddress broadcastAddress = interfaceAddress
+							.getBroadcast();
 					if (broadcastAddress == null)
 						continue;
 					return broadcastAddress;

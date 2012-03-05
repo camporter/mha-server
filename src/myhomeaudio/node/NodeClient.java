@@ -66,7 +66,7 @@ public class NodeClient {
 			System.exit(1);
 		}
 		
-		host = sd.getAddress().getHostAddress();
+		//host = sd.getAddress().getHostAddress();
 		serverPort = sd.getNodePort();
 		
 		try {

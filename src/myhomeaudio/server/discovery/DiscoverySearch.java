@@ -20,17 +20,8 @@ import java.util.Vector;
 
 public final class DiscoverySearch implements Runnable {
 
-	protected static InetAddress broadcastAddress;
+	protected InetAddress broadcastAddress;
 	protected int broadcastPort;
-
-	static {
-		try {
-			//multicastA;//InetAddress.getByName(DiscoveryConstants.MULTICAST_ADDRESS);
-			//multicastPort = DiscoveryConstants.MULTICAST_PORT;
-		} catch (UnknownHostException uhe) {
-			uhe.printStackTrace();
-		}
-	}
 
 	protected String serviceName;
 	protected boolean shouldRun = true;
@@ -41,16 +32,19 @@ public final class DiscoverySearch implements Runnable {
 	protected Thread searchThread;
 	protected Timer myTimer;
 
-	public DiscoverySearch() {
-		
-		broadcastPort = DiscoveryConstants.BROADCAST_PORT;
+	public DiscoverySearch(String serviceName) {
+
+		this.serviceName = serviceName;
+
+		broadcastPort = DiscoveryConstants.SEARCH_BROADCAST_PORT;
 		broadcastAddress = getBroadcastAddress();
 		if (broadcastAddress == null)
 			System.exit(1);
-		
+
 		try {
 			this.socket = new DatagramSocket(broadcastPort);
 			this.socket.setBroadcast(true);
+			this.socket.setSoTimeout(DiscoveryConstants.SEARCH_SOCKET_TIMEOUT);
 		} catch (SocketException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -131,16 +125,18 @@ public final class DiscoverySearch implements Runnable {
 	}
 
 	public void run() {
-
+		System.out.println("RUN");
 		while (shouldRun) {
 
 			try {
 				byte[] buf = new byte[DiscoveryConstants.DATAGRAM_LENGTH];
 				receivedPacket = new DatagramPacket(buf, buf.length);
+				System.out.println("Waiting to receive...");
 				socket.receive(receivedPacket); // note timeout in effect
-
+				
+				System.out.println("Found a packet");
 				if (isReplyPacket()) {
-
+					
 					DiscoveryDescription descriptor;
 					descriptor = getReplyDescriptor();
 					if (descriptor != null) {
@@ -182,8 +178,9 @@ public final class DiscoverySearch implements Runnable {
 		if (pos > -1) {
 			dataStr = dataStr.substring(0, pos);
 		}
-		
-		if (dataStr.startsWith(DiscoveryConstants.REPLY_HEADER + getEncodedServiceName())) {
+
+		if (dataStr.startsWith(DiscoveryConstants.REPLY_HEADER
+				+ getEncodedServiceName())) {
 			return true;
 		}
 
@@ -197,10 +194,10 @@ public final class DiscoverySearch implements Runnable {
 			dataStr = dataStr.substring(0, pos);
 		}
 
-		StringTokenizer tokens = new StringTokenizer(dataStr.substring(15 + getEncodedServiceName()
-				.length()));
-		if (tokens.countTokens() == 4) {
-			return DiscoveryDescription.parse(tokens.nextToken(), tokens.nextToken(),
+		StringTokenizer tokens = new StringTokenizer(
+				dataStr.substring(15 + getEncodedServiceName().length()));
+		if (tokens.countTokens() == 3) {
+			return DiscoveryDescription.parse(tokens.nextToken(),
 					tokens.nextToken(), tokens.nextToken());
 		} else {
 			return null;
@@ -214,7 +211,7 @@ public final class DiscoverySearch implements Runnable {
 		byte[] bytes = buf.toString().getBytes();
 		DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
 		packet.setAddress(broadcastAddress);
-		packet.setPort(multicastPort);
+		packet.setPort(DiscoveryConstants.RESPONDER_BROADCAST_PORT);
 
 		return packet;
 	}
@@ -228,18 +225,21 @@ public final class DiscoverySearch implements Runnable {
 			}
 		}
 	}
-	
+
 	protected InetAddress getBroadcastAddress() {
 		try {
-			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+			Enumeration<NetworkInterface> interfaces = NetworkInterface
+					.getNetworkInterfaces();
 			while (interfaces.hasMoreElements()) {
 				NetworkInterface networkInterface = interfaces.nextElement();
 				if (networkInterface.isLoopback())
 					continue;
 				if (!networkInterface.isUp())
 					continue;
-				for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
-					InetAddress broadcastAddress = interfaceAddress.getBroadcast();
+				for (InterfaceAddress interfaceAddress : networkInterface
+						.getInterfaceAddresses()) {
+					InetAddress broadcastAddress = interfaceAddress
+							.getBroadcast();
 					if (broadcastAddress == null)
 						continue;
 					return broadcastAddress;

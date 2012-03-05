@@ -20,25 +20,14 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 	private String instanceName;
 	private int clientPort;
 	private int nodePort;
-	private InetAddress address;
 
-	public DiscoveryDescription(String instanceName, int clientPort, int nodePort,
-			InetAddress address) {
+	public DiscoveryDescription(String instanceName, int clientPort, int nodePort) {
 		this.instanceName = instanceName;
 		this.clientPort = clientPort;
 		this.nodePort = nodePort;
-		this.address = address;
 	}
 
 	public DiscoveryDescription() {
-	}
-
-	public InetAddress getAddress() {
-		return address;
-	}
-
-	public void setAddress(InetAddress serviceAddress) {
-		this.address = serviceAddress;
 	}
 
 	public String getInstanceName() {
@@ -100,8 +89,6 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 		StringBuffer buf = new StringBuffer();
 		buf.append(getEncodedInstanceName());
 		buf.append(" ");
-		buf.append(getAddress().getHostAddress());
-		buf.append(" ");
 		buf.append(Integer.toString(clientPort));
 		buf.append(" ");
 		buf.append(Integer.toString(nodePort));
@@ -151,7 +138,7 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 	 *         the given strings.
 	 * @see DiscoveryDescription#toString()
 	 */
-	public static DiscoveryDescription parse(String encodedInstanceName, String addressAsString,
+	public static DiscoveryDescription parse(String encodedInstanceName,
 			String clientPortAsString, String nodePortAsString) {
 
 		DiscoveryDescription descriptor = new DiscoveryDescription();
@@ -163,15 +150,6 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 			descriptor.setInstanceName(name);
 		} catch (UnsupportedEncodingException uee) {
 			uee.printStackTrace();
-			return null;
-		}
-
-		try {
-			InetAddress addr = InetAddress.getByName(addressAsString);
-			descriptor.setAddress(addr);
-		} catch (UnknownHostException uhe) {
-			System.err.println("Unexpected exception: " + uhe);
-			uhe.printStackTrace();
 			return null;
 		}
 

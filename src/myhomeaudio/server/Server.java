@@ -82,7 +82,7 @@ public class Server {
 				}
 				if (!streamThread.isAlive()) {
 					System.err.println("Stream Thread dead !");
-					System.exit(1); // 
+					System.exit(1); //
 				}
 			} catch (InterruptedException e) {
 				System.err.println("Exception: Server Exiting");
@@ -92,19 +92,12 @@ public class Server {
 	}
 
 	private static void startDiscoveryService() {
-		try {
-			System.out.println("** Starting discovery services...");
-			DiscoveryDescription descriptor = new DiscoveryDescription("myhomeaudio", CLIENT_PORT,
-					NODE_PORT, InetAddress.getLocalHost());
-			discoveryResponder = new DiscoveryResponder("myhomeaudio", descriptor);
-			discoveryResponder.addShutdownHandler();
-			discoveryResponder.startResponder();
-
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			System.err.println("Exception: Unable to determine IP Address!");
-			System.exit(1);
-		}
+		System.out.println("** Starting discovery services...");
+		DiscoveryDescription descriptor = new DiscoveryDescription(
+				"myhomeaudio", CLIENT_PORT, NODE_PORT);
+		discoveryResponder = new DiscoveryResponder("myhomeaudio", descriptor);
+		discoveryResponder.addShutdownHandler();
+		discoveryResponder.startResponder();
 	}
 
 	public static void startStreamThread() {

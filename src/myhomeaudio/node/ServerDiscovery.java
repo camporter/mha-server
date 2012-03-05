@@ -14,7 +14,7 @@ public class ServerDiscovery implements DiscoverySearchListener {
 	
 	
 	public ServerDiscovery() {
-		browser = new DiscoverySearch();
+		browser = null;//new DiscoverySearch();
 		browser.addServiceBrowserListener(this);
 		browser.setServiceName("myhomeaudio");
 	}
@@ -45,13 +45,6 @@ public class ServerDiscovery implements DiscoverySearchListener {
 			return descriptor.getNodePort();
 		else
 			return -1;
-	}
-	
-	public InetAddress getAddress() {
-		if (descriptor != null)
-			return descriptor.getAddress();
-		else
-			return null;
 	}
 
 	@Override
