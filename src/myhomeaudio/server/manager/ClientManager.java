@@ -59,9 +59,9 @@ public class ClientManager {
 		try {
 			Statement statement = conn.createStatement();
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
-					+ "clients (id INTEGER PRIMARY KEY AUTOINCREMENT, " + "ipaddress TEXT, "
-					+ "macaddress TEXT UNIQUE, " + "bluetoothname TEXT UNIQUE, "
-					+ "userid INTEGER);");
+					+ "clients (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+					+ "ipaddress TEXT, " + "macaddress TEXT UNIQUE, "
+					+ "bluetoothname TEXT UNIQUE, " + "userid INTEGER);");
 			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -93,7 +93,8 @@ public class ClientManager {
 	 *         any existing client.
 	 */
 	private synchronized DatabaseClient getClient(int id) {
-		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
+		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i
+				.hasNext();) {
 			DatabaseClient nextClient = i.next();
 			if (nextClient.getId() == id) {
 				return new DatabaseClient(nextClient);
@@ -111,7 +112,8 @@ public class ClientManager {
 	 *         doesn't match any existing client.
 	 */
 	public synchronized DatabaseClient getClient(String sessionId) {
-		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
+		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i
+				.hasNext();) {
 			DatabaseClient nextClient = i.next();
 			if (nextClient.getSessionId().equals(sessionId)) {
 				return new DatabaseClient(nextClient);
@@ -131,7 +133,8 @@ public class ClientManager {
 	 * @return The unique session id.
 	 */
 	private String generateSessionId(Client client) {
-		return DigestUtils.sha512Hex(client.getMacAddress() + client.getBluetoothName()
+		return DigestUtils.sha512Hex(client.getMacAddress()
+				+ client.getBluetoothName()
 				+ (new Timestamp(new Date().getTime())).toString());
 	}
 }

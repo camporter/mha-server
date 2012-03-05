@@ -60,8 +60,8 @@ public class UserManager implements StatusCode {
 		try {
 			Statement statement = conn.createStatement();
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
-					+ "users (id INTEGER PRIMARY KEY AUTOINCREMENT, " + "username TEXT UNIQUE, "
-					+ "password TEXT);");
+					+ "users (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+					+ "username TEXT UNIQUE, " + "password TEXT);");
 			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -80,10 +80,13 @@ public class UserManager implements StatusCode {
 			Statement statement = conn.createStatement();
 
 			// Create each DatabaseUser object using rows from the users table
-			ResultSet userResults = statement.executeQuery("SELECT * FROM users;");
+			ResultSet userResults = statement
+					.executeQuery("SELECT * FROM users;");
 			while (userResults.next()) {
-				DatabaseUser dbUser = new DatabaseUser(userResults.getInt("id"),
-						userResults.getString("username"), userResults.getString("password"));
+				DatabaseUser dbUser = new DatabaseUser(
+						userResults.getInt("id"),
+						userResults.getString("username"),
+						userResults.getString("password"));
 				// Populate the userList
 				this.userList.add(dbUser);
 			}
