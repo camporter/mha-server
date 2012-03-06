@@ -39,7 +39,7 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 	}
 
 	/**
-	 * Makes the string URl encoded, which makes it easier to deal with in
+	 * Makes the string URL encoded, which makes it easier to deal with in
 	 * transit.
 	 * 
 	 * @return
@@ -142,6 +142,8 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 			String clientPortAsString, String nodePortAsString) {
 
 		DiscoveryDescription descriptor = new DiscoveryDescription();
+		
+		// Put the instance name
 		try {
 			String name = URLDecoder.decode(encodedInstanceName, "UTF-8");
 			if (name == null || name.length() == 0) {
@@ -153,6 +155,7 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 			return null;
 		}
 
+		// Put the client and node ports
 		try {
 			int p = Integer.parseInt(clientPortAsString);
 			descriptor.setClientPort(p);

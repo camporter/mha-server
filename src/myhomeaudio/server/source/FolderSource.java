@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
- * A media source used to
+ * A media source that provides various media files from a specified folder.
  * 
  * @author Cameron
  * 
@@ -18,11 +18,12 @@ public class FolderSource extends SourceBase implements Source {
 	protected File folder;
 
 	/**
-	 * 
 	 * Create the FolderSource.
 	 * 
-	 * @param folderLocation Which folder to get media from.
-	 * @throws NullPointerException folderLocation cannot be null.
+	 * @param folderLocation
+	 *            Which folder to get media from.
+	 * @throws NullPointerException
+	 *             folderLocation cannot be null.
 	 */
 	public FolderSource(String folderLocation) throws NullPointerException {
 		if (folderLocation == null) {
@@ -32,7 +33,7 @@ public class FolderSource extends SourceBase implements Source {
 			this.folder = new File(folderLocation);
 		}
 	}
-	
+
 	public ArrayList<String> getMediaList() {
 
 		ArrayList<String> mediaList = new ArrayList<String>();
@@ -42,11 +43,12 @@ public class FolderSource extends SourceBase implements Source {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Loads media file data into a byte array
 	 * 
-	 * @param mediaFileName File of media file to open
+	 * @param mediaFileName
+	 *            File of media file to open
 	 * @return Byte array of the media data
 	 */
 	public byte[] getMediaData(String mediaFileName) {
@@ -54,28 +56,38 @@ public class FolderSource extends SourceBase implements Source {
 			File mediaFile = new File(folderLocation + mediaFileName);
 			InputStream fileInput = new FileInputStream(mediaFile);
 			long length = mediaFile.length();
-			
+
 			byte[] bytes = new byte[(int) length];
-			
+
 			int offset = 0;
 			int numRead = 0;
 			// Read each individual byte from the file
-			while(offset < bytes.length && (numRead = fileInput.read(bytes, offset, bytes.length - offset)) >= 0) {
+			while (offset < bytes.length
+					&& (numRead = fileInput.read(bytes, offset, bytes.length
+							- offset)) >= 0) {
 				offset += numRead;
 			}
-			
+
 			if (offset < bytes.length) {
 				// Didn't completely read the file.
 				// Do nothing for now..
 			}
-			
+
 			fileInput.close();
 			return bytes;
-		} catch(IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-		} catch(NullPointerException e) {
+		} catch (NullPointerException e) {
 			e.printStackTrace();
 		}
 		return new byte[0];
+	}
+
+	/**
+	 * 
+	 * @return The folder location represented as a String.
+	 */
+	public String getFolderLocation() {
+		return folderLocation;
 	}
 }
