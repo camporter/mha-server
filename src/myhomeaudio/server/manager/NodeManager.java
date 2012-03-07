@@ -58,7 +58,7 @@ public class NodeManager implements NodeCommands {
 	 * Sends commands from the server to the node
 	 * 
 	 * @param command
-	 *            The command the server wants to send to the node\
+	 *            The command the server wants to send to the node
 	 * @param ipAddress
 	 *            The IP address of the node to send the command to
 	 * @param data
