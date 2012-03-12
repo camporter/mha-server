@@ -2,6 +2,8 @@ package myhomeaudio.server.manager;
 
 import java.util.ArrayList;
 
+import org.json.simple.JSONArray;
+
 import myhomeaudio.server.http.NodeWorker;
 import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
@@ -16,11 +18,12 @@ import myhomeaudio.server.node.NodeCommands;
 public class NodeManager implements NodeCommands {
 
 	private static NodeManager instance = null;
-	private static int nodeCount = 0;
-	private ArrayList<Node> nodeList = new ArrayList<Node>();
+	private static int nodeCount;
+	private ArrayList<Node> nodeList;
 
 	protected NodeManager() {
-
+		nodeList = new ArrayList<Node>();
+		nodeCount = 0;
 	}
 
 	/**
@@ -125,12 +128,24 @@ public class NodeManager implements NodeCommands {
 	 *         found.
 	 */
 	public Node getNodeByName(String name) {
-		// loops through nodeList loooking for node with matching name
+		// loops through nodeList looking for node with matching name
 		for (Node item : nodeList) {
 			if (item.getName().equals(name)) {
 				return item;
 			}
 		}
 		return null;
+	}
+	
+	public ArrayList<Node> getList() {
+		return new ArrayList<Node>(nodeList);
+	}
+	
+	public JSONArray getJSONArray() {
+		JSONArray nodeArray = new JSONArray();
+		for (Node n : nodeList) {
+			nodeArray.add(n);
+		}
+		return nodeArray;
 	}
 }

@@ -121,6 +121,11 @@ public class ClientManager {
 		}
 		return null;
 	}
+	
+	public boolean isValidClient(String sessionId) {
+		if (getClient(sessionId) != null) return true;
+		return false;
+	}
 
 	/**
 	 * Creates a session id that will be unique to a specific client.
@@ -136,5 +141,23 @@ public class ClientManager {
 		return DigestUtils.sha512Hex(client.getMacAddress()
 				+ client.getBluetoothName()
 				+ (new Timestamp(new Date().getTime())).toString());
+	}
+	
+	/**
+	 * Removes a client from the manager.
+	 * 
+	 * @param sessionId Corresponding session id for the client to remove.
+	 * @return Whether the removal succeeded.
+	 */
+	public synchronized boolean removeClient(String sessionId) {
+		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
+			DatabaseClient nextClient = i.next();
+			if (nextClient.getSessionId().equals(sessionId)) {
+				clientList.remove(nextClient);
+				return true;
+			}
+		}
+		return false;
+		
 	}
 }

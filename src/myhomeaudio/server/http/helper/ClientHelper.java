@@ -78,13 +78,19 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 
 						body.put("status", STATUS_OK);
 						body.put("session", sessionId);
-						
+
 						this.httpStatus = HttpStatus.SC_OK;
 					}
 				}
 
 			} else if (uriSegments.get(1).equals("logout")) {
 				System.out.println("Getting logout from client");
+
+				if (jsonRequest.containsKey("session")) {
+					if (cm.removeClient((String) jsonRequest.get("session"))) {
+						this.httpStatus = HttpStatus.SC_OK;
+					}
+				}
 
 			}
 		} catch (Exception e) {
@@ -93,5 +99,5 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 
 		return body.toString();
 	}
-	
+
 }

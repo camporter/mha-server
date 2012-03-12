@@ -1,5 +1,8 @@
 package myhomeaudio.server.node;
 
+import org.json.simple.JSONAware;
+import org.json.simple.JSONObject;
+
 import myhomeaudio.server.Room;
 
 /**
@@ -8,7 +11,7 @@ import myhomeaudio.server.Room;
  * @author Cameron
  * 
  */
-public class Node {
+public class Node implements JSONAware {
 	private int id;
 	private Room room;
 	private String ipAddress;
@@ -40,6 +43,14 @@ public class Node {
 	
 	public void setNodeId(int id) {
 		this.id = id;
+	}
+
+	@Override
+	public String toJSONString() {
+		JSONObject nodeJSON = new JSONObject();
+		nodeJSON.put("id", id);
+		nodeJSON.put("name", name);
+		return nodeJSON.toString();
 	}
 
 }
