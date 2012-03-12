@@ -92,7 +92,8 @@ public class ClientManager {
 	 * @return Returns a DatabaseClient object, or null if the id doesn't match
 	 *         any existing client.
 	 */
-	private synchronized DatabaseClient getClient(int id) {
+	//TODO changed visibilty for clientHelper
+	public synchronized DatabaseClient getClient(int id) {
 		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i
 				.hasNext();) {
 			DatabaseClient nextClient = i.next();

@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import myhomeaudio.server.client.Client;
+import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.manager.ClientManager;
@@ -91,7 +92,14 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 						this.httpStatus = HttpStatus.SC_OK;
 					}
 				}
-
+				
+			} else if (uriSegments.get(1).equals("locations")){
+				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("locations")){
+					DatabaseClient dClient = cm.getClient((Integer)jsonRequest.get("session"));
+					
+					body.put("status", STATUS_OK);
+					this.httpStatus = HttpStatus.SC_OK;
+				}	
 			}
 		} catch (Exception e) {
 			// Do nothing for now
