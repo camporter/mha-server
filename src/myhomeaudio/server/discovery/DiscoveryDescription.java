@@ -18,11 +18,13 @@ import java.net.UnknownHostException;
 public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 
 	private String instanceName;
+	private String address;
 	private int clientPort;
 	private int nodePort;
 
-	public DiscoveryDescription(String instanceName, int clientPort, int nodePort) {
+	public DiscoveryDescription(String instanceName, String address, int clientPort, int nodePort) {
 		this.instanceName = instanceName;
+		this.address = address;
 		this.clientPort = clientPort;
 		this.nodePort = nodePort;
 	}
@@ -69,6 +71,10 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 	public int getNodePort() {
 		return nodePort;
 	}
+	
+	public String getAddress() {
+		return address;
+	}
 
 	public void setClientPort(int clientPort) {
 		this.clientPort = clientPort;
@@ -76,6 +82,10 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 
 	public void setNodePort(int nodePort) {
 		this.nodePort = nodePort;
+	}
+	
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	/**
@@ -88,6 +98,8 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
 		buf.append(getEncodedInstanceName());
+		buf.append(" ");
+		buf.append(address);
 		buf.append(" ");
 		buf.append(Integer.toString(clientPort));
 		buf.append(" ");
@@ -138,8 +150,7 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 	 *         the given strings.
 	 * @see DiscoveryDescription#toString()
 	 */
-	public static DiscoveryDescription parse(String encodedInstanceName,
-			String clientPortAsString, String nodePortAsString) {
+	public static DiscoveryDescription parse(String encodedInstanceName, String addressAsString, String clientPortAsString, String nodePortAsString) {
 
 		DiscoveryDescription descriptor = new DiscoveryDescription();
 		
@@ -154,7 +165,10 @@ public class DiscoveryDescription implements Comparable<DiscoveryDescription> {
 			uee.printStackTrace();
 			return null;
 		}
-
+		
+		// Put the address
+		descriptor.setAddress(addressAsString);
+		
 		// Put the client and node ports
 		try {
 			int p = Integer.parseInt(clientPortAsString);

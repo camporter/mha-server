@@ -36,6 +36,8 @@ public class NodeHelper extends Helper implements HelperInterface, NodeCommands,
 			if (jsonRequest.containsKey("session")
 					&& cm.isValidClient((String) jsonRequest.get("session"))) {
 				body.put("nodes", nm.getJSONArray());
+				body.put("status", STATUS_OK);
+				
 				this.httpStatus = HttpStatus.SC_OK;
 			}
 		}

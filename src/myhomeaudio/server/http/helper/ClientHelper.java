@@ -1,11 +1,6 @@
 package myhomeaudio.server.http.helper;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.StringTokenizer;
-
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.http.HTTPMimeType;
@@ -15,16 +10,7 @@ import myhomeaudio.server.manager.UserManager;
 import myhomeaudio.server.node.NodeCommands;
 import myhomeaudio.server.user.User;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.MethodNotSupportedException;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 

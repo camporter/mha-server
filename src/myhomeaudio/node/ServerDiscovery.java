@@ -1,6 +1,8 @@
 package myhomeaudio.node;
 
-import java.net.InetAddress;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import myhomeaudio.server.discovery.DiscoverySearch;
 import myhomeaudio.server.discovery.DiscoverySearchListener;
@@ -9,33 +11,39 @@ import myhomeaudio.server.discovery.DiscoveryDescription;
 
 public class ServerDiscovery implements DiscoverySearchListener {
 	
-	DiscoverySearch browser;
+	DiscoverySearch search;
 	DiscoveryDescription descriptor;
 	
 	
 	public ServerDiscovery() {
-		browser = null;//new DiscoverySearch();
-		browser.addServiceBrowserListener(this);
-		browser.setServiceName("myhomeaudio");
+		search = new DiscoverySearch("myhomeaudio");
+		search.addServiceBrowserListener(this);
 	}
 	
 	public boolean doDiscovery() {
-		browser.startListener();
-		browser.startLookup();
+		search.startListener();
+		search.startLookup();
 		
 		try {
-			Thread.sleep(2000);
+			Thread.sleep(800);
 		} catch (InterruptedException e) {
 			// Nothing
 		}
 		
-		browser.stopLookup();
-		browser.stopListener();
+		search.stopLookup();
+		search.stopListener();
 		
 		if (descriptor == null) {
 			return false;
 		}
 		else {
+			try {
+				Socket s = new Socket(descriptor.getAddress(), descriptor.getNodePort());
+				s.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
 			return true;
 		}
 	}
@@ -49,6 +57,7 @@ public class ServerDiscovery implements DiscoverySearchListener {
 
 	@Override
 	public void serviceReply(DiscoveryDescription descriptor) {
+		System.out.println("RECEIVED!");
 		this.descriptor = descriptor;
 		
 	}

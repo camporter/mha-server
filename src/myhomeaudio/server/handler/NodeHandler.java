@@ -67,14 +67,6 @@ public class NodeHandler extends Thread {
 					}
 
 					nodeSocket.close();
-
-					// Give the request its own thread
-					/*
-					 * NodeRequest2 request = new NodeRequest2(nodeSocket);
-					 * 
-					 * System.out.println("Starting New NodeRequest");
-					 * request.start();
-					 */
 				}
 			} catch (IOException e) {
 				// e.printStackTrace();

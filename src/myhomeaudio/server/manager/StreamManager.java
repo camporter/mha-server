@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import myhomeaudio.server.database.Database;
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.stream.StreamBase;
-import myhomeaudio.server.stream.StreamThread;
 
 /**
  * Manages all the streams existing on the server.
@@ -19,14 +18,12 @@ import myhomeaudio.server.stream.StreamThread;
  */
 public class StreamManager implements StatusCode {
 
-	// stream types: 0 dataStream, 1 otherStream
-
 	private static StreamManager instance = null;
 
 	private ArrayList<StreamBase> streamList;
 	private Database db;
 
-	protected StreamManager(StreamThread thread) {
+	protected StreamManager() {
 		System.out.println("*** Starting StreamManager...");
 		this.db = Database.getInstance();
 		this.streamList = new ArrayList<StreamBase>();
@@ -34,14 +31,11 @@ public class StreamManager implements StatusCode {
 		if (!checkStreamsTable() && !updateStreamsFromDB()) {
 			System.exit(1); // Exit is there's a problem with the database.
 		}
-
-		thread.setStreamList(streamList); // Pass off the stream list to the
-											// StreamThread
 	}
 
-	public static synchronized StreamManager getInstance(StreamThread thread) {
+	public static synchronized StreamManager getInstance() {
 		if (instance == null) {
-			instance = new StreamManager(thread);
+			instance = new StreamManager();
 		}
 		return instance;
 	}

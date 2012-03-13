@@ -5,13 +5,11 @@ import java.net.UnknownHostException;
 
 import myhomeaudio.server.discovery.DiscoveryDescription;
 import myhomeaudio.server.discovery.DiscoveryResponder;
-import myhomeaudio.server.discovery.MDNSDiscoveryService;
 import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.handler.NodeHandler;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.manager.UserManager;
-import myhomeaudio.server.stream.StreamThread;
 
 /**
  * Entry point for the My Home Audio Server.
@@ -31,7 +29,7 @@ public class Server {
 	protected static NodeHandler nodeHandler;
 	protected static ClientHandler clientHandler;
 	protected static DiscoveryResponder discoveryResponder;
-	protected static StreamThread streamThread;
+	//protected static StreamThread streamThread;
 
 	/**
 	 * @param args
@@ -59,7 +57,7 @@ public class Server {
 		// startDiscoveryService();
 		startDiscoveryService();
 
-		startStreamThread();
+		//startStreamThread();
 
 		while (true) {
 			try {
@@ -80,10 +78,6 @@ public class Server {
 					System.out.println("Attempting to restart discovery...");
 					discoveryResponder.startResponder();
 				}
-				if (!streamThread.isAlive()) {
-					System.err.println("Stream Thread dead !");
-					System.exit(1); //
-				}
 			} catch (InterruptedException e) {
 				System.err.println("Exception: Server Exiting");
 				System.exit(0);
@@ -93,19 +87,25 @@ public class Server {
 
 	private static void startDiscoveryService() {
 		System.out.println("** Starting discovery services...");
-		DiscoveryDescription descriptor = new DiscoveryDescription(
-				"myhomeaudio", CLIENT_PORT, NODE_PORT);
-		discoveryResponder = new DiscoveryResponder("myhomeaudio", descriptor);
-		discoveryResponder.addShutdownHandler();
-		discoveryResponder.startResponder();
+		DiscoveryDescription descriptor;
+		try {
+			descriptor = new DiscoveryDescription(
+					"myhomeaudio", InetAddress.getLocalHost().getHostAddress(), CLIENT_PORT, NODE_PORT);
+			discoveryResponder = new DiscoveryResponder("myhomeaudio", descriptor);
+			discoveryResponder.addShutdownHandler();
+			discoveryResponder.startResponder();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
-	public static void startStreamThread() {
+	/*public static void startStreamThread() {
 		streamThread = new StreamThread();
 		streamThread.setName("StreamThread");
 		streamThread.start();
 
-	}
+	}*/
 
 	/**
 	 * Starts up a new NodeHandler thread

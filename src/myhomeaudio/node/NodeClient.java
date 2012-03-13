@@ -63,7 +63,7 @@ public class NodeClient {
 		ServerDiscovery sd = new ServerDiscovery();
 		if (!sd.doDiscovery()) {
 			System.err.println("Unable to discover server.");
-			System.exit(1);
+			//System.exit(1);
 		}
 		
 		//host = sd.getAddress().getHostAddress();

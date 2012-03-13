@@ -133,7 +133,6 @@ public final class DiscoverySearch implements Runnable {
 				receivedPacket = new DatagramPacket(buf, buf.length);
 				System.out.println("Waiting to receive...");
 				socket.receive(receivedPacket); // note timeout in effect
-
 				System.out.println("Found a packet");
 				if (isReplyPacket()) {
 
@@ -196,8 +195,8 @@ public final class DiscoverySearch implements Runnable {
 
 		StringTokenizer tokens = new StringTokenizer(
 				dataStr.substring(15 + getEncodedServiceName().length()));
-		if (tokens.countTokens() == 3) {
-			return DiscoveryDescription.parse(tokens.nextToken(),
+		if (tokens.countTokens() == 4) {
+			return DiscoveryDescription.parse(tokens.nextToken(), tokens.nextToken(),
 					tokens.nextToken(), tokens.nextToken());
 		} else {
 			return null;
