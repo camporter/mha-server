@@ -14,7 +14,8 @@ import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
 
-public class NodeHelper extends Helper implements HelperInterface, NodeCommands, StatusCode {
+public class NodeHelper extends Helper implements HelperInterface,
+		NodeCommands, StatusCode {
 
 	@Override
 	public String getOutput(ArrayList<String> uriSegments, String data) {
@@ -30,16 +31,22 @@ public class NodeHelper extends Helper implements HelperInterface, NodeCommands,
 		ClientManager cm = ClientManager.getInstance();
 
 		JSONObject jsonRequest = (JSONObject) JSONValue.parse(data);
-		if (uriSegments.get(1).equals("list")) {
+		
+		String method = uriSegments.get(1);
+		
+		if (method.equals("list")) {
 			// List the nodes
 
 			if (jsonRequest.containsKey("session")
 					&& cm.isValidClient((String) jsonRequest.get("session"))) {
 				body.put("nodes", nm.getJSONArray());
 				body.put("status", STATUS_OK);
-				
+
 				this.httpStatus = HttpStatus.SC_OK;
 			}
+		} else {
+			// Method not recognized
+			body.put("status", STATUS_BAD_METHOD);
 		}
 
 		return body.toString();

@@ -1,20 +1,60 @@
 package myhomeaudio.server.http.helper;
 
-public class StreamHelper extends Helper implements HelperInterface {
+import java.util.ArrayList;
 
-	public boolean play() {
-		return false;
+import myhomeaudio.server.http.HTTPMimeType;
+import myhomeaudio.server.http.StatusCode;
+import myhomeaudio.server.manager.ClientManager;
+import myhomeaudio.server.manager.StreamManager;
 
-	}
+import org.apache.http.HttpStatus;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
-	public boolean pause() {
-		return false;
+public class StreamHelper extends Helper implements HelperInterface, StatusCode {
 
-	}
+	@Override
+	public String getOutput(ArrayList<String> uriSegments, String data) {
+		// Set the content-type
+		this.contentType = HTTPMimeType.MIME_JSON;
+		this.httpStatus = HttpStatus.SC_BAD_REQUEST;
 
-	public boolean next() {
-		return false;
+		JSONObject body = new JSONObject();
+		body.put("status", STATUS_FAILED);
 
+		StreamManager sm = StreamManager.getInstance();
+		ClientManager cm = ClientManager.getInstance();
+
+		JSONObject jsonRequest = (JSONObject) JSONValue.parse(data);
+
+		String method = uriSegments.get(1);
+
+		// All of the Stream methods must have a session key
+		// Make sure the session key exists and is valid
+		if (jsonRequest.containsKey("session")
+				&& cm.isValidClient((String) jsonRequest.get("session"))) {
+			if (method.equals("play")) {
+				// Play a new media on the stream
+
+			} else if (method.equals("resume")) {
+				// Resume playing the currently paused media
+
+			} else if (method.equals("pause")) {
+				// Pause the currently playing media
+
+			} else if (method.equals("next")) {
+				// Start the next media in the stream
+			} else if (method.equals("previous")) {
+				// Start the previous media in the stream
+			} else {
+				// Method not recognized
+				body.put("status", STATUS_BAD_METHOD);
+			}
+		} else {
+			// Bad session
+			body.put("status", STATUS_BAD_SESSION);
+
+		}
 	}
 
 }
