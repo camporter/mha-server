@@ -8,6 +8,7 @@ import java.net.Socket;
 import myhomeaudio.server.http.helper.ClientHelper;
 import myhomeaudio.server.http.helper.NodeHelper;
 import myhomeaudio.server.http.helper.SongHelper;
+import myhomeaudio.server.http.helper.StreamHelper;
 import myhomeaudio.server.http.helper.UserHelper;
 
 import org.apache.http.ConnectionClosedException;
@@ -68,6 +69,7 @@ public class ClientHandler extends Thread {
 		httpRequestRegistry.register("/node*", new NodeHelper());
 		httpRequestRegistry.register("/client*", new ClientHelper());
 		httpRequestRegistry.register("/user*", new UserHelper());
+		httpRequestRegistry.register("/stream*", new StreamHelper());
 		// TODO: Add other helpers to the request registry
 
 		this.httpService = new HttpService(httpProcessor, new DefaultConnectionReuseStrategy(),

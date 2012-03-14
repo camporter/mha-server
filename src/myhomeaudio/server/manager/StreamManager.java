@@ -5,10 +5,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import myhomeaudio.server.database.Database;
 import myhomeaudio.server.http.StatusCode;
-import myhomeaudio.server.stream.StreamBase;
+import myhomeaudio.server.stream.Stream;
 
 /**
  * Manages all the streams existing on the server.
@@ -20,15 +24,15 @@ public class StreamManager implements StatusCode {
 
 	private static StreamManager instance = null;
 
-	private ArrayList<StreamBase> streamList;
+	private ArrayList<Stream> streamList;
 	private Database db;
 
 	protected StreamManager() {
 		System.out.println("*** Starting StreamManager...");
 		this.db = Database.getInstance();
-		this.streamList = new ArrayList<StreamBase>();
-
-		if (!checkStreamsTable() && !updateStreamsFromDB()) {
+		this.streamList = new ArrayList<Stream>();
+		
+		if (!checkStreamsTable() || !updateStreamsFromDB()) {
 			System.exit(1); // Exit is there's a problem with the database.
 		}
 	}
@@ -48,9 +52,8 @@ public class StreamManager implements StatusCode {
 		Connection conn = this.db.getConnection();
 		try {
 			Statement statement = conn.createStatement();
-			statement
-					.executeUpdate("CREATE TABLE IF NOT EXISTS "
-							+ "streams (id INTEGER PRIMARY KEY AUTOINCREMENT, type INTEGER );");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "streams (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT );");
 			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -67,15 +70,10 @@ public class StreamManager implements StatusCode {
 		try {
 			Statement statement = conn.createStatement();
 
-			ResultSet streamResults = statement
-					.executeQuery("SELECT * FROM streams;");
+			ResultSet streamResults = statement.executeQuery("SELECT * FROM streams;");
 			while (streamResults.next()) {
-				switch (streamResults.getInt("type")) {
-				case 0:
-				default:
-					break;
-				}
-
+				streamList.add(new Stream(streamResults.getInt("id"), streamResults
+						.getString("name")));
 			}
 			result = true;
 		} catch (SQLException e) {
@@ -83,6 +81,15 @@ public class StreamManager implements StatusCode {
 		}
 		this.db.unlock();
 
+		return result;
+	}
+
+	public JSONArray getListJSON() {
+		JSONArray result = new JSONArray();
+		Iterator<Stream> i = streamList.iterator();
+		while (i.hasNext()) {
+			result.add(i.next());
+		}
 		return result;
 	}
 

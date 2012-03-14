@@ -78,14 +78,14 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 						this.httpStatus = HttpStatus.SC_OK;
 					}
 				}
-				
-			} else if (uriSegments.get(1).equals("locations")){
-				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("locations")){
-					DatabaseClient dClient = cm.getClient((Integer)jsonRequest.get("session"));
-					
+
+			} else if (uriSegments.get(1).equals("locations")) {
+				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("locations")) {
+					DatabaseClient dClient = cm.getClient((Integer) jsonRequest.get("session"));
+
 					body.put("status", STATUS_OK);
 					this.httpStatus = HttpStatus.SC_OK;
-				}	
+				}
 			}
 		} catch (Exception e) {
 			// Do nothing for now

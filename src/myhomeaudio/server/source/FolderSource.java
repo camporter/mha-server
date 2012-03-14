@@ -6,13 +6,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import myhomeaudio.server.media.descriptor.MediaDescriptor;
+
 /**
  * A media source that provides various media files from a specified folder.
  * 
  * @author Cameron
  * 
  */
-public class FolderSource extends SourceBase implements Source {
+public class FolderSource extends ByteSource {
 
 	protected String folderLocation;
 	protected File folder;

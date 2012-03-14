@@ -6,6 +6,7 @@ import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.StreamManager;
+import myhomeaudio.server.stream.Stream;
 
 import org.apache.http.HttpStatus;
 import org.json.simple.JSONObject;
@@ -40,12 +41,26 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 				// Resume playing the currently paused media
 
 			} else if (method.equals("pause")) {
+				
 				// Pause the currently playing media
-
+				
 			} else if (method.equals("next")) {
+				
 				// Start the next media in the stream
 			} else if (method.equals("previous")) {
 				// Start the previous media in the stream
+			} else if (method.equals("list")) {
+				// List the streams on the server
+				body.put("streams", sm.getListJSON());
+				body.put("status", STATUS_OK);
+				this.httpStatus = HttpStatus.SC_OK;
+				
+			} else if (method.equals("add")) {
+				// Add a new stream to the server
+				
+			} else if (method.equals("remove")) {
+				// Remove a stream from the server
+				
 			} else {
 				// Method not recognized
 				body.put("status", STATUS_BAD_METHOD);
@@ -55,6 +70,7 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 			body.put("status", STATUS_BAD_SESSION);
 
 		}
+		return body.toString();
 	}
 
 }

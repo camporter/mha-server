@@ -3,46 +3,68 @@ package myhomeaudio.server.stream;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.json.simple.JSONAware;
+import org.json.simple.JSONObject;
+
 import myhomeaudio.server.media.descriptor.MediaDescriptor;
 import myhomeaudio.server.node.Node;
 import myhomeaudio.server.source.Source;
 
 /**
- * Abstract basis for 
+ * Abstract basis for
+ * 
  * @author Cameron
- *
+ * 
  */
-public abstract class StreamBase {
+public class Stream implements JSONAware {
 
+	protected int id;
+	protected String name;
 	protected Source source;
 	protected MediaDescriptor currentMedia;
 	protected ArrayList<Node> nodeList;
 	protected Date currentMediaTime;
-	
+
 	// mediaState keep the state of the music into account.
 	protected int mediaState;
-	
-	protected StreamBase() {
 
+	public Stream(int id, String name) {
+		this.id = id;
+		this.name = name;
 	}
-
+	
+	public Stream(Stream s) {
+		this.id = s.id();
+		this.name = s.name();
+	}
+	
+	public int id() {
+		return id;
+	}
+	public String name() {
+		return name;
+	}
+	
 	/**
-	 * Adds a Node to be tuned to this stream.
+	 * Adds a Node to be connected to this stream.
 	 * 
 	 * @param newNode
 	 *            The new Node to be added.
 	 * @return Returns true if the node is added successfully.
 	 */
 	public final boolean addNode(Node newNode) {
-		
-		if (newNode != null && nodeList.add(newNode)) return true;
-		
+
+		if (newNode != null && nodeList.add(newNode))
+			return true;
+
 		return false;
 	}
-	
+
 	/**
 	 * Changes the Source for the Stream.
-	 * @param newSource The new source for the stream to use.
+	 * 
+	 * @param newSource
+	 *            The new source for the stream to use.
 	 * @return Returns true if the new source is changed successfully.
 	 */
 	public boolean setSource(Source newSource) {
@@ -52,11 +74,19 @@ public abstract class StreamBase {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Updates the stream, such as the time and other details.
 	 */
 	public void update() {
+	}
+
+	@Override
+	public String toJSONString() {
+		JSONObject result = new JSONObject();
+		result.put("id", id);
+		result.put("name", name);
+		return result.toString();
 	}
 
 }

@@ -9,6 +9,7 @@ import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.handler.NodeHandler;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
+import myhomeaudio.server.manager.StreamManager;
 import myhomeaudio.server.manager.UserManager;
 
 /**
@@ -42,6 +43,7 @@ public class Server {
 		NodeManager.getInstance();
 		ClientManager.getInstance();
 		UserManager.getInstance();
+		StreamManager.getInstance();
 
 		// SongFiles songs = SongFiles.getInstance();
 		// songs.populateSongList();
