@@ -28,23 +28,34 @@ public class Stream implements JSONAware {
 	// mediaState keep the state of the music into account.
 	protected int mediaState;
 
-	public Stream(int id, String name) {
-		this.id = id;
+	public Stream(String name) {
 		this.name = name;
+		this.id = -1;
 	}
-	
+
+	public Stream(String name, int id) {
+		this.name = name;
+		this.id = id;
+	}
+
 	public Stream(Stream s) {
 		this.id = s.id();
 		this.name = s.name();
 	}
-	
+
+	public Stream(int id, Stream s) {
+		this(s);
+		this.id = id;
+	}
+
 	public int id() {
 		return id;
 	}
+
 	public String name() {
 		return name;
 	}
-	
+
 	/**
 	 * Adds a Node to be connected to this stream.
 	 * 
