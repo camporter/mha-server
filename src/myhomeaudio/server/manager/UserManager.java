@@ -108,14 +108,14 @@ public class UserManager implements StatusCode {
 	 * @return Registration status code.
 	 */
 	public int registerUser(User user) {
+		int result = STATUS_FAILED;
 		if (getUser(user.getUsername()) != null) {
-			return STATUS_REG_DUPLICATE;
+			result = STATUS_REG_DUPLICATE;
 		} else if (user.getPassword().length() < 0) {
 			/*
 			 * TODO: Set password requirements somewhere sane and do further
 			 * checking here.
 			 */
-			return STATUS_FAILED;
 		} else {
 			int newId = -1;
 
@@ -135,16 +135,44 @@ public class UserManager implements StatusCode {
 				statement.setString(1, user.getUsername());
 				ResultSet resultSet = statement.executeQuery();
 				newId = resultSet.getInt("id");
+				
+				// Add the registered user to the userList with their id
+				this.userList.add(new DatabaseUser(newId, user));
+				
+				result = STATUS_OK;
 			} catch (SQLException e) {
 				e.printStackTrace();
-				return STATUS_FAILED;
 			}
 			this.db.unlock();
-
-			// Add the registered user to the userList with their id
-			this.userList.add(new DatabaseUser(newId, user));
-			return STATUS_OK;
 		}
+		
+		return result;
+	}
+	
+	public int removeUser(User user) {
+		int result = STATUS_FAILED;
+		
+		if (user != null) {
+			DatabaseUser dbUser = getMatchingUser(user);
+			if (dbUser != null) {
+				this.db.lock();
+				Connection conn = this.db.getConnection();
+				try {
+					PreparedStatement pstatement = conn.prepareStatement("DELETE FROM users WHERE id = ?;");
+					pstatement.setInt(1, dbUser.getId());
+					pstatement.executeUpdate();
+					
+					userList.remove(dbUser);
+					
+					result = STATUS_OK;
+				} catch (SQLException e) {
+					e.printStackTrace();
+					result = STATUS_FAILED;
+				}
+				this.db.unlock();
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -209,8 +237,7 @@ public class UserManager implements StatusCode {
 	private DatabaseUser getMatchingUser(User user) {
 		for (Iterator<DatabaseUser> i = this.userList.iterator(); i.hasNext();) {
 			DatabaseUser nextUser = i.next();
-			if (nextUser.getUsername().equals(user.getUsername())
-					&& nextUser.getPassword().equals(user.getPassword())) {
+			if (nextUser.getUsername().equals(user.getUsername())) {
 				// Usernames match
 				return nextUser;
 			}

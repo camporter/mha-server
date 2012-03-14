@@ -88,9 +88,11 @@ public class StreamManager implements StatusCode {
 	}
 
 	public int addStream(Stream stream) {
-		if (getStream(stream.name()) != null) {
+		int result = STATUS_FAILED;
+		
+		if (stream != null && getStream(stream.name()) != null) {
 			// Stream with that name already exists
-			return STATUS_REG_DUPLICATE;
+			result = STATUS_REG_DUPLICATE;
 		} else {
 			int newId = -1;
 			
@@ -98,26 +100,55 @@ public class StreamManager implements StatusCode {
 			this.db.lock();
 			Connection conn = this.db.getConnection();
 			try {
-				PreparedStatement pstatement = conn.prepareStatement("INSER INTO streams (name) VALUES (?);");
+				PreparedStatement pstatement = conn.prepareStatement("INSERT INTO streams (name) VALUES (?);");
 				pstatement.setString(1, stream.name());
 				pstatement.executeUpdate();
 				
 				// We want the id of the new Stream, so let's get it back
-				PreparedStatement statement = conn.prepareStatement("SELECT id FROM streams WHERE name = ? LIMIT 1");
+				PreparedStatement statement = conn.prepareStatement("SELECT id FROM streams WHERE name = ? LIMIT 1;");
 				statement.setString(1, stream.name());
 				ResultSet resultSet = statement.executeQuery();
 				newId = resultSet.getInt("id");
+				
+				// Add the new Stream to the streamList with their new id
+				this.streamList.add(new Stream (newId, stream));
+				
+				result = STATUS_OK;
 			} catch (SQLException e) {
 				e.printStackTrace();
-				return STATUS_FAILED;
 			}
 			this.db.unlock();
-			
-			// Add the new Stream to the streamList with their new id
-			this.streamList.add(new Stream (newId, stream));
-			
-			return STATUS_OK;
 		}
+		
+		return result;
+	}
+	
+	public int removeStream(Stream stream) {
+		int result = STATUS_FAILED;
+		
+		
+		if (stream != null) {
+			Stream dbStream = getStream(stream.name());
+			if (dbStream != null) {
+				this.db.lock();
+				Connection conn = this.db.getConnection();
+				try {
+					PreparedStatement pstatement = conn.prepareStatement("DELETE FROM streams WHERE id = ?;");
+					pstatement.setInt(1, dbStream.id());
+					pstatement.executeUpdate();
+					
+					streamList.remove(dbStream);
+					
+					result = STATUS_OK;
+				} catch (SQLException e) {
+					e.printStackTrace();
+					result = STATUS_FAILED;
+				}
+				this.db.unlock();
+			}
+		}
+		
+		return result;
 	}
 
 	/**
