@@ -55,8 +55,12 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 				body.put("status", STATUS_OK);
 				this.httpStatus = HttpStatus.SC_OK;
 				
-			} else if (method.equals("add")) {
+			} else if (method.equals("add") && jsonRequest.containsKey("stream")) {
 				// Add a new stream to the server
+				JSONObject streamObj = (JSONObject) jsonRequest.get("stream");
+				Stream newStream = new Stream((String) streamObj.get("name"));
+				
+				body.put("status", sm.addStream(newStream));
 				
 			} else if (method.equals("remove")) {
 				// Remove a stream from the server
