@@ -87,6 +87,12 @@ public class StreamManager implements StatusCode {
 		return result;
 	}
 
+	/**
+	 * Adds a Stream to the StreamManager.
+	 * 
+	 * @param stream Stream object representing the Stream to add.
+	 * @return StatusCode which shows the outcome of the operation.
+	 */
 	public int addStream(Stream stream) {
 		int result = STATUS_FAILED;
 		
@@ -123,6 +129,12 @@ public class StreamManager implements StatusCode {
 		return result;
 	}
 	
+	/**
+	 * Removes a Stream from the manager.
+	 * 
+	 * @param stream Stream object representing the Stream to remove.
+	 * @return StatusCode which shows the outcome of the operation.
+	 */
 	public int removeStream(Stream stream) {
 		int result = STATUS_FAILED;
 		

@@ -40,7 +40,7 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 			} else if (method.equals("resume")) {
 				// Resume playing the currently paused media
 
-			} else if (method.equals("pause")) {
+			} else if (method.equals("pause") && jsonRequest.containsKey("stream")) {
 				
 				// Pause the currently playing media
 				
