@@ -62,7 +62,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 								(String) jsonRequest.get("bluetoothname"));
 
 						String sessionId = cm.addClient(lClient);
-
+						
 						body.put("status", STATUS_OK);
 						body.put("session", sessionId);
 
@@ -82,7 +82,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 			} else if (uriSegments.get(1).equals("locations")) {
 				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("locations")) {
 					DatabaseClient dClient = cm.getClient((Integer) jsonRequest.get("session"));
-
+					dClient.updateLocations((String)jsonRequest.get("locations"));
 					body.put("status", STATUS_OK);
 					this.httpStatus = HttpStatus.SC_OK;
 				}

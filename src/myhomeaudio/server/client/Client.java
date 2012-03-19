@@ -1,5 +1,10 @@
 package myhomeaudio.server.client;
 
+import java.util.ArrayList;
+
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import myhomeaudio.server.user.User;
 
 /**
@@ -14,13 +19,14 @@ public class Client {
 	private String ipAddress;
 	private String bluetoothName;
 	private User user;
-	private String sessionId;
+	private String locations;
 	
 	public Client(User user, String macAddress, String ipAddress, String bluetoothName) {
 		this.user = new User(user);
 		this.macAddress = macAddress;
 		this.ipAddress = ipAddress;
 		this.bluetoothName = bluetoothName;
+		this.locations = null;
 	}
 	
 	public Client(String macAddress, String ipAddress, String bluetoothName) {
@@ -28,6 +34,7 @@ public class Client {
 		this.macAddress = macAddress;
 		this.ipAddress = ipAddress;
 		this.bluetoothName = bluetoothName;
+		this.locations = null;
 	}
 	
 	public Client(Client client) {
@@ -35,6 +42,7 @@ public class Client {
 		this.macAddress = client.getMacAddress();
 		this.ipAddress = client.getIpAddress();
 		this.bluetoothName = client.getBluetoothName();
+		this.locations = null;
 	}
 
 	public String getIpAddress() {
@@ -56,5 +64,13 @@ public class Client {
 	
 	public void setCurrentUser(User user) {
 		this.user = new User(user);
+	}
+	
+	public String getLocations(){
+		return locations;
+	}
+	
+	public void updateLocations(String locations){
+		this.locations = locations;
 	}
 }

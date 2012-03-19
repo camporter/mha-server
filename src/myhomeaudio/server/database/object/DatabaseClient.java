@@ -1,5 +1,7 @@
 package myhomeaudio.server.database.object;
 
+import java.util.ArrayList;
+
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.user.User;
 
@@ -44,6 +46,13 @@ public class DatabaseClient extends DatabaseObject<Client> {
 
 	public void setCurrentUser(User user) {
 		this.object.setCurrentUser(user);
+	}
+	
+	public String getLocations(){
+		return this.object.getLocations();
+	}
+	public void updateLocations(String locations) {
+		this.object.updateLocations(locations);
 	}
 
 }
