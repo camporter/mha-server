@@ -13,7 +13,7 @@ import myhomeaudio.server.Room;
  */
 public class Node implements JSONAware {
 	private int id;
-	private Room room;
+	//private Room room;
 	private String ipAddress;
 	private String name;
 
