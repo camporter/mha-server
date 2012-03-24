@@ -12,7 +12,7 @@ import myhomeaudio.server.Room;
  * 
  */
 public class Node implements JSONAware {
-	private int id;
+	private String id;
 	//private Room room;
 	private String ipAddress;
 	private String name;
@@ -36,12 +36,16 @@ public class Node implements JSONAware {
 	public String getName() {
 		return this.name;
 	}
+	
+	public String getId(){
+		return this.id;
+	}
 
 	public void setName(String name) {
 		this.name = name;
 	}
 	
-	public void setNodeId(int id) {
+	public void setNodeId(String id) {
 		this.id = id;
 	}
 
