@@ -3,7 +3,6 @@ package myhomeaudio.server.locations.layout;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import myhomeaudio.server.locations.DeviceObject;
 import myhomeaudio.server.node.Node;
 
 /**

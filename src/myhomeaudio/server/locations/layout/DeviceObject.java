@@ -1,4 +1,4 @@
-package myhomeaudio.server.locations;
+package myhomeaudio.server.locations.layout;
 
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;

@@ -8,7 +8,7 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import myhomeaudio.server.locations.DeviceObject;
+import myhomeaudio.server.locations.layout.DeviceObject;
 import myhomeaudio.server.user.User;
 
 /**
@@ -24,6 +24,7 @@ public class Client {
 	private String bluetoothName;
 	private User user;
 	private ArrayList<DeviceObject> location;//current location data
+	
 	
 	
 	

@@ -5,6 +5,7 @@ import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
+import myhomeaudio.server.locations.Triangulation;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.UserManager;
 import myhomeaudio.server.node.NodeCommands;
@@ -81,19 +82,23 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 
 			} else if (uriSegments.get(1).equals("locations")) {
 				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("locations")) {
-					DatabaseClient dClient = cm.getClient((Integer) jsonRequest.get("session"));
+					DatabaseClient dClient = cm.getClient((String) jsonRequest.get("session"));
 					if(dClient.updateLocations((String)jsonRequest.get("locations"))){
 						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;
+						//TODO call triangulation 
 					}	
 				}
 			} else if(uriSegments.get(1).equals("initialConfig")){
 				//TODO store config information in db
 				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("entries")) {
-					DatabaseClient dClient = cm.getClient((Integer) jsonRequest.get("session"));
+					if(cm.isValidClient((String)jsonRequest.get("session"))){
 					
-					body.put("status", STATUS_OK);
-					this.httpStatus = HttpStatus.SC_OK;
+						Triangulation tn = Triangulation.getInstance();
+						
+						body.put("status", STATUS_OK);
+						this.httpStatus = HttpStatus.SC_OK;
+					}
 				}
 			}
 		} catch (Exception e) {
