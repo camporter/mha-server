@@ -115,7 +115,6 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 							}
 						}
 						
-						//{"session":sessionID, "entries": [{"id":id, "entries":[{"id":id, "min":minValue, "max":maxValue},...]}, ... }]}
 						
 						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;

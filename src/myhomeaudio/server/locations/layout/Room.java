@@ -3,6 +3,10 @@ package myhomeaudio.server.locations.layout;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
 import myhomeaudio.server.node.Node;
 
 /**
@@ -19,6 +23,11 @@ public class Room {
 		this.id = id;
 	}
 	
+	public Room(String id, ArrayList<NodeSignalRange> nsr){
+		this.interference = nsr;
+		this.id = id;
+	}
+	
 	public boolean addNodeRange(NodeSignalRange nodeSignalRange){
 		if(!id.equals(nodeSignalRange.getNodeId())){
 			if(!containsNode(nodeSignalRange.getNodeId())){
@@ -27,6 +36,19 @@ public class Room {
 			}
 		}
 		return false;
+	}
+	
+	public static ArrayList<NodeSignalRange> parseNodeSignals(String data){
+		ArrayList<NodeSignalRange> interference = new ArrayList<NodeSignalRange>();
+		Object o = (Object)JSONValue.parse(data);
+		JSONArray jArray = (JSONArray)(o);
+		//NodeSignalRange[] nsr = (NodeSignalRange[]) jArray.toArray();
+		JSONObject jObject;
+		for(Object object : jArray){
+			jObject = (JSONObject)object;
+			interference.add(new NodeSignalRange((String)jObject.get("id"), ((Long)jObject.get("min")).intValue(), ((Long)jObject.get("max")).intValue()));
+		}
+		return interference;
 	}
 	
 	private boolean containsNode(String id){
