@@ -156,6 +156,25 @@ public class NodeManager implements NodeCommands {
 		}
 		return null;
 	}
+	
+	/**
+	 * Get a Node object with the given node id
+	 * 
+	 * @param id
+	 *            The id of the node to be searched for.
+	 * @return The node with the matching id. Returns null if not node is
+	 *         found.
+	 */
+	public Node getNodeById(String id) {
+		// loops through nodeList looking for node with matching name
+		for (Node item : nodeList) {
+			if (item.getId().equals(id)) {
+				return item;
+			}
+		}
+		return null;
+	}
+	
 	public ArrayList<Node> getList() {
 		return new ArrayList<Node>(nodeList);
 	}

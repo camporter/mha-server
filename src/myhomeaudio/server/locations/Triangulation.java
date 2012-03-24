@@ -21,20 +21,38 @@ public class Triangulation {
 		}
 		return instance;
 	}
-	public boolean addNodeConfiguration(){
-		
-		return true;
+	public void addNodeConfiguration(ClientInitialization client){
+		ClientInitialization clientInitial = getClientInitialization(client.getClient());
+		if(clientInitial == null){
+			clients.add(client);
+		}else{
+			removeClientInitialization(clientInitial.getClient());
+			clients.add(client);
+		}
+		for(ClientInitialization clients : this.clients){
+			
+		}
 	}
 	
-	public ClientInitialization getClientInitialization(Client client){
-		for (Iterator<ClientInitialization> i = this.clients.iterator(); 
-			i.hasNext();) {
-			ClientInitialization checkClient = i.next();
-		if (checkClient.getClient()) {
-			return new DatabaseClient(nextClient);
-		}}
+	public ClientInitialization getClientInitialization(String macAddress){
+	
+		for(ClientInitialization clients : this.clients){
+			if(clients.isClient(macAddress)){
+				return clients;
+			}
+		}
+		return null;
 	}
+	
+	public void removeClientInitialization(String macAddress){
+		for(ClientInitialization client : this.clients){
+			if(client.getClient().equals(macAddress)){
+				this.clients.remove(client);
+			}
+		}
+	}
+	
 	public boolean isPresent(Client client){
-		
+		return false;
 	}
 }

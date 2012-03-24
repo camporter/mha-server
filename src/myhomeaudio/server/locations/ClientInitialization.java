@@ -22,6 +22,10 @@ public class ClientInitialization {
 		return true;
 	}
 	
+	public boolean isClient(String clientMac){
+		return this.clientMac.equals(clientMac);
+	}
+	
 	public String getClient(){
 		return clientMac;
 	}

@@ -6,12 +6,17 @@ import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.locations.Triangulation;
+import myhomeaudio.server.locations.layout.NodeSignalRange;
+import myhomeaudio.server.locations.layout.Room;
 import myhomeaudio.server.manager.ClientManager;
+import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.manager.UserManager;
+import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
 import myhomeaudio.server.user.User;
 
 import org.apache.http.HttpStatus;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -95,6 +100,22 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 					if(cm.isValidClient((String)jsonRequest.get("session"))){
 					
 						Triangulation tn = Triangulation.getInstance();
+						NodeManager nm = NodeManager.getInstance();
+						JSONArray rooms = (JSONArray)((Object)(JSONValue.parse((String)jsonRequest.get("entries"))));
+						
+						while(!rooms.isEmpty()){
+							Node node = nm.getNodeById((String)((JSONObject)rooms.remove(0)).get("id"));
+							
+							JSONArray nodeSignals = (JSONArray)((Object)(JSONValue.parse((String)jsonRequest.get("entries"))));
+							Room room = new Room(node.getId());
+							while(!nodeSignals.isEmpty()){
+								JSONObject jObject = (JSONObject) nodeSignals.remove(0);
+								room.addNodeRange(new NodeSignalRange((String)jObject.get("id"),
+											(Integer)jObject.get("min"), (Integer)jObject.get("max")));
+							}
+						}
+						
+						//{"session":sessionID, "entries": [{"id":id, "entries":[{"id":id, "min":minValue, "max":maxValue},...]}, ... }]}
 						
 						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;
