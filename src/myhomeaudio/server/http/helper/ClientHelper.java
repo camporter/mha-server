@@ -5,6 +5,7 @@ import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
+import myhomeaudio.server.locations.ClientInitialization;
 import myhomeaudio.server.locations.Triangulation;
 import myhomeaudio.server.locations.layout.NodeSignalRange;
 import myhomeaudio.server.locations.layout.Room;
@@ -101,21 +102,24 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 					
 						Triangulation tn = Triangulation.getInstance();
 						NodeManager nm = NodeManager.getInstance();
-						JSONArray rooms = (JSONArray)((Object)(JSONValue.parse((String)jsonRequest.get("entries"))));
+						JSONArray rooms = (JSONArray)(jsonRequest.get("entries"));
 						
+						ArrayList<Room> addedRooms = new ArrayList<Room>();
 						while(!rooms.isEmpty()){
-							Node node = nm.getNodeById((String)((JSONObject)rooms.remove(0)).get("id"));
+							JSONObject jOb = (JSONObject)rooms.remove(0);
+							Node node = nm.getNodeById((String)(jOb.get("id")));
 							
-							JSONArray nodeSignals = (JSONArray)((Object)(JSONValue.parse((String)jsonRequest.get("entries"))));
+							JSONArray nodeSignals = (JSONArray)(jOb.get("entries"));
 							Room room = new Room(node.getId());
 							while(!nodeSignals.isEmpty()){
 								JSONObject jObject = (JSONObject) nodeSignals.remove(0);
 								room.addNodeRange(new NodeSignalRange((String)jObject.get("id"),
-											(Integer)jObject.get("min"), (Integer)jObject.get("max")));
+											((Long)jObject.get("min")).intValue(), ((Long)jObject.get("max")).intValue()));
 							}
+							addedRooms.add(room);	
 						}
-						
-						
+						DatabaseClient dbc = cm.getClient((String)jsonRequest.get("session"));
+						tn.addNodeConfiguration(new ClientInitialization(dbc.getMacAddress(), addedRooms));
 						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;
 					}
