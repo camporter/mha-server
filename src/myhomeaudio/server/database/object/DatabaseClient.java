@@ -51,8 +51,8 @@ public class DatabaseClient extends DatabaseObject<Client> {
 	public String getLocations(){
 		return this.object.getLocations();
 	}
-	public void updateLocations(String locations) {
-		this.object.updateLocations(locations);
+	public boolean updateLocations(String locations) {
+		return this.object.updateLocations(locations);
 	}
 
 }

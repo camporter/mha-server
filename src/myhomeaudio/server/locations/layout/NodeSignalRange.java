@@ -1,11 +1,18 @@
 package myhomeaudio.server.locations.layout;
 
-public class NodeRange {
-	private final String id;
+/**
+ * Stores node rssi ranges, the
+ * maximum and minimum values
+ * obtains for a particular node
+ *
+ */
+
+public class NodeSignalRange {
+	private final String id; //node id
 	private final int min;
 	private final int max;
 	
-	public NodeRange(String id, int min, int max){
+	public NodeSignalRange(String id, int min, int max){
 		this.id = id;
 		this.min = min;
 		this.max = max;

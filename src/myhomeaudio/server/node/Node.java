@@ -3,8 +3,6 @@ package myhomeaudio.server.node;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
-import myhomeaudio.server.Room;
-
 /**
  * Represents a physical node.
  * 

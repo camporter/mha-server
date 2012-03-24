@@ -82,11 +82,13 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 			} else if (uriSegments.get(1).equals("locations")) {
 				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("locations")) {
 					DatabaseClient dClient = cm.getClient((Integer) jsonRequest.get("session"));
-					dClient.updateLocations((String)jsonRequest.get("locations"));
-					body.put("status", STATUS_OK);
-					this.httpStatus = HttpStatus.SC_OK;
+					if(dClient.updateLocations((String)jsonRequest.get("locations"))){
+						body.put("status", STATUS_OK);
+						this.httpStatus = HttpStatus.SC_OK;
+					}	
 				}
 			} else if(uriSegments.get(1).equals("initialConfig")){
+				//TODO store config information in db
 				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("entries")) {
 					DatabaseClient dClient = cm.getClient((Integer) jsonRequest.get("session"));
 					
