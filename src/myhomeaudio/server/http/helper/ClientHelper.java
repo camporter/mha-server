@@ -34,6 +34,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public String getOutput(ArrayList<String> uriSegments, String data) {
 
 		// Set the content-type
