@@ -11,7 +11,7 @@ import org.json.simple.JSONObject;
  */
 public class Node implements JSONAware {
 	private String id;
-	//private Room room;
+	//private NodeSignalBoundary room;
 	private String ipAddress;
 	private String name;
 

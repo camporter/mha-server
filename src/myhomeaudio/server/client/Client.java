@@ -9,6 +9,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import myhomeaudio.server.locations.layout.DeviceObject;
+import myhomeaudio.server.node.Node;
 import myhomeaudio.server.user.User;
 
 /**
@@ -22,19 +23,13 @@ public class Client {
 	private String macAddress;
 	private String ipAddress;
 	private String bluetoothName;
-	private User user;
-	private ArrayList<DeviceObject> location;//current location data
-	
-	
-	
-	
+	private User user;	
 	
 	public Client(User user, String macAddress, String ipAddress, String bluetoothName) {
 		this.user = new User(user);
 		this.macAddress = macAddress;
 		this.ipAddress = ipAddress;
 		this.bluetoothName = bluetoothName;
-		this.location = null;
 	}
 	
 	public Client(String macAddress, String ipAddress, String bluetoothName) {
@@ -42,7 +37,6 @@ public class Client {
 		this.macAddress = macAddress;
 		this.ipAddress = ipAddress;
 		this.bluetoothName = bluetoothName;
-		this.location = null;
 	}
 	
 	public Client(Client client) {
@@ -50,7 +44,6 @@ public class Client {
 		this.macAddress = client.getMacAddress();
 		this.ipAddress = client.getIpAddress();
 		this.bluetoothName = client.getBluetoothName();
-		this.location = null;
 	}
 
 	public String getIpAddress() {
@@ -72,25 +65,5 @@ public class Client {
 	
 	public void setCurrentUser(User user) {
 		this.user = new User(user);
-	}
-	
-	public String getLocations(){
-		JSONArray jArray = new JSONArray();
-		while(!location.isEmpty()){
-			jArray.add(location.remove(0).toJSONString());
-		}
-		return jArray.toJSONString();
-	}
-	
-	public boolean updateLocations(String location){
-		this.location = new ArrayList<DeviceObject>();
-		Object object = JSONValue.parse(location);
-		JSONArray jArray = (JSONArray)object;
-		JSONObject jObject;
-		while(!jArray.isEmpty()){
-			jObject = (JSONObject) jArray.remove(0);
-			this.location.add(new DeviceObject((String)jObject.get("id"), ((Long)jObject.get("rssi")).intValue()));
-		}	
-		return true;
 	}
 }

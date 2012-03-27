@@ -3,22 +3,22 @@ package myhomeaudio.server.locations;
 import java.util.ArrayList;
 
 import myhomeaudio.server.client.Client;
-import myhomeaudio.server.locations.layout.Room;
+import myhomeaudio.server.locations.layout.NodeSignalBoundary;
 
 public class ClientInitialization {
 	//TODO use something other than macAddress of client
 	private final String clientMac;
-	private ArrayList<Room> rooms;
+	private ArrayList<NodeSignalBoundary> nodeSignalBoundaries;
 	
-	public ClientInitialization(String clientMac, ArrayList<Room> rooms){
+	public ClientInitialization(String clientMac, ArrayList<NodeSignalBoundary> nodeSignalBoundaries){
 		this.clientMac = clientMac;
-		this.rooms = rooms;
+		this.nodeSignalBoundaries = nodeSignalBoundaries;
 	}
 	
-	public boolean updateRoomConfig(ArrayList<Room> rooms){
-		if(rooms == null)
+	public boolean updateRoomConfig(ArrayList<NodeSignalBoundary> nodeSignalBoundaries){
+		if(nodeSignalBoundaries == null)
 			return false;
-		this.rooms = rooms;
+		this.nodeSignalBoundaries = nodeSignalBoundaries;
 		return true;
 	}
 	

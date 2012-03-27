@@ -8,7 +8,7 @@ import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.locations.ClientInitialization;
 import myhomeaudio.server.locations.Triangulation;
 import myhomeaudio.server.locations.layout.NodeSignalRange;
-import myhomeaudio.server.locations.layout.Room;
+import myhomeaudio.server.locations.layout.NodeSignalBoundary;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.manager.UserManager;
@@ -90,7 +90,9 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 			} else if (uriSegments.get(1).equals("locations")) {
 				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("locations")) {
 					DatabaseClient dClient = cm.getClient((String) jsonRequest.get("session"));
-					if(dClient.updateLocations((String)jsonRequest.get("locations"))){
+					//use Triangulation to find closest node
+					//set closest node
+					if(dClient.updateLocation((String)jsonRequest.get("locations"))){
 						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;
 						//TODO call triangulation 
@@ -105,19 +107,19 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 						NodeManager nm = NodeManager.getInstance();
 						JSONArray rooms = (JSONArray)(jsonRequest.get("entries"));
 						
-						ArrayList<Room> addedRooms = new ArrayList<Room>();
+						ArrayList<NodeSignalBoundary> addedRooms = new ArrayList<NodeSignalBoundary>();
 						while(!rooms.isEmpty()){
 							JSONObject jOb = (JSONObject)rooms.remove(0);
 							Node node = nm.getNodeById((String)(jOb.get("id")));
 							
 							JSONArray nodeSignals = (JSONArray)(jOb.get("entries"));
-							Room room = new Room(node.getId());
+							NodeSignalBoundary nodeSignalBoundary = new NodeSignalBoundary(node.getId());
 							while(!nodeSignals.isEmpty()){
 								JSONObject jObject = (JSONObject) nodeSignals.remove(0);
-								room.addNodeRange(new NodeSignalRange((String)jObject.get("id"),
+								nodeSignalBoundary.addNodeRange(new NodeSignalRange((String)jObject.get("id"),
 											((Long)jObject.get("min")).intValue(), ((Long)jObject.get("max")).intValue()));
 							}
-							addedRooms.add(room);	
+							addedRooms.add(nodeSignalBoundary);	
 						}
 						DatabaseClient dbc = cm.getClient((String)jsonRequest.get("session"));
 						tn.addNodeConfiguration(new ClientInitialization(dbc.getMacAddress(), addedRooms));

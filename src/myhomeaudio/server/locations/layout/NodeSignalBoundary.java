@@ -14,16 +14,16 @@ import myhomeaudio.server.node.Node;
  * 
  *
  */
-public class Room {
-	private final String id;
+public class NodeSignalBoundary {
+	private final String id; //node within room
 	private ArrayList<NodeSignalRange> interference;
 	
-	public Room(String id){
+	public NodeSignalBoundary(String id){
 		this.interference = new ArrayList<NodeSignalRange>();
 		this.id = id;
 	}
 	
-	public Room(String id, ArrayList<NodeSignalRange> nsr){
+	public NodeSignalBoundary(String id, ArrayList<NodeSignalRange> nsr){
 		this.interference = nsr;
 		this.id = id;
 	}
