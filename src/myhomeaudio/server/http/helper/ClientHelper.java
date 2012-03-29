@@ -5,12 +5,19 @@ import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
+import myhomeaudio.server.locations.ClientInitialization;
+import myhomeaudio.server.locations.Triangulation;
+import myhomeaudio.server.locations.layout.NodeSignalRange;
+import myhomeaudio.server.locations.layout.NodeSignalBoundary;
 import myhomeaudio.server.manager.ClientManager;
+import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.manager.UserManager;
+import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
 import myhomeaudio.server.user.User;
 
 import org.apache.http.HttpStatus;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -27,6 +34,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public String getOutput(ArrayList<String> uriSegments, String data) {
 
 		// Set the content-type
@@ -81,10 +89,43 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 
 			} else if (uriSegments.get(1).equals("locations")) {
 				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("locations")) {
-					DatabaseClient dClient = cm.getClient((Integer) jsonRequest.get("session"));
-					dClient.updateLocations((String)jsonRequest.get("locations"));
-					body.put("status", STATUS_OK);
-					this.httpStatus = HttpStatus.SC_OK;
+					DatabaseClient dClient = cm.getClient((String) jsonRequest.get("session"));
+					//use Triangulation to find closest node
+					//set closest node
+					if(dClient.updateLocation((String)jsonRequest.get("locations"))){
+						body.put("status", STATUS_OK);
+						this.httpStatus = HttpStatus.SC_OK;
+						//TODO call triangulation 
+					}	
+				}
+			} else if(uriSegments.get(1).equals("initialConfig")){
+				//TODO store config information in db
+				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("entries")) {
+					if(cm.isValidClient((String)jsonRequest.get("session"))){
+					
+						Triangulation tn = Triangulation.getInstance();
+						NodeManager nm = NodeManager.getInstance();
+						JSONArray rooms = (JSONArray)(jsonRequest.get("entries"));
+						
+						ArrayList<NodeSignalBoundary> addedRooms = new ArrayList<NodeSignalBoundary>();
+						while(!rooms.isEmpty()){
+							JSONObject jOb = (JSONObject)rooms.remove(0);
+							Node node = nm.getNodeById((String)(jOb.get("id")));
+							
+							JSONArray nodeSignals = (JSONArray)(jOb.get("entries"));
+							NodeSignalBoundary nodeSignalBoundary = new NodeSignalBoundary(node.getId());
+							while(!nodeSignals.isEmpty()){
+								JSONObject jObject = (JSONObject) nodeSignals.remove(0);
+								nodeSignalBoundary.addNodeRange(new NodeSignalRange((String)jObject.get("id"),
+											((Long)jObject.get("min")).intValue(), ((Long)jObject.get("max")).intValue()));
+							}
+							addedRooms.add(nodeSignalBoundary);	
+						}
+						DatabaseClient dbc = cm.getClient((String)jsonRequest.get("session"));
+						tn.addNodeConfiguration(new ClientInitialization(dbc.getMacAddress(), addedRooms));
+						body.put("status", STATUS_OK);
+						this.httpStatus = HttpStatus.SC_OK;
+					}
 				}
 			}
 		} catch (Exception e) {

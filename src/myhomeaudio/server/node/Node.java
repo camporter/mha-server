@@ -3,8 +3,6 @@ package myhomeaudio.server.node;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
-import myhomeaudio.server.Room;
-
 /**
  * Represents a physical node.
  * 
@@ -12,8 +10,8 @@ import myhomeaudio.server.Room;
  * 
  */
 public class Node implements JSONAware {
-	private int id;
-	private Room room;
+	private String id;
+	//private NodeSignalBoundary room;
 	private String ipAddress;
 	private String name;
 
@@ -36,12 +34,16 @@ public class Node implements JSONAware {
 	public String getName() {
 		return this.name;
 	}
+	
+	public String getId(){
+		return this.id;
+	}
 
 	public void setName(String name) {
 		this.name = name;
 	}
 	
-	public void setNodeId(int id) {
+	public void setNodeId(String id) {
 		this.id = id;
 	}
 

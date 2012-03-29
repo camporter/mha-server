@@ -1,9 +1,13 @@
 package myhomeaudio.server.manager;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.json.simple.JSONArray;
 
+import myhomeaudio.server.client.Client;
 import myhomeaudio.server.http.NodeWorker;
 import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
@@ -52,6 +56,7 @@ public class NodeManager implements NodeCommands {
 		if (nodeList.contains(node)) {
 			return false;
 		}
+		node.setNodeId(generateNodeId(node));
 		nodeList.add(node);
 		nodeCount++;
 		return true;
@@ -120,7 +125,22 @@ public class NodeManager implements NodeCommands {
 	}
 
 	/**
-	 * Get aNode object with the given node name
+	 * Creates a node id
+	 * It uses the SHA-512 hash function
+	 * 
+	 * @param node
+	 *            The node to generate the id for.
+	 * @return The unique session id.
+	 */
+	private String generateNodeId(Node node) {
+		return DigestUtils.sha512Hex(node.getIpAddress()
+				+ node.getName()
+				+ (new Timestamp(new Date().getTime())).toString());
+	}
+	
+	
+	/**
+	 * Get a Node object with the given node name
 	 * 
 	 * @param name
 	 *            The name of the node to be searched for.
@@ -131,6 +151,24 @@ public class NodeManager implements NodeCommands {
 		// loops through nodeList looking for node with matching name
 		for (Node item : nodeList) {
 			if (item.getName().equals(name)) {
+				return item;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Get a Node object with the given node id
+	 * 
+	 * @param id
+	 *            The id of the node to be searched for.
+	 * @return The node with the matching id. Returns null if not node is
+	 *         found.
+	 */
+	public Node getNodeById(String id) {
+		// loops through nodeList looking for node with matching name
+		for (Node item : nodeList) {
+			if (item.getId().equals(id)) {
 				return item;
 			}
 		}
