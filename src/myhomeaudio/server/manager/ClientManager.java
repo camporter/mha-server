@@ -13,6 +13,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.Database;
 import myhomeaudio.server.database.object.DatabaseClient;
+import myhomeaudio.server.locations.layout.DeviceObject;
 import myhomeaudio.server.locations.layout.NodeSignalBoundary;
 
 /**
@@ -60,9 +61,9 @@ public class ClientManager {
 		try {
 			Statement statement = conn.createStatement();
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
-					+ "clients (id INTEGER PRIMARY KEY AUTOINCREMENT, "
-					+ "ipaddress TEXT, " + "macaddress TEXT UNIQUE, "
-					+ "bluetoothname TEXT UNIQUE, " + "userid INTEGER);");
+					+ "clients (id INTEGER PRIMARY KEY AUTOINCREMENT, " + "ipaddress TEXT, "
+					+ "macaddress TEXT UNIQUE, " + "bluetoothname TEXT UNIQUE, "
+					+ "userid INTEGER);");
 			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -93,10 +94,9 @@ public class ClientManager {
 	 * @return Returns a DatabaseClient object, or null if the id doesn't match
 	 *         any existing client.
 	 */
-	//TODO changed visibilty for clientHelper
+	// TODO changed visibilty for clientHelper
 	public synchronized DatabaseClient getClient(int id) {
-		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i
-				.hasNext();) {
+		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
 			DatabaseClient nextClient = i.next();
 			if (nextClient.getId() == id) {
 				return new DatabaseClient(nextClient);
@@ -104,10 +104,9 @@ public class ClientManager {
 		}
 		return null;
 	}
-	
+
 	private synchronized DatabaseClient getClientBySession(String sessionId) {
-		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i
-				.hasNext();) {
+		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
 			DatabaseClient nextClient = i.next();
 			if (nextClient.getSessionId().equals(sessionId)) {
 				return nextClient;
@@ -115,7 +114,7 @@ public class ClientManager {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Gets the DatabaseClient object associated with the given session id.
 	 * 
@@ -131,23 +130,54 @@ public class ClientManager {
 		}
 		return null;
 	}
-	
+
 	public boolean isValidClient(String sessionId) {
-		if (getClient(sessionId) != null) return true;
+		if (getClient(sessionId) != null)
+			return true;
 		return false;
 	}
-	
-	public boolean changeClientInitialization(String sessionId, ArrayList<NodeSignalBoundary> nodeSignatures) {
+
+	/**
+	 * Changes the client initialization configuration, which includes the node
+	 * signatures for each node.
+	 * 
+	 * @param sessionId
+	 *            The session given to the client we want to set the
+	 *            initialization for.
+	 * @param nodeSignatures
+	 *            The list of NodeSignalBoundaries, which describe what ranges
+	 *            are seen around the area for each node.
+	 * @return Whether the operation completed successfully.
+	 */
+	public boolean changeClientInitialization(String sessionId,
+			ArrayList<NodeSignalBoundary> nodeSignatures) {
 		DatabaseClient databaseClient = getClientBySession(sessionId);
 		databaseClient.setNodeSignatures(nodeSignatures);
 		
+		return false;
 		// TODO: save to db
+	}
+
+	/**
+	 * Updates the location of the client.
+	 * 
+	 * @param sessionId
+	 *            The session given to the client we want to set the location
+	 *            for.
+	 * @param devices
+	 *            A DeviceObject list that provides the id and signal strength
+	 *            for any nodes seen.
+	 * @return Whether the operation completed successfully.
+	 */
+	public boolean updateClientLocation(String sessionId, ArrayList<DeviceObject> devices) {
+		
+		return false;
 	}
 
 	/**
 	 * Creates a session id that will be unique to a specific client.
 	 * <p>
-	 * It uses the SHA-512 hash function on certain fileds of the Client. It
+	 * It uses the SHA-512 hash function on certain fields of the Client. It
 	 * also uses the current timestamp.
 	 * 
 	 * @param client
@@ -155,15 +185,15 @@ public class ClientManager {
 	 * @return The unique session id.
 	 */
 	private String generateSessionId(Client client) {
-		return DigestUtils.sha512Hex(client.getMacAddress()
-				+ client.getBluetoothName()
+		return DigestUtils.sha512Hex(client.getMacAddress() + client.getBluetoothName()
 				+ (new Timestamp(new Date().getTime())).toString());
 	}
-	
+
 	/**
 	 * Removes a client from the manager.
 	 * 
-	 * @param sessionId Corresponding session id for the client to remove.
+	 * @param sessionId
+	 *            Corresponding session id for the client to remove.
 	 * @return Whether the removal succeeded.
 	 */
 	public synchronized boolean removeClient(String sessionId) {
@@ -175,6 +205,6 @@ public class ClientManager {
 			}
 		}
 		return false;
-		
+
 	}
 }

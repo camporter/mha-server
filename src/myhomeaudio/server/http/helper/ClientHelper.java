@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import myhomeaudio.server.client.Client;
-import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
-import myhomeaudio.server.locations.ClientInitialization;
-import myhomeaudio.server.locations.Triangulation;
-import myhomeaudio.server.locations.layout.NodeSignalRange;
+import myhomeaudio.server.locations.layout.DeviceObject;
 import myhomeaudio.server.locations.layout.NodeSignalBoundary;
+import myhomeaudio.server.locations.layout.NodeSignalRange;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.manager.UserManager;
@@ -25,18 +23,6 @@ import org.json.simple.JSONValue;
 
 public class ClientHelper extends Helper implements HelperInterface, NodeCommands, StatusCode {
 
-	class DeviceObject {
-
-		public String name;
-		public int rssi;
-
-		public DeviceObject(String name, int rssi) {
-			this.name = name;
-			this.rssi = rssi;
-		}
-	}
-
-	@SuppressWarnings("unchecked")
 	public String getOutput(ArrayList<String> uriSegments, String data) {
 
 		// Set the content-type
@@ -72,7 +58,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 								(String) jsonRequest.get("bluetoothname"));
 
 						String sessionId = cm.addClient(lClient);
-						
+
 						body.put("status", STATUS_OK);
 						body.put("session", sessionId);
 
@@ -91,54 +77,70 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 
 			} else if (uriSegments.get(1).equals("locations")) {
 				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("locations")) {
-					
+
 					JSONArray locations = (JSONArray) jsonRequest.get("locations");
+					Iterator<JSONObject> i = locations.iterator();
 					
-					cm.updateLocation((String) jsonRequest.get("session"), locations);
+					ArrayList<DeviceObject> devices = new ArrayList<DeviceObject>(locations.size());
 					
-					//use Triangulation to find closest node
-					//set closest node
-					if(dClient.updateLocation((String)jsonRequest.get("locations"))) {
+					// Convert the JSON object-based locations into DeviceObjects
+					while (i.hasNext()) {
+						JSONObject jsonDevice = i.next();
+
+						DeviceObject device = new DeviceObject((Integer) jsonDevice.get("id"),
+								(Integer) jsonDevice.get("rssi"));
+						
+						devices.add(device);
+					}
+
+					// Pass off the session and DeviceObject list to the ClientManager
+					if (cm.updateClientLocation((String) jsonRequest.get("session"), devices)) {
 						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;
-						//TODO call triangulation 
-					}	
+					}
 				}
-			} else if(uriSegments.get(1).equals("initialConfig")){
-				//TODO store config information in db
+			} else if (uriSegments.get(1).equals("initialConfig")) {
+				// TODO store config information in db
 				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("entries")) {
-					if(cm.isValidClient((String)jsonRequest.get("session"))){
-					
-						Triangulation tn = Triangulation.getInstance();
+					if (cm.isValidClient((String) jsonRequest.get("session"))) {
+
 						NodeManager nm = NodeManager.getInstance();
-						
-						JSONArray actualNodes = (JSONArray)(jsonRequest.get("actualNodes"));
-						
+
 						ArrayList<NodeSignalBoundary> nodeSignatures = new ArrayList<NodeSignalBoundary>();
+
+						JSONArray actualNodes = (JSONArray) jsonRequest.get("actualNodes");
 						Iterator<JSONObject> i = actualNodes.iterator();
-						
-						// For each node, get the signal ranges of all other nodes
+
+						// For each node, get the signal ranges of all other
+						// nodes
 						while (i.hasNext()) {
-							Node node = nm.getNodeById((String)(i.next().get("id")));
-							
-							JSONArray foundNodes = (JSONArray)(i.next().get("foundNodes"));
-							
-							NodeSignalBoundary nodeSignalBoundary = new NodeSignalBoundary(node.getId());
-							
+							Node node = nm.getNodeById((String) (i.next().get("id")));
+
+							JSONArray foundNodes = (JSONArray) (i.next().get("foundNodes"));
+
+							NodeSignalBoundary nodeSignalBoundary = new NodeSignalBoundary(
+									node.getId());
+
 							Iterator<JSONObject> j = foundNodes.iterator();
-							
-							// For each found node, get their id and max/min signal values
-							while(j.hasNext()){
+
+							// For each found node, get their id and max/min
+							// signal values
+							while (j.hasNext()) {
 								JSONObject jObject = j.next();
-								nodeSignalBoundary.addNodeRange(new NodeSignalRange((String)jObject.get("id"),
-											((Long)jObject.get("min")).intValue(), ((Long)jObject.get("max")).intValue()));
+								nodeSignalBoundary
+										.addNodeRange(new NodeSignalRange((String) jObject
+												.get("id"), ((Long) jObject.get("min")).intValue(),
+												((Long) jObject.get("max")).intValue()));
 							}
-							
-							nodeSignatures.add(nodeSignalBoundary);	
+
+							nodeSignatures.add(nodeSignalBoundary);
 						}
-						
-						cm.changeClientInitialization((String)jsonRequest.get("session"), nodeSignatures);
-						//tn.addNodeConfiguration(new ClientInitialization(dbc.getMacAddress(), nodeSignatures));
+
+						cm.changeClientInitialization((String) jsonRequest.get("session"),
+								nodeSignatures);
+						// tn.addNodeConfiguration(new
+						// ClientInitialization(dbc.getMacAddress(),
+						// nodeSignatures));
 						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;
 					}
