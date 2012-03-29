@@ -13,6 +13,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.Database;
 import myhomeaudio.server.database.object.DatabaseClient;
+import myhomeaudio.server.locations.layout.NodeSignalBoundary;
 
 /**
  * Stores and maintains all of the clients on the server. This object maintains
@@ -103,7 +104,18 @@ public class ClientManager {
 		}
 		return null;
 	}
-
+	
+	private synchronized DatabaseClient getClientBySession(String sessionId) {
+		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i
+				.hasNext();) {
+			DatabaseClient nextClient = i.next();
+			if (nextClient.getSessionId().equals(sessionId)) {
+				return nextClient;
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Gets the DatabaseClient object associated with the given session id.
 	 * 
@@ -113,12 +125,9 @@ public class ClientManager {
 	 *         doesn't match any existing client.
 	 */
 	public synchronized DatabaseClient getClient(String sessionId) {
-		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i
-				.hasNext();) {
-			DatabaseClient nextClient = i.next();
-			if (nextClient.getSessionId().equals(sessionId)) {
-				return new DatabaseClient(nextClient);
-			}
+		DatabaseClient databaseClient = getClientBySession(sessionId);
+		if (databaseClient != null) {
+			return new DatabaseClient(databaseClient);
 		}
 		return null;
 	}
@@ -126,6 +135,13 @@ public class ClientManager {
 	public boolean isValidClient(String sessionId) {
 		if (getClient(sessionId) != null) return true;
 		return false;
+	}
+	
+	public boolean changeClientInitialization(String sessionId, ArrayList<NodeSignalBoundary> nodeSignatures) {
+		DatabaseClient databaseClient = getClientBySession(sessionId);
+		databaseClient.setNodeSignatures(nodeSignatures);
+		
+		// TODO: save to db
 	}
 
 	/**

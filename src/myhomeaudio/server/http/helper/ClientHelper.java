@@ -1,6 +1,8 @@
 package myhomeaudio.server.http.helper;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.http.HTTPMimeType;
@@ -89,10 +91,14 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 
 			} else if (uriSegments.get(1).equals("locations")) {
 				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("locations")) {
-					DatabaseClient dClient = cm.getClient((String) jsonRequest.get("session"));
+					
+					JSONArray locations = (JSONArray) jsonRequest.get("locations");
+					
+					cm.updateLocation((String) jsonRequest.get("session"), locations);
+					
 					//use Triangulation to find closest node
 					//set closest node
-					if(dClient.updateLocation((String)jsonRequest.get("locations"))){
+					if(dClient.updateLocation((String)jsonRequest.get("locations"))) {
 						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;
 						//TODO call triangulation 
@@ -105,24 +111,34 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 					
 						Triangulation tn = Triangulation.getInstance();
 						NodeManager nm = NodeManager.getInstance();
-						JSONArray rooms = (JSONArray)(jsonRequest.get("entries"));
 						
-						ArrayList<NodeSignalBoundary> addedRooms = new ArrayList<NodeSignalBoundary>();
-						while(!rooms.isEmpty()){
-							JSONObject jOb = (JSONObject)rooms.remove(0);
-							Node node = nm.getNodeById((String)(jOb.get("id")));
+						JSONArray actualNodes = (JSONArray)(jsonRequest.get("actualNodes"));
+						
+						ArrayList<NodeSignalBoundary> nodeSignatures = new ArrayList<NodeSignalBoundary>();
+						Iterator<JSONObject> i = actualNodes.iterator();
+						
+						// For each node, get the signal ranges of all other nodes
+						while (i.hasNext()) {
+							Node node = nm.getNodeById((String)(i.next().get("id")));
 							
-							JSONArray nodeSignals = (JSONArray)(jOb.get("entries"));
+							JSONArray foundNodes = (JSONArray)(i.next().get("foundNodes"));
+							
 							NodeSignalBoundary nodeSignalBoundary = new NodeSignalBoundary(node.getId());
-							while(!nodeSignals.isEmpty()){
-								JSONObject jObject = (JSONObject) nodeSignals.remove(0);
+							
+							Iterator<JSONObject> j = foundNodes.iterator();
+							
+							// For each found node, get their id and max/min signal values
+							while(j.hasNext()){
+								JSONObject jObject = j.next();
 								nodeSignalBoundary.addNodeRange(new NodeSignalRange((String)jObject.get("id"),
 											((Long)jObject.get("min")).intValue(), ((Long)jObject.get("max")).intValue()));
 							}
-							addedRooms.add(nodeSignalBoundary);	
+							
+							nodeSignatures.add(nodeSignalBoundary);	
 						}
-						DatabaseClient dbc = cm.getClient((String)jsonRequest.get("session"));
-						tn.addNodeConfiguration(new ClientInitialization(dbc.getMacAddress(), addedRooms));
+						
+						cm.changeClientInitialization((String)jsonRequest.get("session"), nodeSignatures);
+						//tn.addNodeConfiguration(new ClientInitialization(dbc.getMacAddress(), nodeSignatures));
 						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;
 					}
