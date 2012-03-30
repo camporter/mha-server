@@ -1,5 +1,10 @@
 package myhomeaudio.server.manager;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,7 +13,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.json.simple.JSONArray;
 
 import myhomeaudio.server.client.Client;
+import myhomeaudio.server.database.Database;
 import myhomeaudio.server.http.NodeWorker;
+import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
 
@@ -19,15 +26,17 @@ import myhomeaudio.server.node.NodeCommands;
  * @author cameron
  * 
  */
-public class NodeManager implements NodeCommands {
+public class NodeManager implements NodeCommands, StatusCode {
 
 	private static NodeManager instance = null;
-	private static int nodeCount;
+	
 	private ArrayList<Node> nodeList;
+	private Database db;
 
 	protected NodeManager() {
-		nodeList = new ArrayList<Node>();
-		nodeCount = 0;
+		System.out.println("*** Starting NodeManager...");
+		this.db = Database.getInstance();
+		this.nodeList = new ArrayList<Node>();
 	}
 
 	/**

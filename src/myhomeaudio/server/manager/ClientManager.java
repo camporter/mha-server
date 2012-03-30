@@ -1,6 +1,7 @@
 package myhomeaudio.server.manager;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -83,7 +84,7 @@ public class ClientManager {
 		int newID = -1; // TODO: Store in the database eventually? We don't
 						// necessarily need to save the clients though.
 		String sessionId = generateSessionId(client);
-		this.clientList.add(new DatabaseClient(newID, client, sessionId));
+		this.clientList.add(new DatabaseClient(newID, client, sessionId, false));
 		return sessionId;
 	}
 
@@ -154,8 +155,7 @@ public class ClientManager {
 		DatabaseClient databaseClient = getClientBySession(sessionId);
 		databaseClient.setNodeSignatures(nodeSignatures);
 		
-		return false;
-		// TODO: save to db
+		return updateClientToDatabase(databaseClient);
 	}
 
 	/**
@@ -169,9 +169,55 @@ public class ClientManager {
 	 *            for any nodes seen.
 	 * @return Whether the operation completed successfully.
 	 */
-	public boolean updateClientLocation(String sessionId, ArrayList<DeviceObject> devices) {
+	public synchronized boolean updateClientLocation(String sessionId, ArrayList<DeviceObject> devices) {
+		DatabaseClient databaseClient = getClientBySession(sessionId);
 		
-		return false;
+		return updateClientToDatabase(databaseClient);
+	}
+	
+	/**
+	 * Logs out a client.
+	 * 
+	 * @param sessionId
+	 *            Corresponding session id for the client to remove.
+	 * @return Whether the removal succeeded.
+	 */
+	public synchronized boolean logoutClient(String sessionId) {
+		DatabaseClient databaseClient = getClientBySession(sessionId);
+		databaseClient.logout();
+		return updateClientToDatabase(databaseClient);
+	}
+	
+	/**
+	 * Updates the client in the database.
+	 * @param dbClient The DatabaseClient to use for updating.
+	 * @return Whether the operation succeeded.
+	 */
+	private boolean updateClientToDatabase(DatabaseClient dbClient) {
+		boolean result = false;
+		
+		this.db.lock();
+		Connection conn = this.db.getConnection();
+		try {
+			PreparedStatement pstatement = conn.prepareStatement("UPDATE TABLE clients SET "
+					+ "ipaddress = ?, "
+					+ "macaddress = ?, "
+					+ "bluetoothname = ?, "
+					+ "userid = ? "
+					+ "WHERE id = ?;");
+			pstatement.setString(1, dbClient.getIpAddress());
+			pstatement.setString(2, dbClient.getMacAddress());
+			pstatement.setString(3, dbClient.getBluetoothName());
+			pstatement.setInt(4, dbClient.getLoggedInUserId());
+			pstatement.setInt(5, dbClient.getId());
+			pstatement.executeUpdate();
+			
+			result = true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		this.db.unlock();
+		return result;
 	}
 
 	/**
@@ -187,24 +233,5 @@ public class ClientManager {
 	private String generateSessionId(Client client) {
 		return DigestUtils.sha512Hex(client.getMacAddress() + client.getBluetoothName()
 				+ (new Timestamp(new Date().getTime())).toString());
-	}
-
-	/**
-	 * Removes a client from the manager.
-	 * 
-	 * @param sessionId
-	 *            Corresponding session id for the client to remove.
-	 * @return Whether the removal succeeded.
-	 */
-	public synchronized boolean removeClient(String sessionId) {
-		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
-			DatabaseClient nextClient = i.next();
-			if (nextClient.getSessionId().equals(sessionId)) {
-				clientList.remove(nextClient);
-				return true;
-			}
-		}
-		return false;
-
 	}
 }

@@ -70,7 +70,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 				System.out.println("Getting logout from client");
 
 				if (jsonRequest.containsKey("session")) {
-					if (cm.removeClient((String) jsonRequest.get("session"))) {
+					if (cm.logoutClient((String) jsonRequest.get("session"))) {
 						this.httpStatus = HttpStatus.SC_OK;
 					}
 				}
