@@ -14,6 +14,7 @@ import org.json.simple.JSONArray;
 
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.Database;
+import myhomeaudio.server.database.object.DatabaseNode;
 import myhomeaudio.server.http.NodeWorker;
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.node.Node;
@@ -30,15 +31,19 @@ public class NodeManager implements NodeCommands, StatusCode {
 
 	private static NodeManager instance = null;
 	
-	private ArrayList<Node> nodeList;
+	private ArrayList<DatabaseNode> nodeList;
 	private Database db;
 
 	protected NodeManager() {
 		System.out.println("*** Starting NodeManager...");
 		this.db = Database.getInstance();
-		this.nodeList = new ArrayList<Node>();
+		this.nodeList = new ArrayList<DatabaseNode>();
+		
+		if (!checkNodesTable() || !updateNodesFromDB()) {
+			System.exit(1);
+		}
 	}
-
+	
 	/**
 	 * There is only one instance of NodeManager within program.
 	 * 
@@ -51,6 +56,54 @@ public class NodeManager implements NodeCommands, StatusCode {
 		}
 		return instance;
 	}
+	
+	private boolean checkNodesTable() {
+		boolean result = false;
+		
+		// Make sure the table exists, create it if it doesn't
+		this.db.lock();
+		Connection conn = this.db.getConnection();
+		try {
+			Statement statement = conn.createStatement();
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
+					+ "nodes (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+					+ "name TEXT, ipaddress TEXT);");
+			result = true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		this.db.unlock();
+		
+		return result;
+	}
+	
+	private boolean updateNodesFromDB() {
+		boolean result = true;
+		
+		this.db.lock();
+		Connection conn = this.db.getConnection();
+		try {
+			Statement statement = conn.createStatement();
+			
+			// Create each DatabaseNode object using rows from the nodes table
+			ResultSet nodeResults = statement.executeQuery("SELECT * FROM nodes;");
+			while (nodeResults.next()) {
+				DatabaseNode dbNode = new DatabaseNode(
+						nodeResults.getInt("id"),
+						nodeResults.getString("ipaddress"),
+						nodeResults.getString("name"));
+				// Pooulate the nodeList
+				this.nodeList.add(dbNode);
+			}
+			result = true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		this.db.unlock();
+		
+		return result;
+	}
+	
 
 	// TODO add removeNode, checkNode to make sure no nodes have suddenly
 	// disconnected
