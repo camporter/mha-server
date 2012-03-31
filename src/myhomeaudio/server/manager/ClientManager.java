@@ -2,18 +2,16 @@ package myhomeaudio.server.manager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
-
-import org.apache.commons.codec.digest.DigestUtils;
 
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.Database;
 import myhomeaudio.server.database.object.DatabaseClient;
+import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.locations.layout.DeviceObject;
 import myhomeaudio.server.locations.layout.NodeSignalBoundary;
 
@@ -24,7 +22,7 @@ import myhomeaudio.server.locations.layout.NodeSignalBoundary;
  * @author Cameron
  * 
  */
-public class ClientManager {
+public class ClientManager implements StatusCode {
 
 	private static ClientManager instance = null;
 
@@ -36,7 +34,7 @@ public class ClientManager {
 		this.db = Database.getInstance();
 		this.clientList = new ArrayList<DatabaseClient>();
 
-		if (!checkClientsTable()) {
+		if (!checkClientsTable() || !updateClientsFromDB()) {
 			System.exit(1); // Exit if there's a problem with the database
 		}
 	}
@@ -62,9 +60,9 @@ public class ClientManager {
 		try {
 			Statement statement = conn.createStatement();
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
-					+ "clients (id INTEGER PRIMARY KEY AUTOINCREMENT, " + "ipaddress TEXT, "
-					+ "macaddress TEXT UNIQUE, " + "bluetoothname TEXT UNIQUE, "
-					+ "userid INTEGER);");
+					+ "clients (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+					+ "macaddress TEXT UNIQUE, " + "ipaddress TEXT, "
+					+ "bluetoothname TEXT UNIQUE, " + "userid INTEGER);");
 			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -73,19 +71,108 @@ public class ClientManager {
 		return result;
 	}
 
+	private boolean updateClientsFromDB() {
+		boolean result = false;
+
+		this.db.lock();
+		Connection conn = this.db.getConnection();
+		try {
+			Statement statement = conn.createStatement();
+			
+			// Create each DatabaseClient object using records for the clients table
+			ResultSet clientResults = statement.executeQuery("SELECT * FROM clients;");
+			while (clientResults.next()) {
+				DatabaseClient dbClient = new DatabaseClient(clientResults.getInt("id"),
+						clientResults.getString("macaddress"),
+						clientResults.getString("ipaddress"),
+						clientResults.getString("bluetoothname"),
+						clientResults.getInt("userid"));
+				this.clientList.add(dbClient);
+			}
+			result = true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		this.db.unlock();
+		
+		return result;
+	}
+	
 	/**
 	 * Adds a client to the server.
 	 * 
 	 * @param client
 	 *            The Client object representing the client to add.
-	 * @return The session id assigned to the client for their new session.
+	 * @return Status code
 	 */
-	public synchronized String addClient(Client client) {
-		int newID = -1; // TODO: Store in the database eventually? We don't
-						// necessarily need to save the clients though.
-		String sessionId = generateSessionId(client);
-		this.clientList.add(new DatabaseClient(newID, client, sessionId, false));
-		return sessionId;
+	public int addClient(Client client) {
+		int result = STATUS_FAILED;
+
+		int newId = -1;
+		this.db.lock();
+		Connection conn = this.db.getConnection();
+		try {
+			PreparedStatement pstatement = conn
+					.prepareStatement("INSERT INTO clients (macaddress, ipaddress, bluetoothname) "
+							+ "VALUES (?, ?, ?);");
+			pstatement.setString(1, client.getMacAddress());
+			pstatement.setString(2, client.getIpAddress());
+			pstatement.setString(3, client.getBluetoothName());
+			pstatement.executeUpdate();
+
+			// We want the id of the new client, so get it back
+			PreparedStatement statement = conn.prepareStatement("SELECT id FROM clients "
+					+ "WHERE macaddress = ? AND ipaddress = ? AND bluetoothname = ? LIMIT 1;");
+			pstatement.setString(1, client.getMacAddress());
+			pstatement.setString(2, client.getIpAddress());
+			pstatement.setString(3, client.getBluetoothName());
+			ResultSet resultSet = statement.executeQuery();
+			newId = resultSet.getInt("id");
+
+			// Add the new client to the clientList with their id
+			this.clientList.add(new DatabaseClient(newId, client));
+
+			result = STATUS_OK;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+
+	/**
+	 * Removes a client from the server.
+	 * 
+	 * @param sessionId
+	 *            Corresponding session id for the client to remove.
+	 * @return Whether the removal succeeded.
+	 */
+	public int removeClient(String sessionId) {
+		int result = STATUS_FAILED;
+
+		DatabaseClient dbClient = getClientBySession(sessionId);
+
+		if (dbClient != null) {
+			this.db.lock();
+			Connection conn = this.db.getConnection();
+			try {
+				// Remove the client from the database
+				PreparedStatement pstatement = conn.prepareStatement("DELETE FROM clients "
+						+ "WHERE id = ?");
+				pstatement.setInt(1, dbClient.getId());
+				pstatement.executeUpdate();
+				
+				// Remove the client from the user list
+				clientList.remove(dbClient);
+				
+				result = STATUS_OK;
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			this.db.unlock();
+		}
+
+		return result;
 	}
 
 	/**
@@ -95,8 +182,7 @@ public class ClientManager {
 	 * @return Returns a DatabaseClient object, or null if the id doesn't match
 	 *         any existing client.
 	 */
-	// TODO changed visibilty for clientHelper
-	public synchronized DatabaseClient getClient(int id) {
+	private synchronized DatabaseClient getClient(int id) {
 		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
 			DatabaseClient nextClient = i.next();
 			if (nextClient.getId() == id) {
@@ -115,6 +201,7 @@ public class ClientManager {
 		}
 		return null;
 	}
+	
 
 	/**
 	 * Gets the DatabaseClient object associated with the given session id.
@@ -137,7 +224,43 @@ public class ClientManager {
 			return true;
 		return false;
 	}
-
+	
+	/**
+	 * Logs a user into a client.
+	 * 
+	 * @param clientId The id for the client to log into.
+	 * @param userId The id for the user logging in.
+	 * @return The session id for the client, or null if the clientId was invalid.
+	 */
+	public String loginClient(int clientId, int userId) {
+		DatabaseClient dbClient = getClient(clientId);
+		if (dbClient != null) {
+			String sessionId = dbClient.login(userId);
+			updateClientToDB(dbClient);
+			return sessionId;
+		} else {
+			return null;
+		}
+		
+	}
+	
+	/**
+	 * Logs out a session for a client
+	 * 
+	 * @param sessionId The id for the session to end.
+	 * @return The id for the user that was logged out, or -1 if the sessionId was invalid.
+	 */
+	public int logoutClient(String sessionId) {
+		DatabaseClient dbClient = getClient(sessionId);
+		if (dbClient != null) {
+			int userId = dbClient.logout();
+			updateClientToDB(dbClient);
+			return userId;
+		} else {
+			return -1;
+		}
+	}
+	
 	/**
 	 * Changes the client initialization configuration, which includes the node
 	 * signatures for each node.
@@ -154,8 +277,8 @@ public class ClientManager {
 			ArrayList<NodeSignalBoundary> nodeSignatures) {
 		DatabaseClient databaseClient = getClientBySession(sessionId);
 		databaseClient.setNodeSignatures(nodeSignatures);
-		
-		return updateClientToDatabase(databaseClient);
+
+		return updateClientToDB(databaseClient);
 	}
 
 	/**
@@ -169,69 +292,41 @@ public class ClientManager {
 	 *            for any nodes seen.
 	 * @return Whether the operation completed successfully.
 	 */
-	public synchronized boolean updateClientLocation(String sessionId, ArrayList<DeviceObject> devices) {
+	public synchronized boolean updateClientLocation(String sessionId,
+			ArrayList<DeviceObject> devices) {
 		DatabaseClient databaseClient = getClientBySession(sessionId);
-		
-		return updateClientToDatabase(databaseClient);
+
+		return updateClientToDB(databaseClient);
 	}
-	
-	/**
-	 * Logs out a client.
-	 * 
-	 * @param sessionId
-	 *            Corresponding session id for the client to remove.
-	 * @return Whether the removal succeeded.
-	 */
-	public synchronized boolean logoutClient(String sessionId) {
-		DatabaseClient databaseClient = getClientBySession(sessionId);
-		databaseClient.logout();
-		return updateClientToDatabase(databaseClient);
-	}
-	
+
 	/**
 	 * Updates the client in the database.
-	 * @param dbClient The DatabaseClient to use for updating.
+	 * 
+	 * @param dbClient
+	 *            The DatabaseClient to use for updating.
 	 * @return Whether the operation succeeded.
 	 */
-	private boolean updateClientToDatabase(DatabaseClient dbClient) {
+	private boolean updateClientToDB(DatabaseClient dbClient) {
 		boolean result = false;
-		
+
 		this.db.lock();
 		Connection conn = this.db.getConnection();
 		try {
 			PreparedStatement pstatement = conn.prepareStatement("UPDATE TABLE clients SET "
-					+ "ipaddress = ?, "
-					+ "macaddress = ?, "
-					+ "bluetoothname = ?, "
-					+ "userid = ? "
-					+ "WHERE id = ?;");
-			pstatement.setString(1, dbClient.getIpAddress());
-			pstatement.setString(2, dbClient.getMacAddress());
+					+ "macaddress = ?, " + "ipaddress = ?, " + "bluetoothname = ?, "
+					+ "userid = ? " + "WHERE id = ?;");
+			pstatement.setString(1, dbClient.getMacAddress());
+			pstatement.setString(2, dbClient.getIpAddress());
 			pstatement.setString(3, dbClient.getBluetoothName());
 			pstatement.setInt(4, dbClient.getLoggedInUserId());
 			pstatement.setInt(5, dbClient.getId());
 			pstatement.executeUpdate();
-			
+
 			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		this.db.unlock();
 		return result;
-	}
-
-	/**
-	 * Creates a session id that will be unique to a specific client.
-	 * <p>
-	 * It uses the SHA-512 hash function on certain fields of the Client. It
-	 * also uses the current timestamp.
-	 * 
-	 * @param client
-	 *            The client to generate the session id for.
-	 * @return The unique session id.
-	 */
-	private String generateSessionId(Client client) {
-		return DigestUtils.sha512Hex(client.getMacAddress() + client.getBluetoothName()
-				+ (new Timestamp(new Date().getTime())).toString());
 	}
 }

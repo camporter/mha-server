@@ -58,7 +58,7 @@ public class NodeHandler extends Thread {
 							+ nodeSocket.getInetAddress().getHostAddress());
 
 					NodeManager nm = NodeManager.getInstance();
-					Node newNode = new Node(nodeSocket.getInetAddress().getHostAddress(), "");
+					Node newNode = new Node("", nodeSocket.getInetAddress().getHostAddress(), null);
 
 					if (nm.addNode(newNode)) {
 						// Request the name from the node

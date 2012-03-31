@@ -1,6 +1,10 @@
 package myhomeaudio.server.database.object;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.locations.layout.NodeSignalBoundary;
@@ -15,9 +19,8 @@ public class DatabaseClient extends DatabaseObject<Client> {
 	
 	private ArrayList<NodeSignalBoundary> nodeSignatures;
 	
-	public DatabaseClient(int id, Client client, String sessionId) {
+	public DatabaseClient(int id, Client client) {
 		super(id, new Client(client));
-		this.sessionId = sessionId;
 		this.closestNode = null;
 		this.loggedUserId = -1; // Set logged out
 		this.nodeSignatures = null; // Starts off as null
@@ -31,25 +34,38 @@ public class DatabaseClient extends DatabaseObject<Client> {
 		this.loggedUserId = dbClient.getLoggedInUserId();
 	}
 	
-	public String getSessionId() {
-		return this.sessionId;
+	public DatabaseClient(int id, String macAddress, String ipAddress, String bluetoothName, int userId) {
+		super(id, new Client(macAddress, ipAddress, bluetoothName));
+		this.loggedUserId = userId;
 	}
 	
-	public void setSessionId(String sessionId) {
-		this.sessionId = sessionId;
+	public String getSessionId() {
+		return this.sessionId;
 	}
 	
 	public int getLoggedInUserId() {
 		return loggedUserId;
 	}
 	
-	public void login(int userId) {
+	/**
+	 * Logs the DatabaseClient in with a specific user.
+	 * @param userId The id of the user to login
+	 * @return The session id.
+	 */
+	public String login(int userId) {
 		loggedUserId = userId;
+		sessionId = generateSessionId();
+		return sessionId;
 	}
 	
+	/**
+	 * Logs the DatabaseClient out.
+	 * @return The user id that was logged out.
+	 */
 	public int logout() {
 		int result = loggedUserId;
 		loggedUserId = -1;
+		sessionId = null;
 		return result;
 	}
 
@@ -79,5 +95,17 @@ public class DatabaseClient extends DatabaseObject<Client> {
 	
 	public void setNodeSignatures(ArrayList<NodeSignalBoundary> nodeSignatures) {
 		this.nodeSignatures = new ArrayList<NodeSignalBoundary>(nodeSignatures);
+	}
+	
+	/**
+	 * Creates a session id that will be unique to a specific client.
+	 * <p>
+	 * It uses the SHA-512 hash function on certain fields of the Client. It
+	 * also uses the current timestamp.
+	 * 
+	 * @return The unique session id.
+	 */
+	private String generateSessionId() {
+		return DigestUtils.sha512Hex(this.object.getMacAddress()+this.object.getBluetoothName()+(new Timestamp(new Date().getTime())).toString());
 	}
 }

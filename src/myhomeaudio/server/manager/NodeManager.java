@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.simple.JSONArray;
@@ -67,7 +68,7 @@ public class NodeManager implements NodeCommands, StatusCode {
 			Statement statement = conn.createStatement();
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
 					+ "nodes (id INTEGER PRIMARY KEY AUTOINCREMENT, "
-					+ "name TEXT, ipaddress TEXT);");
+					+ "name TEXT, ipaddress TEXT, bluetoothAddress TEXT);");
 			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -90,9 +91,10 @@ public class NodeManager implements NodeCommands, StatusCode {
 			while (nodeResults.next()) {
 				DatabaseNode dbNode = new DatabaseNode(
 						nodeResults.getInt("id"),
+						nodeResults.getString("name"),
 						nodeResults.getString("ipaddress"),
-						nodeResults.getString("name"));
-				// Pooulate the nodeList
+						nodeResults.getString("bluetoothaddress"));
+				// Populate the nodeList
 				this.nodeList.add(dbNode);
 			}
 			result = true;
@@ -104,9 +106,6 @@ public class NodeManager implements NodeCommands, StatusCode {
 		return result;
 	}
 	
-
-	// TODO add removeNode, checkNode to make sure no nodes have suddenly
-	// disconnected
 	/**
 	 * Add Node, places nodes within network into an arrayList
 	 * 
@@ -114,14 +113,82 @@ public class NodeManager implements NodeCommands, StatusCode {
 	 *            Node to be added to the arrayList
 	 * @return True - Item added to list, False - Item already in list
 	 */
-	public synchronized boolean addNode(Node node) {
-		if (nodeList.contains(node)) {
-			return false;
+	public int addNode(Node node) {
+		int result = STATUS_FAILED;
+		
+		// TODO: Check for duplicates
+		
+		int newId = -1;
+		
+		// Add new node to the database
+		this.db.lock();
+		Connection conn = this.db.getConnection();
+		try {
+			PreparedStatement pstatement = conn.prepareStatement("INSERT INTO nodes (name, ipaddress, bluetoothaddress) VALUES (?, ?, ?);");
+			pstatement.setString(1, node.getName());
+			pstatement.setString(2, node.getIpAddress());
+			pstatement.setString(3, node.getBluetoothAddress());
+			pstatement.executeUpdate();
+			
+			// We want the id of the new node, so get it back
+			PreparedStatement statement = conn.prepareStatement("SELECT id FROM nodes " + 
+					"WHERE name = ? AND ipaddress = ? AND bluetoothaddress = ?;");
+			ResultSet resultSet = statement.executeQuery();
+			newId = resultSet.getInt("id");
+			
+			// Add the new node to the nodeList with their id
+			this.nodeList.add(new DatabaseNode(newId, node));
+			
+			result = STATUS_OK;		
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		node.setNodeId(generateNodeId(node));
-		nodeList.add(node);
-		nodeCount++;
-		return true;
+		this.db.unlock();
+		
+		return result;
+	}
+	
+	public int removeNode(Node node) {
+		int result = STATUS_FAILED;
+		
+		if (node != null) {
+			DatabaseNode dbNode = getMatchingNode(node);
+			if (dbNode != null) {
+				this.db.lock();
+				Connection conn = this.db.getConnection();
+				try {
+					PreparedStatement pstatement = conn.prepareStatement("DELETE FROM nodes "
+							+ "WHERE id = ?");
+					pstatement.setInt(1, dbNode.getId());
+					pstatement.executeUpdate();
+					
+					nodeList.remove(dbNode);
+					
+					result = STATUS_OK;
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				this.db.unlock();
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Gets the DatabaseNode object that resides in the nodeList which
+	 * corresponds with the Node object being given.
+	 * 
+	 * @param node
+	 * @return The corresponding DatabaseNode, or null if not found.
+	 */
+	private DatabaseNode getMatchingNode(Node node) {
+		for (Iterator<DatabaseNode> i  = this.nodeList.iterator(); i.hasNext();) {
+			DatabaseNode nextNode = i.next();
+			if (nextNode.equals(node)) {
+				return nextNode;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -185,21 +252,6 @@ public class NodeManager implements NodeCommands, StatusCode {
 		}
 		return null;
 	}
-
-	/**
-	 * Creates a node id
-	 * It uses the SHA-512 hash function
-	 * 
-	 * @param node
-	 *            The node to generate the id for.
-	 * @return The unique session id.
-	 */
-	private String generateNodeId(Node node) {
-		return DigestUtils.sha512Hex(node.getIpAddress()
-				+ node.getName()
-				+ (new Timestamp(new Date().getTime())).toString());
-	}
-	
 	
 	/**
 	 * Get a Node object with the given node name
@@ -237,13 +289,13 @@ public class NodeManager implements NodeCommands, StatusCode {
 		return null;
 	}
 	
-	public ArrayList<Node> getList() {
-		return new ArrayList<Node>(nodeList);
+	public ArrayList<DatabaseNode> getList() {
+		return new ArrayList<DatabaseNode>(nodeList);
 	}
 	
 	public JSONArray getJSONArray() {
 		JSONArray nodeArray = new JSONArray();
-		for (Node n : nodeList) {
+		for (DatabaseNode n : nodeList) {
 			nodeArray.add(n);
 		}
 		return nodeArray;

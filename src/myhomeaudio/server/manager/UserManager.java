@@ -41,7 +41,6 @@ public class UserManager implements StatusCode {
 			System.exit(1); // Exit if the table doesn't exist or we can't
 							// update?
 		}
-
 	}
 
 	public static synchronized UserManager getInstance() {
@@ -60,8 +59,8 @@ public class UserManager implements StatusCode {
 		try {
 			Statement statement = conn.createStatement();
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
-					+ "users (id INTEGER PRIMARY KEY AUTOINCREMENT, "
-					+ "username TEXT UNIQUE, " + "password TEXT);");
+					+ "users (id INTEGER PRIMARY KEY AUTOINCREMENT, " + "username TEXT UNIQUE, "
+					+ "password TEXT);");
 			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -79,14 +78,11 @@ public class UserManager implements StatusCode {
 		try {
 			Statement statement = conn.createStatement();
 
-			// Create each DatabaseUser object using rows from the users table
-			ResultSet userResults = statement
-					.executeQuery("SELECT * FROM users;");
+			// Create each DatabaseUser object using records from the users table
+			ResultSet userResults = statement.executeQuery("SELECT * FROM users;");
 			while (userResults.next()) {
-				DatabaseUser dbUser = new DatabaseUser(
-						userResults.getInt("id"),
-						userResults.getString("username"),
-						userResults.getString("password"));
+				DatabaseUser dbUser = new DatabaseUser(userResults.getInt("id"),
+						userResults.getString("username"), userResults.getString("password"));
 				// Populate the userList
 				this.userList.add(dbUser);
 			}
@@ -129,45 +125,45 @@ public class UserManager implements StatusCode {
 				pstatement.setString(2, user.getPassword());
 				pstatement.executeUpdate();
 
-				// We want the id of the new user, so let's get it back
+				// We want the id of the new user, so get it back
 				PreparedStatement statement = conn
 						.prepareStatement("SELECT id FROM users WHERE username = ? LIMIT 1;");
 				statement.setString(1, user.getUsername());
 				ResultSet resultSet = statement.executeQuery();
 				newId = resultSet.getInt("id");
-				
+
 				// Add the registered user to the userList with their id
 				this.userList.add(new DatabaseUser(newId, user));
-				
+
 				result = STATUS_OK;
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			this.db.unlock();
 		}
-		
+
 		return result;
 	}
-	
+
 	public int removeUser(User user) {
 		int result = STATUS_FAILED;
-		
+
 		if (user != null) {
 			DatabaseUser dbUser = getMatchingUser(user);
 			if (dbUser != null) {
 				this.db.lock();
 				Connection conn = this.db.getConnection();
 				try {
-					PreparedStatement pstatement = conn.prepareStatement("DELETE FROM users WHERE id = ?;");
+					PreparedStatement pstatement = conn.prepareStatement("DELETE FROM users "
+							+ "WHERE id = ?;");
 					pstatement.setInt(1, dbUser.getId());
 					pstatement.executeUpdate();
-					
+
 					userList.remove(dbUser);
-					
+
 					result = STATUS_OK;
 				} catch (SQLException e) {
 					e.printStackTrace();
-					result = STATUS_FAILED;
 				}
 				this.db.unlock();
 			}
@@ -232,7 +228,7 @@ public class UserManager implements StatusCode {
 	 * corresponds with the User object being given.
 	 * 
 	 * @param user
-	 * @return The DatabaseUser, or null if not found.
+	 * @return The corresponding DatabaseUser, or null if not found.
 	 */
 	private DatabaseUser getMatchingUser(User user) {
 		for (Iterator<DatabaseUser> i = this.userList.iterator(); i.hasNext();) {
