@@ -31,6 +31,10 @@ public class DatabaseNode extends DatabaseObject<Node> implements JSONAware {
 	public String getBluetoothAddress() {
 		return this.object.getBluetoothAddress();
 	}
+	
+	public void setName(String name){
+		this.object.setName(name);
+	}
 
 	@Override
 	public String toJSONString() {

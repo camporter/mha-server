@@ -31,6 +31,7 @@ import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
 import org.apache.http.util.EntityUtils;
 
+import myhomeaudio.server.database.object.DatabaseNode;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
@@ -167,11 +168,11 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 					httpExecutor.postProcess(response, httpProcessor, httpContext);
 
 					// Get the corresponding node
-					Node node = nm.getNodeByIpAddress(this.ipAddress);
-					if (node != null) {
+					DatabaseNode dbnode = nm.getNodeByIpAddress(this.ipAddress);
+					if (dbnode != null) {
 						// Change the bluetooth name for the node
 						String name = EntityUtils.toString(response.getEntity()).trim();
-						node.setName(name);
+						dbnode.setName(name);
 						System.out.println("Got name from node: " + name);
 					}
 				} catch (HttpException e) {

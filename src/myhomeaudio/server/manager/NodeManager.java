@@ -210,14 +210,16 @@ public class NodeManager implements NodeCommands, StatusCode {
 
 	}
 
+	/*
 	/**
 	 * Returns the current number of nodes under NodeManager management
 	 * 
 	 * @return nodeCount Number of nodes
-	 */
+	 * 
 	public synchronized int getNodeCount() {
 		return nodeCount;
 	}
+	*/
 
 	/**
 	 * Verifies that a node with the given name exists within the node manager
@@ -227,7 +229,7 @@ public class NodeManager implements NodeCommands, StatusCode {
 	 * @return True if the node exists
 	 */
 	public boolean isValidNode(String bluetoothName) {
-		for (Node node : this.nodeList) {
+		for (DatabaseNode node : this.nodeList) {
 			if (node.getName().equals(bluetoothName)) {
 				return true;
 			}
@@ -244,8 +246,8 @@ public class NodeManager implements NodeCommands, StatusCode {
 	 * @return The node with the corresponding IP. Returns null if no node with
 	 *         the corresponding IP address is found.
 	 */
-	public Node getNodeByIpAddress(String ipAddress) {
-		for (Node item : nodeList) {
+	public DatabaseNode getNodeByIpAddress(String ipAddress) {
+		for (DatabaseNode item : nodeList) {
 			if (item.getIpAddress().equals(ipAddress)) {
 				return item;
 			}
@@ -261,9 +263,9 @@ public class NodeManager implements NodeCommands, StatusCode {
 	 * @return The node with the matching name. Returns null if not node is
 	 *         found.
 	 */
-	public Node getNodeByName(String name) {
+	public DatabaseNode getNodeByName(String name) {
 		// loops through nodeList looking for node with matching name
-		for (Node item : nodeList) {
+		for (DatabaseNode item : nodeList) {
 			if (item.getName().equals(name)) {
 				return item;
 			}
@@ -271,6 +273,7 @@ public class NodeManager implements NodeCommands, StatusCode {
 		return null;
 	}
 	
+	/*
 	/**
 	 * Get a Node object with the given node id
 	 * 
@@ -278,16 +281,17 @@ public class NodeManager implements NodeCommands, StatusCode {
 	 *            The id of the node to be searched for.
 	 * @return The node with the matching id. Returns null if not node is
 	 *         found.
-	 */
+
 	public Node getNodeById(String id) {
 		// loops through nodeList looking for node with matching name
-		for (Node item : nodeList) {
+		for (DatabaseNode item : nodeList) {
 			if (item.getId().equals(id)) {
 				return item;
 			}
 		}
 		return null;
 	}
+	*/
 	
 	public ArrayList<DatabaseNode> getList() {
 		return new ArrayList<DatabaseNode>(nodeList);
