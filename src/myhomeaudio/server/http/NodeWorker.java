@@ -156,7 +156,7 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 				}
 				break;
 
-			case NODE_NAME:
+			case NODE_INFO:
 				System.out.println("Asking for node's name...");
 				getRequest = new BasicHttpRequest("GET", "name");
 				getRequest.setParams(httpParams);

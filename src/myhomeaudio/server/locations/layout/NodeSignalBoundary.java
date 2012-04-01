@@ -15,57 +15,59 @@ import myhomeaudio.server.node.Node;
  *
  */
 public class NodeSignalBoundary {
-	private final String id; //node within room
+
+	private final int id; // node within room
 	private ArrayList<NodeSignalRange> interference;
-	
-	public NodeSignalBoundary(String id){
+
+	public NodeSignalBoundary(int i) {
 		this.interference = new ArrayList<NodeSignalRange>();
-		this.id = id;
+		this.id = i;
 	}
-	
-	public NodeSignalBoundary(String id, ArrayList<NodeSignalRange> nsr){
+
+	public NodeSignalBoundary(int id, ArrayList<NodeSignalRange> nsr) {
 		this.interference = nsr;
 		this.id = id;
 	}
-	
-	public boolean addNodeRange(NodeSignalRange nodeSignalRange){
-		if(!id.equals(nodeSignalRange.getNodeId())){
-			if(!containsNode(nodeSignalRange.getNodeId())){
+
+	public boolean addNodeRange(NodeSignalRange nodeSignalRange) {
+		if (!(id == nodeSignalRange.getNodeId())) {
+			if (!containsNode(nodeSignalRange.getNodeId())) {
 				interference.add(nodeSignalRange);
 				return true;
 			}
 		}
 		return false;
 	}
-	
-	public static ArrayList<NodeSignalRange> parseNodeSignals(String data){
+
+	public static ArrayList<NodeSignalRange> parseNodeSignals(String data) {
 		ArrayList<NodeSignalRange> interference = new ArrayList<NodeSignalRange>();
-		Object o = (Object)JSONValue.parse(data);
-		JSONArray jArray = (JSONArray)(o);
-		//NodeSignalRange[] nsr = (NodeSignalRange[]) jArray.toArray();
+		Object o = (Object) JSONValue.parse(data);
+		JSONArray jArray = (JSONArray) (o);
+		// NodeSignalRange[] nsr = (NodeSignalRange[]) jArray.toArray();
 		JSONObject jObject;
-		for(Object object : jArray){
-			jObject = (JSONObject)object;
-			interference.add(new NodeSignalRange((String)jObject.get("id"), ((Long)jObject.get("min")).intValue(), ((Long)jObject.get("max")).intValue()));
+		for (Object object : jArray) {
+			jObject = (JSONObject) object;
+			interference.add(new NodeSignalRange((Integer) jObject.get("id"), ((Long) jObject
+					.get("min")).intValue(), ((Long) jObject.get("max")).intValue()));
 		}
 		return interference;
 	}
-	
-	private boolean containsNode(String id){
+
+	private boolean containsNode(int id) {
 		Iterator iterate = interference.iterator();
-		while(iterate.hasNext()){
-			if(((NodeSignalRange)iterate.next()).getNodeId().equals(id)){
+		while (iterate.hasNext()) {
+			if (((NodeSignalRange) iterate.next()).getNodeId() == id) {
 				return true;
 			}
-		}	
+		}
 		return false;
 	}
-	
-	public String getNodeId(){
+
+	public int getNodeId() {
 		return id;
 	}
-	
-	public int get(){
+
+	public int get() {
 		return interference.size();
 	}
 }

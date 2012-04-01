@@ -235,7 +235,6 @@ public class NodeManager implements NodeCommands, StatusCode {
 			}
 		}
 		return false;
-
 	}
 
 	/**
@@ -247,9 +246,9 @@ public class NodeManager implements NodeCommands, StatusCode {
 	 *         the corresponding IP address is found.
 	 */
 	public DatabaseNode getNodeByIpAddress(String ipAddress) {
-		for (DatabaseNode item : nodeList) {
-			if (item.getIpAddress().equals(ipAddress)) {
-				return item;
+		for (DatabaseNode nextNode : nodeList) {
+			if (nextNode.getIpAddress().equals(ipAddress)) {
+				return new DatabaseNode(nextNode);
 			}
 		}
 		return null;
@@ -260,38 +259,37 @@ public class NodeManager implements NodeCommands, StatusCode {
 	 * 
 	 * @param name
 	 *            The name of the node to be searched for.
-	 * @return The node with the matching name. Returns null if not node is
-	 *         found.
+	 * @return The node with the matching name. Returns null if the node is
+	 *         not found.
 	 */
 	public DatabaseNode getNodeByName(String name) {
 		// loops through nodeList looking for node with matching name
-		for (DatabaseNode item : nodeList) {
-			if (item.getName().equals(name)) {
-				return item;
+		for (DatabaseNode nextNode : nodeList) {
+			if (nextNode.getName().equals(name)) {
+				return new DatabaseNode(nextNode);
 			}
 		}
 		return null;
 	}
 	
-	/*
+	
 	/**
 	 * Get a Node object with the given node id
 	 * 
-	 * @param id
+	 * @param nodeId
 	 *            The id of the node to be searched for.
-	 * @return The node with the matching id. Returns null if not node is
-	 *         found.
-
-	public Node getNodeById(String id) {
+	 * @return The node with the matching id. Returns null if the node is not found.
+	 */
+	public DatabaseNode getNodeById(int nodeId) {
 		// loops through nodeList looking for node with matching name
-		for (DatabaseNode item : nodeList) {
-			if (item.getId().equals(id)) {
-				return item;
+		for (DatabaseNode nextNode : nodeList) {
+			if (nextNode.getId() == nodeId) {
+				return new DatabaseNode(nextNode);
 			}
 		}
 		return null;
 	}
-	*/
+	
 	
 	public ArrayList<DatabaseNode> getList() {
 		return new ArrayList<DatabaseNode>(nodeList);

@@ -7,7 +7,7 @@ import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.object.DatabaseClient;
 
 public class Triangulation {
-
+/*
 	private static Triangulation instance = null;
 	private ArrayList<ClientInitialization> clients;
 	
@@ -55,4 +55,5 @@ public class Triangulation {
 	public boolean isPresent(Client client){
 		return false;
 	}
+	*/
 }

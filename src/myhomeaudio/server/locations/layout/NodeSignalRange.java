@@ -8,11 +8,11 @@ package myhomeaudio.server.locations.layout;
  */
 
 public class NodeSignalRange {
-	private final String id; //node id
+	private final int id; //node id
 	private final int min;
 	private final int max;
 	
-	public NodeSignalRange(String id, int min, int max){
+	public NodeSignalRange(int id, int min, int max){
 		this.id = id;
 		this.min = min;
 		this.max = max;
@@ -25,7 +25,7 @@ public class NodeSignalRange {
 		return false;
 	}
 	
-	public String getNodeId(){
+	public int getNodeId(){
 		return id;
 	}
 }

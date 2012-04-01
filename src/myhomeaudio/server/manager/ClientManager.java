@@ -147,10 +147,10 @@ public class ClientManager implements StatusCode {
 	 *            Corresponding session id for the client to remove.
 	 * @return Whether the removal succeeded.
 	 */
-	public int removeClient(String sessionId) {
+	public int removeClient(int clientId) {
 		int result = STATUS_FAILED;
 
-		DatabaseClient dbClient = getClientBySession(sessionId);
+		DatabaseClient dbClient = getClient(clientId);
 
 		if (dbClient != null) {
 			this.db.lock();
@@ -159,7 +159,7 @@ public class ClientManager implements StatusCode {
 				// Remove the client from the database
 				PreparedStatement pstatement = conn.prepareStatement("DELETE FROM clients "
 						+ "WHERE id = ?");
-				pstatement.setInt(1, dbClient.getId());
+				pstatement.setInt(1, clientId);
 				pstatement.executeUpdate();
 				
 				// Remove the client from the user list
@@ -218,6 +218,15 @@ public class ClientManager implements StatusCode {
 		}
 		return null;
 	}
+	public DatabaseClient getClient(Client client) {
+		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
+			DatabaseClient nextClient = i.next();
+			if (nextClient.equals(client)) {
+				return nextClient;
+			}
+		}
+		return null;
+	}
 
 	public boolean isValidClient(String sessionId) {
 		if (getClient(sessionId) != null)
@@ -242,6 +251,18 @@ public class ClientManager implements StatusCode {
 			return null;
 		}
 		
+	}
+	
+	/**
+	 * Logs a user into a client.
+	 * 
+	 * @param client The Client to log into.
+	 * @param userId The id for the user logging in.
+	 * @return The session id for the client, or null if the client was invalid.
+	 */
+	public String loginClient(Client client, int userId) {
+		DatabaseClient dbClient = getClient(client);
+		return loginClient(dbClient.getId(), userId);
 	}
 	
 	/**

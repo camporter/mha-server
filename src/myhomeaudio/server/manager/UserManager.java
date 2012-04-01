@@ -201,9 +201,18 @@ public class UserManager implements StatusCode {
 			return STATUS_OK;
 		}
 		return STATUS_FAILED;
-
 	}
-
+	
+	public int logoutUser(int userId) {
+		DatabaseUser dbUser = getUserById(userId);
+		if (dbUser != null) {
+			dbUser.setLoggedOut();
+			return STATUS_OK;
+		}
+		return STATUS_FAILED;
+	}
+	
+	
 	/**
 	 * Gets a list of users currently logged in.
 	 * 
@@ -240,7 +249,18 @@ public class UserManager implements StatusCode {
 		}
 		return null;
 	}
-
+	
+	private DatabaseUser getUserById(int id) {
+		for (Iterator<DatabaseUser> i = this.userList.iterator(); i.hasNext();) {
+			DatabaseUser nextUser = i.next();
+			if (nextUser.getId() == id) {
+				// User id match!
+				return nextUser;
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Gets the DatabaseUser object associated with the given user id.
 	 * 
@@ -249,12 +269,9 @@ public class UserManager implements StatusCode {
 	 *         any existing user.
 	 */
 	public DatabaseUser getUser(int id) {
-		for (Iterator<DatabaseUser> i = this.userList.iterator(); i.hasNext();) {
-			DatabaseUser nextUser = i.next();
-			if (nextUser.getId() == id) {
-				// User id match!
-				return new DatabaseUser(nextUser);
-			}
+		DatabaseUser dbUser = getUserById(id);
+		if (dbUser != null) {
+			return new DatabaseUser(dbUser);
 		}
 		return null;
 	}

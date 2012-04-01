@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import myhomeaudio.server.client.Client;
+import myhomeaudio.server.database.object.DatabaseNode;
+import myhomeaudio.server.database.object.DatabaseUser;
 import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.locations.layout.DeviceObject;
@@ -53,16 +55,19 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 
 					// Check that the login succeeded
 					if (um.loginUser(lUser) == STATUS_OK) {
-						Client lClient = new Client(lUser, (String) jsonRequest.get("macaddress"),
+						Client lClient = new Client((String) jsonRequest.get("macaddress"),
 								(String) jsonRequest.get("ipaddress"),
 								(String) jsonRequest.get("bluetoothname"));
+						
+						// Get the session by logging the client in
+						String sessionId = cm.loginClient(lClient, um.getUser(lUser.getUsername())
+								.getId());
 
-						String sessionId = cm.addClient(lClient);
-
-						body.put("status", STATUS_OK);
-						body.put("session", sessionId);
-
-						this.httpStatus = HttpStatus.SC_OK;
+						if (sessionId != null) {
+							body.put("status", STATUS_OK);
+							body.put("session", sessionId);
+							this.httpStatus = HttpStatus.SC_OK;
+						}
 					}
 				}
 
@@ -70,7 +75,11 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 				System.out.println("Getting logout from client");
 
 				if (jsonRequest.containsKey("session")) {
-					if (cm.logoutClient((String) jsonRequest.get("session"))) {
+					int userId = cm.logoutClient((String) jsonRequest.get("session"));
+					
+					if (userId != -1) {
+						um.logoutUser(userId);
+						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;
 					}
 				}
@@ -80,27 +89,28 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 
 					JSONArray locations = (JSONArray) jsonRequest.get("locations");
 					Iterator<JSONObject> i = locations.iterator();
-					
+
 					ArrayList<DeviceObject> devices = new ArrayList<DeviceObject>(locations.size());
-					
-					// Convert the JSON object-based locations into DeviceObjects
+
+					// Convert the JSON object-based locations into
+					// DeviceObjects
 					while (i.hasNext()) {
 						JSONObject jsonDevice = i.next();
 
 						DeviceObject device = new DeviceObject((Integer) jsonDevice.get("id"),
 								(Integer) jsonDevice.get("rssi"));
-						
+
 						devices.add(device);
 					}
 
-					// Pass off the session and DeviceObject list to the ClientManager
+					// Pass off the session and DeviceObject list to the
+					// ClientManager
 					if (cm.updateClientLocation((String) jsonRequest.get("session"), devices)) {
 						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;
 					}
 				}
 			} else if (uriSegments.get(1).equals("initialConfig")) {
-				// TODO store config information in db
 				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("entries")) {
 					if (cm.isValidClient((String) jsonRequest.get("session"))) {
 
@@ -114,7 +124,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 						// For each node, get the signal ranges of all other
 						// nodes
 						while (i.hasNext()) {
-							Node node = nm.getNodeById((String) (i.next().get("id")));
+							DatabaseNode node = nm.getNodeById((Integer) i.next().get("id"));
 
 							JSONArray foundNodes = (JSONArray) (i.next().get("foundNodes"));
 
@@ -128,7 +138,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 							while (j.hasNext()) {
 								JSONObject jObject = j.next();
 								nodeSignalBoundary
-										.addNodeRange(new NodeSignalRange((String) jObject
+										.addNodeRange(new NodeSignalRange((Integer) jObject
 												.get("id"), ((Long) jObject.get("min")).intValue(),
 												((Long) jObject.get("max")).intValue()));
 							}

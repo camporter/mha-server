@@ -4,5 +4,5 @@ public interface NodeCommands {
 
 	public static final int NODE_PLAY = 0;
 	public static final int NODE_PAUSE = 1;
-	public static final int NODE_NAME = 2;
+	public static final int NODE_INFO = 2;
 }

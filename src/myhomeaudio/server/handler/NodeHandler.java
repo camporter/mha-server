@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.Node;
 import myhomeaudio.server.node.NodeCommands;
@@ -60,9 +61,9 @@ public class NodeHandler extends Thread {
 					NodeManager nm = NodeManager.getInstance();
 					Node newNode = new Node("", nodeSocket.getInetAddress().getHostAddress(), null);
 
-					if (nm.addNode(newNode)) {
-						// Request the name from the node
-						nm.sendNodeCommand(NodeCommands.NODE_NAME, nodeSocket.getInetAddress()
+					if (nm.addNode(newNode) == StatusCode.STATUS_OK) {
+						// Request some info from the node
+						nm.sendNodeCommand(NodeCommands.NODE_INFO, nodeSocket.getInetAddress()
 								.getHostAddress(), "");
 					}
 
