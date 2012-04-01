@@ -123,9 +123,9 @@ public class ClientManager implements StatusCode {
 			// We want the id of the new client, so get it back
 			PreparedStatement statement = conn.prepareStatement("SELECT id FROM clients "
 					+ "WHERE macaddress = ? AND ipaddress = ? AND bluetoothname = ? LIMIT 1;");
-			pstatement.setString(1, client.getMacAddress());
-			pstatement.setString(2, client.getIpAddress());
-			pstatement.setString(3, client.getBluetoothName());
+			statement.setString(1, client.getMacAddress());
+			statement.setString(2, client.getIpAddress());
+			statement.setString(3, client.getBluetoothName());
 			ResultSet resultSet = statement.executeQuery();
 			newId = resultSet.getInt("id");
 
@@ -186,7 +186,7 @@ public class ClientManager implements StatusCode {
 		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
 			DatabaseClient nextClient = i.next();
 			if (nextClient.getId() == id) {
-				return new DatabaseClient(nextClient);
+				return nextClient;
 			}
 		}
 		return null;
@@ -212,9 +212,11 @@ public class ClientManager implements StatusCode {
 	 *         doesn't match any existing client.
 	 */
 	public synchronized DatabaseClient getClient(String sessionId) {
-		DatabaseClient databaseClient = getClientBySession(sessionId);
-		if (databaseClient != null) {
-			return new DatabaseClient(databaseClient);
+		if (sessionId != null) {
+			DatabaseClient databaseClient = getClientBySession(sessionId);
+			if (databaseClient != null) {
+				return new DatabaseClient(databaseClient);
+			}
 		}
 		return null;
 	}
@@ -243,6 +245,7 @@ public class ClientManager implements StatusCode {
 	 */
 	public String loginClient(int clientId, int userId) {
 		DatabaseClient dbClient = getClient(clientId);
+		
 		if (dbClient != null) {
 			String sessionId = dbClient.login(userId);
 			updateClientToDB(dbClient);
@@ -261,8 +264,16 @@ public class ClientManager implements StatusCode {
 	 * @return The session id for the client, or null if the client was invalid.
 	 */
 	public String loginClient(Client client, int userId) {
-		DatabaseClient dbClient = getClient(client);
-		return loginClient(dbClient.getId(), userId);
+		if (client != null) {
+			DatabaseClient dbClient = getClient(client);
+			
+			if (dbClient == null) {
+				// Client doesn't exist yet, go ahead and add it
+				addClient(client);
+			}
+			return loginClient(dbClient.getId(), userId);
+		}
+		return null;
 	}
 	
 	/**
@@ -333,7 +344,7 @@ public class ClientManager implements StatusCode {
 		this.db.lock();
 		Connection conn = this.db.getConnection();
 		try {
-			PreparedStatement pstatement = conn.prepareStatement("UPDATE TABLE clients SET "
+			PreparedStatement pstatement = conn.prepareStatement("UPDATE clients SET "
 					+ "macaddress = ?, " + "ipaddress = ?, " + "bluetoothname = ?, "
 					+ "userid = ? " + "WHERE id = ?;");
 			pstatement.setString(1, dbClient.getMacAddress());
