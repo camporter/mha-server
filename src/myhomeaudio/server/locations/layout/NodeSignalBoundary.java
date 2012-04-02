@@ -31,7 +31,7 @@ public class NodeSignalBoundary implements JSONAware {
 	}
 
 	public boolean addNodeRange(NodeSignalRange nodeSignalRange) {
-		if (!containsNode(nodeSignalRange.getNodeId())) {
+		if (!containsNodeById(nodeSignalRange.getNodeId())) {
 			foundNodes.add(nodeSignalRange);
 			return true;
 		}
@@ -50,7 +50,13 @@ public class NodeSignalBoundary implements JSONAware {
 		return null;
 	}
 
-	private boolean containsNode(int id) {
+	/**
+	 * Determines if node with specific id is contained
+	 * within the area
+	 * @param id Node id to check
+	 * @return True - if found, False - if not
+	 */
+	private boolean containsNodeById(int id) {
 		Iterator iterate = foundNodes.iterator();
 		while (iterate.hasNext()) {
 			if (((NodeSignalRange) iterate.next()).getNodeId() == id) {
@@ -60,10 +66,18 @@ public class NodeSignalBoundary implements JSONAware {
 		return false;
 	}
 
+	/**
+	 * Return current NodeSignalBoundary node id
+	 * @return int Node id
+	 */
 	public int getNodeId() {
 		return id;
 	}
 
+	/**
+	 * Return number of nodes within area
+	 * @return int Number of found nodes
+	 */
 	public int size() {
 		return foundNodes.size();
 	}

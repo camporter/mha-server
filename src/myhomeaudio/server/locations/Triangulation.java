@@ -14,7 +14,23 @@ import myhomeaudio.server.locations.layout.NodeSignalBoundary;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.Node;
 
+/**
+ * Triangulates a client's location using the initial configuration signatures 
+ * and current device signature readings
+ * 
+ * @author Ryan
+ *
+ */
 public class Triangulation {
+	
+	/**
+	 * Finds the node whose device signals match 
+	 * a client's initial configuration signature
+	 * 
+	 * @param nodeSignatures Client signatures to check
+	 * @param devices Array of device reading values
+	 * @return Node whose readings match a signature, or null
+	 */
 	public static Node findLocation(
 			ArrayList<NodeSignalBoundary> nodeSignatures,
 			ArrayList<DeviceObject> devices) {
