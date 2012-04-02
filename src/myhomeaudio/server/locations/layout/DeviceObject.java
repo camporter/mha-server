@@ -4,8 +4,8 @@ import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
 public class DeviceObject implements JSONAware {
-		public int id;
-		public int rssi;
+		public final int id;
+		public final int rssi;
 
 		public DeviceObject(int id, int rssi) {
 			this.id = id;

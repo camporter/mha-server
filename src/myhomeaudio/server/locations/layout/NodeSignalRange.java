@@ -1,5 +1,8 @@
 package myhomeaudio.server.locations.layout;
 
+import org.json.simple.JSONAware;
+import org.json.simple.JSONObject;
+
 /**
  * Stores node rssi ranges, the
  * maximum and minimum values
@@ -7,7 +10,7 @@ package myhomeaudio.server.locations.layout;
  *
  */
 
-public class NodeSignalRange {
+public class NodeSignalRange implements JSONAware{
 	private final int id; //node id
 	private final int min;
 	private final int max;
@@ -27,5 +30,14 @@ public class NodeSignalRange {
 	
 	public int getNodeId(){
 		return id;
+	}
+
+	@Override
+	public String toJSONString() {
+		JSONObject object = new JSONObject();
+		object.put("max", max);
+		object.put("min", min);
+		object.put("id", id);
+		return object.toJSONString();
 	}
 }

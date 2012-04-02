@@ -12,8 +12,10 @@ import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.Database;
 import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.http.StatusCode;
+import myhomeaudio.server.locations.Triangulation;
 import myhomeaudio.server.locations.layout.DeviceObject;
 import myhomeaudio.server.locations.layout.NodeSignalBoundary;
+import myhomeaudio.server.node.Node;
 
 /**
  * Stores and maintains all of the clients on the server. This object maintains
@@ -328,6 +330,10 @@ public class ClientManager implements StatusCode {
 			ArrayList<DeviceObject> devices) {
 		DatabaseClient databaseClient = getClientBySession(sessionId);
 
+		Node node = Triangulation.findLocation(databaseClient.getNodeSignatures(), devices);
+		if(!node.equals(databaseClient.getClosestNode())){
+			//update client location and streaming
+		}
 		return updateClientToDB(databaseClient);
 	}
 

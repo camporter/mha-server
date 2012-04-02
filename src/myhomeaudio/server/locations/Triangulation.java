@@ -3,57 +3,39 @@ package myhomeaudio.server.locations;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.object.DatabaseClient;
+import myhomeaudio.server.database.object.DatabaseNode;
+import myhomeaudio.server.locations.layout.DeviceObject;
+import myhomeaudio.server.locations.layout.NodeSignalBoundary;
+import myhomeaudio.server.manager.NodeManager;
+import myhomeaudio.server.node.Node;
 
 public class Triangulation {
-/*
-	private static Triangulation instance = null;
-	private ArrayList<ClientInitialization> clients;
-	
-	public Triangulation(){
-		clients = new ArrayList<ClientInitialization>();
-	}
-	
-	public static Triangulation getInstance(){
-		if (instance == null) {
-			instance = new Triangulation();
-		}
-		return instance;
-	}
-	public void addNodeConfiguration(ClientInitialization client){
-		ClientInitialization clientInitial = getClientInitialization(client.getClient());
-		if(clientInitial == null){
-			clients.add(client);
-		}else{
-			removeClientInitialization(clientInitial.getClient());
-			clients.add(client);
-		}
-		for(ClientInitialization clients : this.clients){
-			
-		}
-	}
-	
-	public ClientInitialization getClientInitialization(String macAddress){
-	
-		for(ClientInitialization clients : this.clients){
-			if(clients.isClient(macAddress)){
-				return clients;
+	public static Node findLocation(
+			ArrayList<NodeSignalBoundary> nodeSignatures,
+			ArrayList<DeviceObject> devices) {
+		
+		int[] tally = new int[nodeSignatures.size()];
+		Iterator<DeviceObject> iterableDevices = devices.iterator();
+		Iterator<NodeSignalBoundary> iterableSignatures;
+		DeviceObject device;
+		NodeSignalBoundary signature;
+		for(int i=0; iterableDevices.hasNext(); i++){
+			iterableSignatures = nodeSignatures.iterator();
+			signature = iterableSignatures.next();
+			while(iterableDevices.hasNext()){
+				device = iterableDevices.next();
+				if(signature.getNodeRange(device.id).checkRange(device.rssi)){
+					tally[i]++;
+				}
 			}
 		}
+			
 		return null;
 	}
-	
-	public void removeClientInitialization(String macAddress){
-		for(ClientInitialization client : this.clients){
-			if(client.getClient().equals(macAddress)){
-				this.clients.remove(client);
-			}
-		}
-	}
-	
-	public boolean isPresent(Client client){
-		return false;
-	}
-	*/
 }
+
