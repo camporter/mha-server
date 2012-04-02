@@ -331,8 +331,14 @@ public class ClientManager implements StatusCode {
 		DatabaseClient databaseClient = getClientBySession(sessionId);
 
 		Node node = Triangulation.findLocation(databaseClient.getNodeSignatures(), devices);
-		if(!node.equals(databaseClient.getClosestNode())){
-			//update client location and streaming
+		if(node != null && databaseClient.getClosestNode() != null){
+			if(!node.equals(databaseClient.getClosestNode())){
+				//client location changed - update client location and streaming
+			}
+		}else if(node != null){
+			//client discovered - update
+		}else if(databaseClient.getClosestNode() != null){
+			//client lost - update
 		}
 		return updateClientToDB(databaseClient);
 	}

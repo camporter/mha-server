@@ -35,6 +35,10 @@ public class DatabaseNode extends DatabaseObject<Node> implements JSONAware {
 	public void setName(String name){
 		this.object.setName(name);
 	}
+	
+	public Node getNode(){
+		return new Node(this.object);
+	}
 
 	@Override
 	public String toJSONString() {

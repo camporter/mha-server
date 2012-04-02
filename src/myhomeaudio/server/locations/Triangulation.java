@@ -19,19 +19,25 @@ public class Triangulation {
 			ArrayList<NodeSignalBoundary> nodeSignatures,
 			ArrayList<DeviceObject> devices) {
 		
-		int[] tally = new int[nodeSignatures.size()];
-		Iterator<DeviceObject> iterableDevices = devices.iterator();
-		Iterator<NodeSignalBoundary> iterableSignatures;
+		NodeManager nm = NodeManager.getInstance();
+		Iterator<DeviceObject> iterableDevices;
+		Iterator<NodeSignalBoundary> iterableSignatures = nodeSignatures.iterator();
 		DeviceObject device;
 		NodeSignalBoundary signature;
-		for(int i=0; iterableDevices.hasNext(); i++){
-			iterableSignatures = nodeSignatures.iterator();
+		boolean match;
+		
+		while(iterableSignatures.hasNext()){
 			signature = iterableSignatures.next();
+			iterableDevices = devices.iterator();
+			match = true;
 			while(iterableDevices.hasNext()){
 				device = iterableDevices.next();
-				if(signature.getNodeRange(device.id).checkRange(device.rssi)){
-					tally[i]++;
+				if(!signature.getNodeRange(device.id).checkRange(device.rssi)){
+					match = false;
 				}
+			}
+			if(match){
+				return nm.getNodeById(signature.getNodeId()).getNode();
 			}
 		}
 			

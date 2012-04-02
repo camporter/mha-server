@@ -31,11 +31,9 @@ public class NodeSignalBoundary implements JSONAware {
 	}
 
 	public boolean addNodeRange(NodeSignalRange nodeSignalRange) {
-		if (!(id == nodeSignalRange.getNodeId())) {
-			if (!containsNode(nodeSignalRange.getNodeId())) {
-				foundNodes.add(nodeSignalRange);
-				return true;
-			}
+		if (!containsNode(nodeSignalRange.getNodeId())) {
+			foundNodes.add(nodeSignalRange);
+			return true;
 		}
 		return false;
 	}
@@ -50,20 +48,6 @@ public class NodeSignalBoundary implements JSONAware {
 			}
 		}
 		return null;
-	}
-	
-	public static ArrayList<NodeSignalRange> parseNodeSignals(String data){
-		ArrayList<NodeSignalRange> interference = new ArrayList<NodeSignalRange>();
-		Object o = (Object) JSONValue.parse(data);
-		JSONArray jArray = (JSONArray) (o);
-		// NodeSignalRange[] nsr = (NodeSignalRange[]) jArray.toArray();
-		JSONObject jObject;
-		for (Object object : jArray) {
-			jObject = (JSONObject) object;
-			interference.add(new NodeSignalRange((Integer) jObject.get("id"), ((Long) jObject
-					.get("min")).intValue(), ((Long) jObject.get("max")).intValue()));
-		}
-		return interference;
 	}
 
 	private boolean containsNode(int id) {
@@ -80,7 +64,7 @@ public class NodeSignalBoundary implements JSONAware {
 		return id;
 	}
 
-	public int get() {
+	public int size() {
 		return foundNodes.size();
 	}
 	
