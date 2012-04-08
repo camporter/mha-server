@@ -50,6 +50,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 						&& jsonRequest.containsKey("ipaddress")
 						&& jsonRequest.containsKey("macaddress")
 						&& jsonRequest.containsKey("bluetoothname")) {
+					
 					User lUser = new User((String) jsonRequest.get("username"),
 							(String) jsonRequest.get("password"));
 
@@ -59,10 +60,11 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 								(String) jsonRequest.get("ipaddress"),
 								(String) jsonRequest.get("bluetoothname"));
 						
+						
 						// Get the session by logging the client in
 						String sessionId = cm.loginClient(lClient, um.getUser(lUser.getUsername())
 								.getId());
-
+						
 						if (sessionId != null) {
 							body.put("status", STATUS_OK);
 							body.put("session", sessionId);
@@ -157,6 +159,7 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 				}
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			// Do nothing for now
 		}
 

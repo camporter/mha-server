@@ -138,6 +138,7 @@ public class ClientManager implements StatusCode {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		this.db.unlock();
 
 		return result;
 	}
@@ -271,7 +272,11 @@ public class ClientManager implements StatusCode {
 			
 			if (dbClient == null) {
 				// Client doesn't exist yet, go ahead and add it
-				addClient(client);
+				if (addClient(client) == STATUS_OK) {
+					dbClient = getClient(client);
+				} else {
+					return null;
+				}
 			}
 			return loginClient(dbClient.getId(), userId);
 		}
