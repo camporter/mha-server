@@ -93,7 +93,7 @@ public class NodeManager implements NodeCommands, StatusCode {
 						nodeResults.getInt("id"),
 						nodeResults.getString("name"),
 						nodeResults.getString("ipaddress"),
-						nodeResults.getString("bluetoothaddress"));
+						nodeResults.getString("bluetoothAddress"));
 				// Populate the nodeList
 				this.nodeList.add(dbNode);
 			}
@@ -124,7 +124,7 @@ public class NodeManager implements NodeCommands, StatusCode {
 		this.db.lock();
 		Connection conn = this.db.getConnection();
 		try {
-			PreparedStatement pstatement = conn.prepareStatement("INSERT INTO nodes (name, ipaddress, bluetoothaddress) VALUES (?, ?, ?);");
+			PreparedStatement pstatement = conn.prepareStatement("INSERT INTO nodes (name, ipaddress, bluetoothAddress) VALUES (?, ?, ?);");
 			pstatement.setString(1, node.getName());
 			pstatement.setString(2, node.getIpAddress());
 			pstatement.setString(3, node.getBluetoothAddress());
@@ -132,7 +132,10 @@ public class NodeManager implements NodeCommands, StatusCode {
 			
 			// We want the id of the new node, so get it back
 			PreparedStatement statement = conn.prepareStatement("SELECT id FROM nodes " + 
-					"WHERE name = ? AND ipaddress = ? AND bluetoothaddress = ?;");
+					"WHERE name = ? AND ipaddress = ? AND bluetoothAddress = ? LIMIT 1;");
+			statement.setString(1, node.getName());
+			statement.setString(2, node.getIpAddress());
+			statement.setString(3, node.getBluetoothAddress());
 			ResultSet resultSet = statement.executeQuery();
 			newId = resultSet.getInt("id");
 			
