@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import myhomeaudio.server.client.Client;
+import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.database.object.DatabaseNode;
 import myhomeaudio.server.database.object.DatabaseUser;
 import myhomeaudio.server.http.HTTPMimeType;
@@ -66,8 +67,13 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 								.getId());
 						
 						if (sessionId != null) {
+							
+							// Get whether user has previously configured network
+							boolean initialConfig = cm.getClient(sessionId).isConfigured();
+							
 							body.put("status", STATUS_OK);
 							body.put("session", sessionId);
+							body.put("initialConfig", initialConfig);
 							this.httpStatus = HttpStatus.SC_OK;
 						}
 					}

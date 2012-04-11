@@ -72,6 +72,10 @@ public class DatabaseClient extends DatabaseObject<Client> {
 		sessionId = null;
 		return result;
 	}
+	
+	public boolean isConfigured(){
+		return nodeSignatures != null;
+	}
 
 	public String getIpAddress() {
 		return this.object.getIpAddress();
