@@ -69,11 +69,11 @@ public class ClientHelper extends Helper implements HelperInterface, NodeCommand
 						if (sessionId != null) {
 							
 							// Get whether user has previously configured network
-							boolean initialConfig = cm.getClient(sessionId).isConfigured();
+							boolean configured = cm.getClient(sessionId).isConfigured();
 							
 							body.put("status", STATUS_OK);
 							body.put("session", sessionId);
-							body.put("initialConfig", initialConfig);
+							body.put("configured", configured);
 							this.httpStatus = HttpStatus.SC_OK;
 						}
 					}
