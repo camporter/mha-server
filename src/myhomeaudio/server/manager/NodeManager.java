@@ -97,6 +97,7 @@ public class NodeManager implements NodeCommands, StatusCode {
 						nodeResults.getString("ipaddress"),
 						nodeResults.getString("bluetoothAddress"));
 				// Populate the nodeList
+				dbNode.setActive(false);
 				this.nodeList.add(dbNode);
 			}
 			result = true;
@@ -123,6 +124,7 @@ public class NodeManager implements NodeCommands, StatusCode {
 		
 		if(isValidNodeByIpAddress(node.getIpAddress())){
 			System.out.println("Duplicate Found: " + getNodeByIpAddress(node.getIpAddress()));
+			getNodeByIpAddress(node.getIpAddress()).setActive(true);
 			return STATUS_OK;
 		}
 		
@@ -148,7 +150,9 @@ public class NodeManager implements NodeCommands, StatusCode {
 			newId = resultSet.getInt("id");
 			
 			// Add the new node to the nodeList with their id
-			this.nodeList.add(new DatabaseNode(newId, node));
+			DatabaseNode dbNode = new DatabaseNode(newId, node);
+			dbNode.setActive(true);
+			this.nodeList.add(dbNode);
 			
 			result = STATUS_OK;		
 		} catch (SQLException e) {
@@ -371,9 +375,32 @@ public class NodeManager implements NodeCommands, StatusCode {
 		return new ArrayList<DatabaseNode>(nodeList);
 	}
 	
+	public ArrayList<DatabaseNode> getActiveList(){
+		ArrayList<DatabaseNode> activeNodeList = new ArrayList<DatabaseNode>();
+		Iterator<DatabaseNode> i = nodeList.iterator();
+		DatabaseNode dbNode = null;
+		while(i.hasNext()){
+			dbNode = i.next();
+			if(dbNode.isActive()){
+				activeNodeList.add(dbNode);
+			}
+		}
+		return activeNodeList;
+	}
+	
 	public JSONArray getJSONArray() {
 		JSONArray nodeArray = new JSONArray();
 		for (DatabaseNode n : nodeList) {
+			nodeArray.add(n);
+		}
+		return nodeArray;
+	}
+	
+	public JSONArray getActiveListJSONArray(){
+		JSONArray nodeArray = new JSONArray();
+		ArrayList<DatabaseNode> activeList = getActiveList();
+			
+		for (DatabaseNode n : activeList) {
 			nodeArray.add(n);
 		}
 		return nodeArray;

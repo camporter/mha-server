@@ -6,18 +6,23 @@ import org.json.simple.JSONObject;
 import myhomeaudio.server.node.Node;
 
 public class DatabaseNode extends DatabaseObject<Node> implements JSONAware {
+	
+	boolean isActive;
 
 	public DatabaseNode(int id, String name, String ipAddress, String bluetoothAddress) {
 		super(id, new Node(name, ipAddress, null));
+		isActive = false;
 	}
 
 	public DatabaseNode(int id, Node node) {
 		super(id, new Node(node));
+		isActive = false;
 	}
 
 	public DatabaseNode(DatabaseNode dbNode) {
 		super(dbNode.getId(), new Node(dbNode.getName(), dbNode.getIpAddress(),
 				dbNode.getBluetoothAddress()));
+		isActive = false;
 	}
 
 	public String getIpAddress() {
@@ -34,6 +39,13 @@ public class DatabaseNode extends DatabaseObject<Node> implements JSONAware {
 	
 	public void setName(String name){
 		this.object.setName(name);
+	}
+	
+	public boolean isActive(){
+		return isActive;
+	}
+	public void setActive(boolean active){
+		isActive = active;
 	}
 	
 	/* (non-Javadoc)
