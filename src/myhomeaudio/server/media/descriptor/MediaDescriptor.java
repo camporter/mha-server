@@ -50,6 +50,16 @@ public class MediaDescriptor {
 		this.byteData = null;
 	}
 
+	public MediaDescriptor(MediaDescriptor descriptor) {
+		this.id = descriptor.id();
+		this.title = descriptor.title();
+		this.artist = descriptor.artist();
+		this.album = descriptor.album();
+		this.genre = descriptor.genre();
+		this.location = descriptor.location();
+		this.byteData = descriptor.byteData();
+	}
+
 	public int id() {
 		return id;
 	}

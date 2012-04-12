@@ -390,19 +390,16 @@ public class NodeManager implements NodeCommands, StatusCode {
 	
 	public JSONArray getJSONArray() {
 		JSONArray nodeArray = new JSONArray();
-		for (DatabaseNode n : nodeList) {
-			nodeArray.add(n);
-		}
+		nodeArray.addAll(nodeArray);
 		return nodeArray;
 	}
 	
 	public JSONArray getActiveListJSONArray(){
 		JSONArray nodeArray = new JSONArray();
+		
 		ArrayList<DatabaseNode> activeList = getActiveList();
-			
-		for (DatabaseNode n : activeList) {
-			nodeArray.add(n);
-		}
+		nodeArray.addAll(activeList);
+		
 		return nodeArray;
 	}
 }

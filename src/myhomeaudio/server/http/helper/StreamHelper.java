@@ -1,7 +1,10 @@
 package myhomeaudio.server.http.helper;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
+import myhomeaudio.server.database.object.DatabaseNode;
+import myhomeaudio.server.database.object.DatabaseStream;
 import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.manager.ClientManager;
@@ -9,6 +12,7 @@ import myhomeaudio.server.manager.StreamManager;
 import myhomeaudio.server.stream.Stream;
 
 import org.apache.http.HttpStatus;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -66,10 +70,22 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 			} else if (method.equals("remove")) {
 				// Remove a stream from the server
 				JSONObject streamObj = (JSONObject) jsonRequest.get("stream");
-				Stream removeStream = new Stream((String) streamObj.get("name"), (Integer) streamObj.get("id"));
+				DatabaseStream removeStream = new DatabaseStream((Integer) streamObj.get("id"), (String) streamObj.get("name"));
 				
 				body.put("status", sm.removeStream(removeStream));
 				this.httpStatus = HttpStatus.SC_OK;
+			} else if (method.equals("assign")) {
+				// Assign nodes to a stream
+				JSONObject streamObj = (JSONObject) jsonRequest.get("stream");
+				DatabaseStream stream = new DatabaseStream((Integer) streamObj.get("id"), (String) streamObj.get("name"));
+				JSONArray nodeListArray = (JSONArray) jsonRequest.get("nodes");
+				ArrayList<DatabaseNode> nodeList = new ArrayList<DatabaseNode>();
+				nodeList.addAll(nodeListArray);
+				
+				body.put("status", sm.setNodes(stream, nodeList));
+				
+				// TODO: trigger a process to switch the audio
+				
 			} else {
 				// Method not recognized
 				body.put("status", STATUS_BAD_METHOD);
