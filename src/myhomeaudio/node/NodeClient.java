@@ -92,12 +92,8 @@ public class NodeClient {
 			HttpService httpService = new HttpService(httpProc,
 					new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory(),
 					registry, params);
-
-			System.out.println("Incoming connection from ");
 			while (true) {
 				Socket serverSocket = nodeSocket.accept();
-				System.out.println("Incoming connection from " + serverSocket.getInetAddress());
-				
 				
 				DefaultHttpServerConnection connection = new DefaultHttpServerConnection();
 				System.out.println("Incoming connection from " + serverSocket.getInetAddress());
