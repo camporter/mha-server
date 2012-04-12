@@ -168,11 +168,10 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 					httpExecutor.postProcess(response, httpProcessor, httpContext);
 
 					// Get the corresponding node
-					DatabaseNode dbnode = nm.getNodeByIpAddress(this.ipAddress);
-					if (dbnode != null) {
+					if(nm.isValidNodeByIpAddress(this.ipAddress)){
 						// Change the bluetooth name for the node
 						String name = EntityUtils.toString(response.getEntity()).trim();
-						dbnode.setName(name);
+						nm.updateNodeName(this.ipAddress, name);
 						System.out.println("Got name from node: " + name);
 					}
 				} catch (HttpException e) {

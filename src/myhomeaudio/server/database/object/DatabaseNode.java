@@ -36,6 +36,14 @@ public class DatabaseNode extends DatabaseObject<Node> implements JSONAware {
 		this.object.setName(name);
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "DatabaseNode [id=" + id + ", object=" + object + "]";
+	}
+
 	public Node getNode(){
 		return new Node(this.object);
 	}

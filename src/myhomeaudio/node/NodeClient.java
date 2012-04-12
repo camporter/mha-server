@@ -68,6 +68,7 @@ public class NodeClient {
 		
 		//host = sd.getAddress().getHostAddress();
 		serverPort = sd.getNodePort();
+		System.out.println("Server Discovered on Port: " + serverPort);
 		
 		try {
 			ServerSocket nodeSocket = new ServerSocket(NodeClient.nodePort);
@@ -92,8 +93,12 @@ public class NodeClient {
 					new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory(),
 					registry, params);
 
+			System.out.println("Incoming connection from ");
 			while (true) {
 				Socket serverSocket = nodeSocket.accept();
+				System.out.println("Incoming connection from " + serverSocket.getInetAddress());
+				
+				
 				DefaultHttpServerConnection connection = new DefaultHttpServerConnection();
 				System.out.println("Incoming connection from " + serverSocket.getInetAddress());
 				connection.bind(serverSocket, params);
@@ -180,6 +185,7 @@ public class NodeClient {
 
 			System.out.println("Sending name...");
 			// Send the name of the node as data
+			System.out.println("Requesting and sending node name");
 			response.setEntity(new StringEntity(this.nodeName));
 			response.setStatusCode(HttpStatus.SC_OK);
 

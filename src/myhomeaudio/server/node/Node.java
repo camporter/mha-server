@@ -65,4 +65,13 @@ public class Node {
 		}
 		return false;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Node [ipAddress=" + ipAddress + ", name=" + name
+				+ ", bluetoothAddress=" + bluetoothAddress + "]";
+	}
 }

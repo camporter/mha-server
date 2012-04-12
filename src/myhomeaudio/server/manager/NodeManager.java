@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -15,6 +16,7 @@ import org.json.simple.JSONArray;
 
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.Database;
+import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.database.object.DatabaseNode;
 import myhomeaudio.server.http.NodeWorker;
 import myhomeaudio.server.http.StatusCode;
@@ -116,7 +118,13 @@ public class NodeManager implements NodeCommands, StatusCode {
 	public int addNode(Node node) {
 		int result = STATUS_FAILED;
 		
-		// TODO: Check for duplicates
+		// TODO: Check for duplicates, verify node information correct
+		//Prevent node being added with just IP address
+		
+		if(isValidNodeByIpAddress(node.getIpAddress())){
+			System.out.println("Duplicate Found: " + getNodeByIpAddress(node.getIpAddress()));
+			return STATUS_OK;
+		}
 		
 		int newId = -1;
 		
@@ -175,6 +183,20 @@ public class NodeManager implements NodeCommands, StatusCode {
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * Updates the bluetooth name of a node
+	 * @param ipAddress 
+	 * 			IP Address of the node to be updated
+	 * @param name
+	 * 			New name of node
+	 * @return True if name successfully updated
+	 */
+	public boolean updateNodeName(String ipAddress, String name){
+		DatabaseNode dbNode = getNodeByIpAddress(ipAddress);;
+		dbNode.setName(name);
+		return updateNodeToDB(dbNode);
 	}
 	
 	/**
@@ -239,6 +261,22 @@ public class NodeManager implements NodeCommands, StatusCode {
 		}
 		return false;
 	}
+	
+	/**
+	 * Verifies that a node with the given IP address exists within the node manager
+	 * 
+	 * @param ipAddress
+	 *            IP address of the node
+	 * @return True if the node exists
+	 */
+	public boolean isValidNodeByIpAddress(String ipAddress) {
+		for (DatabaseNode node : this.nodeList) {
+			if (node.getIpAddress().equals(ipAddress)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Get a Node object with the given IP address
@@ -248,14 +286,49 @@ public class NodeManager implements NodeCommands, StatusCode {
 	 * @return The node with the corresponding IP. Returns null if no node with
 	 *         the corresponding IP address is found.
 	 */
-	public DatabaseNode getNodeByIpAddress(String ipAddress) {
+	public synchronized DatabaseNode getNode(String ipAddress) {
+		DatabaseNode dbNode = getNodeByIpAddress(ipAddress);
+		if(dbNode != null){
+			return new DatabaseNode(dbNode);
+		}
+		return null;
+	}
+	
+	private synchronized DatabaseNode getNodeByIpAddress(String ipAddress){
 		for (DatabaseNode nextNode : nodeList) {
 			if (nextNode.getIpAddress().equals(ipAddress)) {
-				return new DatabaseNode(nextNode);
+				return nextNode;
 			}
 		}
 		return null;
 	}
+	
+	private boolean updateNodeToDB(DatabaseNode dbNode) {
+		boolean result = false;
+
+		this.db.lock();
+		Connection conn = this.db.getConnection();
+		try {
+			if(dbNode != null){
+				PreparedStatement pstatement = conn.prepareStatement("UPDATE nodes SET "
+						+ "name = ?, " + "ipaddress = ?, " + "bluetoothAddress = ? " + "WHERE id = ?;");
+				
+				pstatement.setString(1, dbNode.getName());
+				pstatement.setString(2, dbNode.getIpAddress());
+				pstatement.setString(3, dbNode.getBluetoothAddress());
+				pstatement.setInt(4, dbNode.getId());
+				pstatement.executeUpdate();
+
+				result = true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		this.db.unlock();
+		return result;
+	}
+
+
 	
 	/**
 	 * Get a Node object with the given node name
