@@ -31,9 +31,9 @@ public class NodeHelper extends Helper implements HelperInterface,
 		ClientManager cm = ClientManager.getInstance();
 
 		JSONObject jsonRequest = (JSONObject) JSONValue.parse(data);
-		
+
 		String method = uriSegments.get(1);
-		
+
 		if (method.equals("list")) {
 			// List the nodes
 
@@ -44,9 +44,9 @@ public class NodeHelper extends Helper implements HelperInterface,
 
 				this.httpStatus = HttpStatus.SC_OK;
 			}
-		} else if(method.equals("activelist")){
-			//List the active nodes
-			
+		} else if (method.equals("activelist")) {
+			// List the active nodes
+
 			if (jsonRequest.containsKey("session")
 					&& cm.isValidClient((String) jsonRequest.get("session"))) {
 				body.put("nodes", nm.getActiveListJSONArray());
@@ -54,7 +54,7 @@ public class NodeHelper extends Helper implements HelperInterface,
 
 				this.httpStatus = HttpStatus.SC_OK;
 			}
-		}else {
+		} else {
 
 			// Method not recognized
 			body.put("status", STATUS_BAD_METHOD);

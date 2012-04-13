@@ -196,10 +196,12 @@ public class ClientManager implements StatusCode {
 	}
 
 	private synchronized DatabaseClient getClientBySession(String sessionId) {
-		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
-			DatabaseClient nextClient = i.next();
-			if (nextClient.getSessionId().equals(sessionId)) {
-				return nextClient;
+		if (sessionId != null) {
+			for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
+				DatabaseClient nextClient = i.next();
+				if (nextClient.getSessionId() != null && nextClient.getSessionId().equals(sessionId)) {
+					return nextClient;
+				}
 			}
 		}
 		return null;
