@@ -63,8 +63,8 @@ public class ClientManager implements StatusCode {
 			Statement statement = conn.createStatement();
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS "
 					+ "clients (id INTEGER PRIMARY KEY AUTOINCREMENT, "
-					+ "macaddress TEXT UNIQUE, " + "ipaddress TEXT, "
-					+ "bluetoothname TEXT UNIQUE, " + "userid INTEGER);");
+					+ "macaddress TEXT, " + "ipaddress TEXT, "
+					+ "bluetoothname TEXT, " + "userid INTEGER);");
 			result = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
