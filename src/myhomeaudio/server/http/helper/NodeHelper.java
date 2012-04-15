@@ -44,16 +44,6 @@ public class NodeHelper extends Helper implements HelperInterface,
 
 				this.httpStatus = HttpStatus.SC_OK;
 			}
-		} else if (method.equals("activelist")) {
-			// List the active nodes
-
-			if (jsonRequest.containsKey("session")
-					&& cm.isValidClient((String) jsonRequest.get("session"))) {
-				body.put("nodes", nm.getActiveListJSONArray());
-				body.put("status", STATUS_OK);
-
-				this.httpStatus = HttpStatus.SC_OK;
-			}
 		} else {
 
 			// Method not recognized

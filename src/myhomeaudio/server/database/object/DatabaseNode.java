@@ -67,6 +67,7 @@ public class DatabaseNode extends DatabaseObject<Node> implements JSONAware {
 		nodeJSON.put("name", this.object.getName());
 		nodeJSON.put("ipaddress", this.object.getIpAddress());
 		nodeJSON.put("bluetoothaddress", this.object.getBluetoothAddress());
+		nodeJSON.put("active", this.isActive);
 		return nodeJSON.toString();
 	}
 

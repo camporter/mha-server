@@ -375,31 +375,9 @@ public class NodeManager implements NodeCommands, StatusCode {
 		return new ArrayList<DatabaseNode>(nodeList);
 	}
 	
-	public ArrayList<DatabaseNode> getActiveList(){
-		ArrayList<DatabaseNode> activeNodeList = new ArrayList<DatabaseNode>();
-		Iterator<DatabaseNode> i = nodeList.iterator();
-		DatabaseNode dbNode = null;
-		while(i.hasNext()){
-			dbNode = i.next();
-			if(dbNode.isActive()){
-				activeNodeList.add(dbNode);
-			}
-		}
-		return activeNodeList;
-	}
-	
 	public JSONArray getJSONArray() {
 		JSONArray nodeArray = new JSONArray();
-		nodeArray.addAll(nodeArray);
-		return nodeArray;
-	}
-	
-	public JSONArray getActiveListJSONArray(){
-		JSONArray nodeArray = new JSONArray();
-		
-		ArrayList<DatabaseNode> activeList = getActiveList();
-		nodeArray.addAll(activeList);
-		
+		nodeArray.addAll(nodeList);
 		return nodeArray;
 	}
 }
