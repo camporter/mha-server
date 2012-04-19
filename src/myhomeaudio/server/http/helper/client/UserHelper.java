@@ -1,12 +1,14 @@
 /**
  * 
  */
-package myhomeaudio.server.http.helper;
+package myhomeaudio.server.http.helper.client;
 
 import java.util.ArrayList;
 
 import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
+import myhomeaudio.server.http.helper.Helper;
+import myhomeaudio.server.http.helper.HelperInterface;
 import myhomeaudio.server.manager.UserManager;
 import myhomeaudio.server.node.NodeCommands;
 import myhomeaudio.server.user.User;

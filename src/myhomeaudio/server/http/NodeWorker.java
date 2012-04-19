@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import myhomeaudio.server.manager.NodeManager;
+import myhomeaudio.server.node.NodeCommands;
+
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -13,8 +16,8 @@ import org.apache.http.HttpVersion;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpClientConnection;
-import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
+import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.params.SyncBasicHttpParams;
@@ -30,11 +33,8 @@ import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
 import org.apache.http.util.EntityUtils;
-
-import myhomeaudio.server.database.object.DatabaseNode;
-import myhomeaudio.server.manager.NodeManager;
-import myhomeaudio.server.node.Node;
-import myhomeaudio.server.node.NodeCommands;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 /**
  * NodeWorker is a thread that sends commands to nodes and receives
@@ -63,7 +63,8 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 	 * @param data
 	 *            Data to be sent to the node
 	 */
-	synchronized public void setRequestData(int command, String ipAddress, String data) {
+	synchronized public void setRequestData(int command, String ipAddress,
+			String data) {
 		this.command = command;
 		this.ipAddress = ipAddress;
 		this.data = data;
@@ -80,9 +81,10 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 		HttpProtocolParams.setUserAgent(httpParams, "MyHomeAudio");
 		HttpProtocolParams.setUseExpectContinue(httpParams, true);
 
-		HttpProcessor httpProcessor = new ImmutableHttpProcessor(new HttpRequestInterceptor[] {
-				new RequestContent(), new RequestTargetHost(), new RequestConnControl(),
-				new RequestUserAgent(), new RequestExpectContinue() });
+		HttpProcessor httpProcessor = new ImmutableHttpProcessor(
+				new HttpRequestInterceptor[] { new RequestContent(),
+						new RequestTargetHost(), new RequestConnControl(),
+						new RequestUserAgent(), new RequestExpectContinue() });
 
 		HttpRequestExecutor httpExecutor = new HttpRequestExecutor();
 
@@ -125,16 +127,20 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 				byte[] songData = new byte[0];// s.getSongData(this.data); //
 												// Gets byte[] of mp3 data
 
-				postRequest = new BasicHttpEntityEnclosingRequest("POST", "play");
+				postRequest = new BasicHttpEntityEnclosingRequest("POST",
+						"play");
 				postRequest.setParams(httpParams);
 
 				postRequest.setEntity(new ByteArrayEntity(songData));
 
 				try {
-					httpExecutor.preProcess(postRequest, httpProcessor, httpContext);
-					response = httpExecutor.execute(postRequest, connection, httpContext);
+					httpExecutor.preProcess(postRequest, httpProcessor,
+							httpContext);
+					response = httpExecutor.execute(postRequest, connection,
+							httpContext);
 					response.setParams(httpParams);
-					httpExecutor.postProcess(response, httpProcessor, httpContext);
+					httpExecutor.postProcess(response, httpProcessor,
+							httpContext);
 				} catch (HttpException e) {
 					e.printStackTrace();
 				}
@@ -147,10 +153,13 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 				getRequest.setParams(httpParams);
 
 				try {
-					httpExecutor.preProcess(getRequest, httpProcessor, httpContext);
-					response = httpExecutor.execute(getRequest, connection, httpContext);
+					httpExecutor.preProcess(getRequest, httpProcessor,
+							httpContext);
+					response = httpExecutor.execute(getRequest, connection,
+							httpContext);
 					response.setParams(httpParams);
-					httpExecutor.postProcess(response, httpProcessor, httpContext);
+					httpExecutor.postProcess(response, httpProcessor,
+							httpContext);
 				} catch (HttpException e) {
 					e.printStackTrace();
 				}
@@ -158,21 +167,33 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 
 			case NODE_INFO:
 				System.out.println("Asking for node's name...");
-				getRequest = new BasicHttpRequest("GET", "name");
+				getRequest = new BasicHttpRequest("GET", "info");
 				getRequest.setParams(httpParams);
 
 				try {
-					httpExecutor.preProcess(getRequest, httpProcessor, httpContext);
-					response = httpExecutor.execute(getRequest, connection, httpContext);
+					httpExecutor.preProcess(getRequest, httpProcessor,
+							httpContext);
+					response = httpExecutor.execute(getRequest, connection,
+							httpContext);
 					response.setParams(httpParams);
-					httpExecutor.postProcess(response, httpProcessor, httpContext);
+					httpExecutor.postProcess(response, httpProcessor,
+							httpContext);
 
 					// Get the corresponding node
-					if(nm.isValidNodeByIpAddress(this.ipAddress)){
+					if (nm.isValidNodeByIpAddress(this.ipAddress)) {
 						// Change the bluetooth name for the node
-						String name = EntityUtils.toString(response.getEntity()).trim();
-						nm.updateNodeName(this.ipAddress, name);
-						System.out.println("Got name from node: " + name);
+						String request = EntityUtils.toString(
+								response.getEntity()).trim();
+						JSONObject requestObject = (JSONObject) JSONValue
+								.parse(request);
+						nm.updateNodeInfo(this.ipAddress,
+								(String) requestObject.get("bluetoothName"),
+								(String) requestObject.get("bluetoothAddress"));
+						System.out.println("Got info from node: "
+								+ ((String) requestObject.get("bluetoothName"))
+								+ ", "
+								+ ((String) requestObject
+										.get("bluetoothAddress")));
 					}
 				} catch (HttpException e) {
 					e.printStackTrace();

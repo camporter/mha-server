@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.Locale;
 
 import myhomeaudio.server.discovery.DiscoverySearch;
+import myhomeaudio.server.http.helper.node.InfoHelper;
 
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpEntity;
@@ -49,15 +50,9 @@ public class NodeClient {
 
 	public static void main(String[] args) {
 		System.out.println("Starting...");
-
-		String nodeName = "cams-lappy-0";
-
-		if (args.length > 0) {
-			nodeName = args[0];
-		} else {
-			System.err.println("A Node name must be provided!");
-			// System.exit(1);
-		}
+		
+		Configuration config = Configuration.getInstance();
+		config.readConfig();
 		
 		// Do the server discovery 
 		ServerDiscovery sd = new ServerDiscovery();
@@ -68,6 +63,7 @@ public class NodeClient {
 		
 		//host = sd.getAddress().getHostAddress();
 		serverPort = sd.getNodePort();
+		
 		System.out.println("Server Discovered on Port: " + serverPort);
 		
 		try {
@@ -87,7 +83,7 @@ public class NodeClient {
 			HttpRequestHandlerRegistry registry = new HttpRequestHandlerRegistry();
 			registry.register("play", new PlayRequestHandler());
 			registry.register("pause", new PauseRequestHandler());
-			registry.register("name", new NameRequestHandler(nodeName));
+			registry.register("info", new InfoHelper());
 
 			HttpService httpService = new HttpService(httpProc,
 					new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory(),
@@ -158,31 +154,6 @@ public class NodeClient {
 
 			System.out.println("Pausing song...");
 
-			response.setStatusCode(HttpStatus.SC_OK);
-
-		}
-	}
-
-	static class NameRequestHandler implements HttpRequestHandler {
-
-		private String nodeName;
-
-		public NameRequestHandler(String nodeName) {
-			this.nodeName = nodeName;
-		}
-
-		public void handle(final HttpRequest request, final HttpResponse response,
-				final HttpContext context) throws HttpException, IOException {
-			String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
-			if (!method.equals("GET")) {
-				// Method is not a GET
-				throw new MethodNotSupportedException(method + " method not supported.");
-			}
-
-			System.out.println("Sending name...");
-			// Send the name of the node as data
-			System.out.println("Requesting and sending node name");
-			response.setEntity(new StringEntity(this.nodeName));
 			response.setStatusCode(HttpStatus.SC_OK);
 
 		}

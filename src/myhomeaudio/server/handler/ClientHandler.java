@@ -5,11 +5,11 @@ import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import myhomeaudio.server.http.helper.ClientHelper;
-import myhomeaudio.server.http.helper.NodeHelper;
-import myhomeaudio.server.http.helper.SongHelper;
-import myhomeaudio.server.http.helper.StreamHelper;
-import myhomeaudio.server.http.helper.UserHelper;
+import myhomeaudio.server.http.helper.client.ClientHelper;
+import myhomeaudio.server.http.helper.client.NodeHelper;
+import myhomeaudio.server.http.helper.client.SongHelper;
+import myhomeaudio.server.http.helper.client.StreamHelper;
+import myhomeaudio.server.http.helper.client.UserHelper;
 
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;

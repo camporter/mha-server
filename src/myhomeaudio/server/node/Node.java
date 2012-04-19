@@ -46,6 +46,10 @@ public class Node {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	public void setAddress(String bluetoothAddress) {
+		this.bluetoothAddress = bluetoothAddress;
+	}
 
 	public boolean equals(Object obj) {
 		if (obj == null) {

@@ -33,7 +33,7 @@ import myhomeaudio.server.node.NodeCommands;
 public class NodeManager implements NodeCommands, StatusCode {
 
 	private static NodeManager instance = null;
-	
+
 	private ArrayList<DatabaseNode> nodeList;
 	private Database db;
 
@@ -41,12 +41,12 @@ public class NodeManager implements NodeCommands, StatusCode {
 		System.out.println("*** Starting NodeManager...");
 		this.db = Database.getInstance();
 		this.nodeList = new ArrayList<DatabaseNode>();
-		
+
 		if (!checkNodesTable() || !updateNodesFromDB()) {
 			System.exit(1);
 		}
 	}
-	
+
 	/**
 	 * There is only one instance of NodeManager within program.
 	 * 
@@ -59,10 +59,10 @@ public class NodeManager implements NodeCommands, StatusCode {
 		}
 		return instance;
 	}
-	
+
 	private boolean checkNodesTable() {
 		boolean result = false;
-		
+
 		// Make sure the table exists, create it if it doesn't
 		this.db.lock();
 		Connection conn = this.db.getConnection();
@@ -76,20 +76,21 @@ public class NodeManager implements NodeCommands, StatusCode {
 			e.printStackTrace();
 		}
 		this.db.unlock();
-		
+
 		return result;
 	}
-	
+
 	private boolean updateNodesFromDB() {
 		boolean result = true;
-		
+
 		this.db.lock();
 		Connection conn = this.db.getConnection();
 		try {
 			Statement statement = conn.createStatement();
-			
+
 			// Create each DatabaseNode object using rows from the nodes table
-			ResultSet nodeResults = statement.executeQuery("SELECT * FROM nodes;");
+			ResultSet nodeResults = statement
+					.executeQuery("SELECT * FROM nodes;");
 			while (nodeResults.next()) {
 				DatabaseNode dbNode = new DatabaseNode(
 						nodeResults.getInt("id"),
@@ -105,10 +106,10 @@ public class NodeManager implements NodeCommands, StatusCode {
 			e.printStackTrace();
 		}
 		this.db.unlock();
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * Add Node, places nodes within network into an arrayList
 	 * 
@@ -118,67 +119,71 @@ public class NodeManager implements NodeCommands, StatusCode {
 	 */
 	public int addNode(Node node) {
 		int result = STATUS_FAILED;
-		
+
 		// TODO: Check for duplicates, verify node information correct
-		//Prevent node being added with just IP address
-		
-		if(isValidNodeByIpAddress(node.getIpAddress())){
-			System.out.println("Duplicate Found: " + getNodeByIpAddress(node.getIpAddress()));
+		// Prevent node being added with just IP address
+
+		if (isValidNodeByIpAddress(node.getIpAddress())) {
+			System.out.println("Duplicate Found: "
+					+ getNodeByIpAddress(node.getIpAddress()));
 			getNodeByIpAddress(node.getIpAddress()).setActive(true);
 			return STATUS_OK;
 		}
-		
+
 		int newId = -1;
-		
+
 		// Add new node to the database
 		this.db.lock();
 		Connection conn = this.db.getConnection();
 		try {
-			PreparedStatement pstatement = conn.prepareStatement("INSERT INTO nodes (name, ipaddress, bluetoothAddress) VALUES (?, ?, ?);");
+			PreparedStatement pstatement = conn
+					.prepareStatement("INSERT INTO nodes (name, ipaddress, bluetoothAddress) VALUES (?, ?, ?);");
 			pstatement.setString(1, node.getName());
 			pstatement.setString(2, node.getIpAddress());
 			pstatement.setString(3, node.getBluetoothAddress());
 			pstatement.executeUpdate();
-			
+
 			// We want the id of the new node, so get it back
-			PreparedStatement statement = conn.prepareStatement("SELECT id FROM nodes " + 
-					"WHERE name = ? AND ipaddress = ? AND bluetoothAddress = ? LIMIT 1;");
+			PreparedStatement statement = conn
+					.prepareStatement("SELECT id FROM nodes "
+							+ "WHERE name = ? AND ipaddress = ? AND bluetoothAddress = ? LIMIT 1;");
 			statement.setString(1, node.getName());
 			statement.setString(2, node.getIpAddress());
 			statement.setString(3, node.getBluetoothAddress());
 			ResultSet resultSet = statement.executeQuery();
 			newId = resultSet.getInt("id");
-			
+
 			// Add the new node to the nodeList with their id
 			DatabaseNode dbNode = new DatabaseNode(newId, node);
 			dbNode.setActive(true);
 			this.nodeList.add(dbNode);
-			
-			result = STATUS_OK;		
+
+			result = STATUS_OK;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		this.db.unlock();
-		
+
 		return result;
 	}
-	
+
 	public int removeNode(Node node) {
 		int result = STATUS_FAILED;
-		
+
 		if (node != null) {
 			DatabaseNode dbNode = getMatchingNode(node);
 			if (dbNode != null) {
 				this.db.lock();
 				Connection conn = this.db.getConnection();
 				try {
-					PreparedStatement pstatement = conn.prepareStatement("DELETE FROM nodes "
-							+ "WHERE id = ?");
+					PreparedStatement pstatement = conn
+							.prepareStatement("DELETE FROM nodes "
+									+ "WHERE id = ?");
 					pstatement.setInt(1, dbNode.getId());
 					pstatement.executeUpdate();
-					
+
 					nodeList.remove(dbNode);
-					
+
 					result = STATUS_OK;
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -188,21 +193,29 @@ public class NodeManager implements NodeCommands, StatusCode {
 		}
 		return result;
 	}
-	
+
 	/**
-	 * Updates the bluetooth name of a node
-	 * @param ipAddress 
-	 * 			IP Address of the node to be updated
+	 * Updates the bluetooth info of a node.
+	 * 
+	 * @param ipAddress
+	 *            IP Address of the node to be updated.
 	 * @param name
-	 * 			New name of node
-	 * @return True if name successfully updated
+	 *            New name of node.
+	 * @return True if name successfully updated, false otherwise.
 	 */
-	public boolean updateNodeName(String ipAddress, String name){
-		DatabaseNode dbNode = getNodeByIpAddress(ipAddress);;
-		dbNode.setName(name);
-		return updateNodeToDB(dbNode);
+	public boolean updateNodeInfo(String ipAddress, String bluetoothName, String bluetoothAddress) {
+		
+		if (ipAddress != null) {
+			DatabaseNode dbNode = getNodeByIpAddress(ipAddress);
+			if (dbNode != null && bluetoothName != null && bluetoothAddress != null) {
+				dbNode.setName(bluetoothName);
+				dbNode.setAddress(bluetoothAddress);
+				return updateNodeToDB(dbNode);
+			}
+		}
+		return false;
 	}
-	
+
 	/**
 	 * Gets the DatabaseNode object that resides in the nodeList which
 	 * corresponds with the Node object being given.
@@ -211,7 +224,7 @@ public class NodeManager implements NodeCommands, StatusCode {
 	 * @return The corresponding DatabaseNode, or null if not found.
 	 */
 	private DatabaseNode getMatchingNode(Node node) {
-		for (Iterator<DatabaseNode> i  = this.nodeList.iterator(); i.hasNext();) {
+		for (Iterator<DatabaseNode> i = this.nodeList.iterator(); i.hasNext();) {
 			DatabaseNode nextNode = i.next();
 			if (nextNode.equals(node)) {
 				return nextNode;
@@ -240,15 +253,12 @@ public class NodeManager implements NodeCommands, StatusCode {
 	}
 
 	/*
-	/**
-	 * Returns the current number of nodes under NodeManager management
+	 * /** Returns the current number of nodes under NodeManager management
 	 * 
 	 * @return nodeCount Number of nodes
 	 * 
-	public synchronized int getNodeCount() {
-		return nodeCount;
-	}
-	*/
+	 * public synchronized int getNodeCount() { return nodeCount; }
+	 */
 
 	/**
 	 * Verifies that a node with the given name exists within the node manager
@@ -265,9 +275,10 @@ public class NodeManager implements NodeCommands, StatusCode {
 		}
 		return false;
 	}
-	
+
 	/**
-	 * Verifies that a node with the given IP address exists within the node manager
+	 * Verifies that a node with the given IP address exists within the node
+	 * manager
 	 * 
 	 * @param ipAddress
 	 *            IP address of the node
@@ -292,13 +303,13 @@ public class NodeManager implements NodeCommands, StatusCode {
 	 */
 	public synchronized DatabaseNode getNode(String ipAddress) {
 		DatabaseNode dbNode = getNodeByIpAddress(ipAddress);
-		if(dbNode != null){
+		if (dbNode != null) {
 			return new DatabaseNode(dbNode);
 		}
 		return null;
 	}
-	
-	private synchronized DatabaseNode getNodeByIpAddress(String ipAddress){
+
+	private synchronized DatabaseNode getNodeByIpAddress(String ipAddress) {
 		for (DatabaseNode nextNode : nodeList) {
 			if (nextNode.getIpAddress().equals(ipAddress)) {
 				return nextNode;
@@ -306,17 +317,19 @@ public class NodeManager implements NodeCommands, StatusCode {
 		}
 		return null;
 	}
-	
+
 	private boolean updateNodeToDB(DatabaseNode dbNode) {
 		boolean result = false;
 
 		this.db.lock();
 		Connection conn = this.db.getConnection();
 		try {
-			if(dbNode != null){
-				PreparedStatement pstatement = conn.prepareStatement("UPDATE nodes SET "
-						+ "name = ?, " + "ipaddress = ?, " + "bluetoothAddress = ? " + "WHERE id = ?;");
-				
+			if (dbNode != null) {
+				PreparedStatement pstatement = conn
+						.prepareStatement("UPDATE nodes SET " + "name = ?, "
+								+ "ipaddress = ?, " + "bluetoothAddress = ? "
+								+ "WHERE id = ?;");
+
 				pstatement.setString(1, dbNode.getName());
 				pstatement.setString(2, dbNode.getIpAddress());
 				pstatement.setString(3, dbNode.getBluetoothAddress());
@@ -332,15 +345,13 @@ public class NodeManager implements NodeCommands, StatusCode {
 		return result;
 	}
 
-
-	
 	/**
 	 * Get a Node object with the given node name
 	 * 
 	 * @param name
 	 *            The name of the node to be searched for.
-	 * @return The node with the matching name. Returns null if the node is
-	 *         not found.
+	 * @return The node with the matching name. Returns null if the node is not
+	 *         found.
 	 */
 	public DatabaseNode getNodeByName(String name) {
 		// loops through nodeList looking for node with matching name
@@ -351,14 +362,14 @@ public class NodeManager implements NodeCommands, StatusCode {
 		}
 		return null;
 	}
-	
-	
+
 	/**
 	 * Get a Node object with the given node id
 	 * 
 	 * @param nodeId
 	 *            The id of the node to be searched for.
-	 * @return The node with the matching id. Returns null if the node is not found.
+	 * @return The node with the matching id. Returns null if the node is not
+	 *         found.
 	 */
 	public DatabaseNode getNodeById(int nodeId) {
 		// loops through nodeList looking for node with matching name
@@ -369,12 +380,11 @@ public class NodeManager implements NodeCommands, StatusCode {
 		}
 		return null;
 	}
-	
-	
+
 	public ArrayList<DatabaseNode> getList() {
 		return new ArrayList<DatabaseNode>(nodeList);
 	}
-	
+
 	public JSONArray getJSONArray() {
 		JSONArray nodeArray = new JSONArray();
 		nodeArray.addAll(nodeList);

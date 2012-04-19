@@ -1,4 +1,4 @@
-package myhomeaudio.server.http.helper;
+package myhomeaudio.server.http.helper.client;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -7,6 +7,8 @@ import myhomeaudio.server.database.object.DatabaseNode;
 import myhomeaudio.server.database.object.DatabaseStream;
 import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
+import myhomeaudio.server.http.helper.Helper;
+import myhomeaudio.server.http.helper.HelperInterface;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.StreamManager;
 import myhomeaudio.server.stream.Stream;

@@ -1,4 +1,4 @@
-package myhomeaudio.server.http.helper;
+package myhomeaudio.server.http.helper.client;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -9,6 +9,8 @@ import myhomeaudio.server.database.object.DatabaseNode;
 import myhomeaudio.server.database.object.DatabaseUser;
 import myhomeaudio.server.http.HTTPMimeType;
 import myhomeaudio.server.http.StatusCode;
+import myhomeaudio.server.http.helper.Helper;
+import myhomeaudio.server.http.helper.HelperInterface;
 import myhomeaudio.server.locations.layout.DeviceObject;
 import myhomeaudio.server.locations.layout.NodeSignalBoundary;
 import myhomeaudio.server.locations.layout.NodeSignalRange;
@@ -24,7 +26,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-public class ClientHelper extends Helper implements HelperInterface, NodeCommands, StatusCode {
+public class ClientHelper extends Helper implements HelperInterface, StatusCode {
 
 	public String getOutput(ArrayList<String> uriSegments, String data) {
 

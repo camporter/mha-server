@@ -41,6 +41,10 @@ public class DatabaseNode extends DatabaseObject<Node> implements JSONAware {
 		this.object.setName(name);
 	}
 	
+	public void setAddress(String bluetoothAddress) {
+		this.object.setAddress(bluetoothAddress);
+	}
+	
 	public boolean isActive(){
 		return isActive;
 	}

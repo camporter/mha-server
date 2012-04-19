@@ -1,5 +1,8 @@
 package myhomeaudio.server.media.descriptor;
 
+import org.json.simple.JSONAware;
+import org.json.simple.JSONObject;
+
 /**
  * Acts as a container for all the media included on the system. Typically, a
  * Source will generate them and then they will be passed off to the
@@ -8,7 +11,7 @@ package myhomeaudio.server.media.descriptor;
  * @author cameron
  * 
  */
-public class MediaDescriptor {
+public class MediaDescriptor implements JSONAware {
 
 	private final int id;
 	private final String title;
@@ -106,5 +109,16 @@ public class MediaDescriptor {
 		return "MediaDescriptor [id=" + id + ", title=" + title + ", artist="
 				+ artist + ", album=" + album + ", genre=" + genre
 				+ ", location=" + location + "]";
+	}
+
+	@Override
+	public String toJSONString() {		
+		JSONObject obj = new JSONObject();
+		obj.put("title", title);
+		obj.put("artist", artist);
+		obj.put("album", album);
+		obj.put("genre", genre);
+		obj.put("location", location);
+		return obj.toString();
 	}
 }

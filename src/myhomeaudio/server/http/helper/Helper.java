@@ -55,6 +55,7 @@ public class Helper implements HelperInterface, HttpRequestHandler, HTTPMimeType
 		// Pull out the request data as a string
 		String requestData = "";
 		if (request instanceof HttpEntityEnclosingRequest) {
+			// The request has data (should be POST)
 			HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
 			requestData = EntityUtils.toString(entity);
 		}
