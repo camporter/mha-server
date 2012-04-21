@@ -52,7 +52,10 @@ public class NodeClient {
 		System.out.println("Starting...");
 		
 		Configuration config = Configuration.getInstance();
-		config.readConfig();
+		if (!config.readConfig()) {
+			System.err.println("Unable to read a config file!");
+			System.exit(1);
+		}
 		
 		// Do the server discovery 
 		ServerDiscovery sd = new ServerDiscovery();
