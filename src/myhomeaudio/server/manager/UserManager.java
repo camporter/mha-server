@@ -106,7 +106,7 @@ public class UserManager implements StatusCode {
 	public int registerUser(User user) {
 		int result = STATUS_FAILED;
 		if (getUser(user.getUsername()) != null) {
-			result = STATUS_REG_DUPLICATE;
+			result = STATUS_DUPLICATE;
 		} else if (user.getPassword().length() < 0) {
 			/*
 			 * TODO: Set password requirements somewhere sane and do further

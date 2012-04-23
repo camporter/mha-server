@@ -16,16 +16,18 @@ public class DatabaseStream extends DatabaseObject<Stream> implements JSONAware 
 	private ArrayList<DatabaseNode> assignedNodeList;
 	private MediaDescriptor currentMedia;
 	private long currentMediaTime = 0;
-	private int currentMediaState = -1;
+	private int currentState = -1;
 	private Source source;
 	
-	public DatabaseStream(int id, Stream stream) {
+	public DatabaseStream(int id, Stream stream, Source source) {
 		super(id, new Stream(stream));
 		this.assignedNodeList = new ArrayList<DatabaseNode>();
+		this.source = source;
 	}
 	
-	public DatabaseStream(int id, String name) {
+	public DatabaseStream(int id, String name, Source source) {
 		super(id, new Stream(name));
+		this.source = source;
 	}
 	
 	public DatabaseStream(DatabaseStream dbStream) {
@@ -33,10 +35,10 @@ public class DatabaseStream extends DatabaseObject<Stream> implements JSONAware 
 		this.assignedNodeList = dbStream.getAssignedNodes();
 		this.currentMedia = dbStream.getCurrentMedia();
 		this.currentMediaTime = dbStream.getCurrentMediaTime();
-		this.currentMediaState = dbStream.getCurrentMediaState();
+		this.currentState = dbStream.getCurrentState();
 		this.source = dbStream.getSource();
 	}
-
+	
 	public String name() {
 		return object.name();
 	}
@@ -75,8 +77,12 @@ public class DatabaseStream extends DatabaseObject<Stream> implements JSONAware 
 		return false;
 	}
 	
-	public int getCurrentMediaState() {
-		return currentMediaState;
+	public int getCurrentState() {
+		return currentState;
+	}
+	
+	public void setCurrentState(int newState) {
+		this.currentState = newState;
 	}
 
 	public MediaDescriptor getCurrentMedia() {
@@ -89,8 +95,7 @@ public class DatabaseStream extends DatabaseObject<Stream> implements JSONAware 
 	}
 
 	public Source getSource() {
-		return null;
-		// TODO: fix this
+		return source;
 	}
 	
 	/**

@@ -40,59 +40,82 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 		// Make sure the session key exists and is valid
 		if (jsonRequest.containsKey("session")
 				&& cm.isValidClient((String) jsonRequest.get("session"))) {
-			if (method.equals("play")) {
-				// Play a new media on the stream
 
-			} else if (method.equals("resume")) {
-				// Resume playing the currently paused media
+			if (method.equals("list")) {
 
-			} else if (method.equals("pause") && jsonRequest.containsKey("stream")) {
-				
-				// Pause the currently playing media
-				
-			} else if (method.equals("next")) {
-				
-				// Start the next media in the stream
-			} else if (method.equals("previous")) {
-				// Start the previous media in the stream
-			} else if (method.equals("list")) {
 				// List the streams on the server
 				body.put("streams", sm.getListJSON());
 				body.put("status", STATUS_OK);
 				this.httpStatus = HttpStatus.SC_OK;
-				
-			} else if (method.equals("add") && jsonRequest.containsKey("stream")) {
+
+			} else if (method.equals("add")
+					&& jsonRequest.containsKey("stream")) {
+
 				// Add a new stream to the server
 				JSONObject streamObj = (JSONObject) jsonRequest.get("stream");
 				Stream newStream = new Stream((String) streamObj.get("name"));
-				
+
 				body.put("status", sm.addStream(newStream));
 				this.httpStatus = HttpStatus.SC_OK;
-				
+
 			} else if (method.equals("remove")) {
+
 				// Remove a stream from the server
-				JSONObject streamObj = (JSONObject) jsonRequest.get("stream");
-				DatabaseStream removeStream = new DatabaseStream((Integer) streamObj.get("id"), (String) streamObj.get("name"));
-				
-				body.put("status", sm.removeStream(removeStream));
+				Integer streamId = (Integer) jsonRequest.get("stream");
+
+				if (streamId != null) {
+					body.put("status", sm.removeStream(streamId));
+				}
 				this.httpStatus = HttpStatus.SC_OK;
+
 			} else if (method.equals("assign")) {
+
 				// Assign nodes to a stream
-				JSONObject streamObj = (JSONObject) jsonRequest.get("stream");
-				DatabaseStream stream = new DatabaseStream((Integer) streamObj.get("id"), (String) streamObj.get("name"));
-				JSONArray nodeListArray = (JSONArray) jsonRequest.get("nodes");
-				ArrayList<DatabaseNode> nodeList = new ArrayList<DatabaseNode>();
-				nodeList.addAll(nodeListArray);
+				Integer streamId = (Integer) jsonRequest.get("stream");
+				JSONArray nodeListArray = (JSONArray) jsonRequest
+						.get("assignedNodes");
+
+				if (streamId != null) {
+					// Make sure stream id was set
+					ArrayList<Integer> nodeList = new ArrayList<Integer>();
+					if (nodeList != null) {
+						// make sure the node list was set
+						nodeList.addAll(nodeListArray);
+
+						body.put("status", sm.setNodes(streamId, nodeList));
+					}
+				}
+				this.httpStatus = HttpStatus.SC_OK;
+
+			} else if (method.equals("action")) {
+
+				// Perform a media action on the stream (pause, resume,
+				// previous, next)
+				Integer streamId = (Integer) jsonRequest.get("stream");
+				Integer action = (Integer) jsonRequest.get("action");
+
+				if (streamId != null && action != null) {
+					// Both the stream id an action exist
+					body.put("status", sm.doAction(streamId, action));
+				}
+				this.httpStatus = HttpStatus.SC_OK;
+
+			} else if (method.equals("play")) {
+
+				// Play a new media on a specific stream
 				
-				body.put("status", sm.setNodes(stream, nodeList));
+			} else if (method.equals("media")) {
 				
-				// TODO: trigger a process to switch the audio
+				// Get the media for a specific stream
 				
 			} else {
+
 				// Method not recognized
 				body.put("status", STATUS_BAD_METHOD);
+
 			}
 		} else {
+
 			// Bad session
 			body.put("status", STATUS_BAD_SESSION);
 

@@ -20,6 +20,7 @@ public class MediaDescriptor implements JSONAware {
 	private final String genre;
 	private final String location;
 	private final byte[] byteData;
+	private final long durationInSeconds;
 
 	public MediaDescriptor(int id, String title, String artist, String album,
 			String genre, String location) {
@@ -30,10 +31,11 @@ public class MediaDescriptor implements JSONAware {
 		this.genre = genre;
 		this.location = location;
 		this.byteData = null;
+		this.durationInSeconds = -1;
 	}
 
 	public MediaDescriptor(int id, String title, String artist, String album,
-			String genre, byte[] byteData) {
+			String genre, byte[] byteData, long durationInSeconds) {
 		this.id = id;
 		this.title = title;
 		this.artist = artist;
@@ -41,6 +43,7 @@ public class MediaDescriptor implements JSONAware {
 		this.genre = genre;
 		this.byteData = byteData;
 		this.location = null;
+		this.durationInSeconds = durationInSeconds;
 	}
 
 	public MediaDescriptor(int id) {
@@ -51,6 +54,7 @@ public class MediaDescriptor implements JSONAware {
 		this.genre = null;
 		this.location = null;
 		this.byteData = null;
+		this.durationInSeconds = -1;
 	}
 
 	public MediaDescriptor(MediaDescriptor descriptor) {
@@ -61,6 +65,7 @@ public class MediaDescriptor implements JSONAware {
 		this.genre = descriptor.genre();
 		this.location = descriptor.location();
 		this.byteData = descriptor.byteData();
+		this.durationInSeconds = descriptor.getDuration();
 	}
 
 	public int id() {
@@ -89,6 +94,10 @@ public class MediaDescriptor implements JSONAware {
 
 	public byte[] byteData() {
 		return byteData;
+	}
+	
+	public long getDuration() {
+		return durationInSeconds;
 	}
 
 	public boolean isLocationDescriptor() {
@@ -119,6 +128,7 @@ public class MediaDescriptor implements JSONAware {
 		obj.put("album", album);
 		obj.put("genre", genre);
 		obj.put("location", location);
+		obj.put("duration", durationInSeconds);
 		return obj.toString();
 	}
 }

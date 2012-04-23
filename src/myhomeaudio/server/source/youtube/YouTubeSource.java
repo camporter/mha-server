@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import myhomeaudio.server.media.descriptor.MediaDescriptor;
-import myhomeaudio.server.source.LocationSource;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -22,7 +20,7 @@ import org.apache.http.util.EntityUtils;
  * 
  * 
  */
-public class YouTubeSource extends LocationSource {
+public class YouTubeSource {
 
 	private static final String BASE_URL = "http://gdata.youtube.com/feeds/api/videos?";
 	private static final String alt = "jsonc";
