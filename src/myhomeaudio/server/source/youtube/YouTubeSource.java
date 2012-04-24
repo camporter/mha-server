@@ -25,8 +25,8 @@ public class YouTubeSource {
 	private static final String BASE_URL = "http://gdata.youtube.com/feeds/api/videos?";
 	private static final String alt = "jsonc";
 	private static final double version = 2.1;
-	
-	//Default search values
+
+	// Default search values
 	private static final int defaultMaxResults = 5;
 	private static final boolean defaultExactMatch = false;
 	private static final String defaultOrderBy = OrderByCommands.RELEVANCE;
@@ -35,11 +35,10 @@ public class YouTubeSource {
 	private int maxResults;
 	private String orderBy;
 	private boolean exactMatch; // for determining to include quotations
-										// around search terms
+								// around search terms
 
 	// Need to format in standard way as FolderSource
 	ResponseMetaData resultsObject = null;
-	
 
 	/**
 	 * Constructor for YouTube source
@@ -51,48 +50,48 @@ public class YouTubeSource {
 		this.orderBy = defaultOrderBy;
 		this.exactMatch = defaultExactMatch;
 	}
-	
-	public YouTubeSource(int maxResults, String orderBy, boolean exactMatch){
+
+	public YouTubeSource(int maxResults, String orderBy, boolean exactMatch) {
 		this.maxResults = maxResults;
 		this.orderBy = orderBy;
 		this.exactMatch = exactMatch;
 	}
-	
-	public YouTubeSource(int maxResults, String orderBy){
+
+	public YouTubeSource(int maxResults, String orderBy) {
 		this.maxResults = maxResults;
 		this.orderBy = orderBy;
 		this.exactMatch = defaultExactMatch;
-		
+
 	}
-	
-	public YouTubeSource(int maxResults, boolean exactMatch){
+
+	public YouTubeSource(int maxResults, boolean exactMatch) {
 		this.maxResults = maxResults;
 		this.orderBy = defaultOrderBy;
 		this.exactMatch = exactMatch;
-		
+
 	}
-	
-	public YouTubeSource(String orderBy, boolean exactMatch){
+
+	public YouTubeSource(String orderBy, boolean exactMatch) {
 		this.maxResults = defaultMaxResults;
 		this.orderBy = orderBy;
 		this.exactMatch = exactMatch;
-		
+
 	}
-	
-	public YouTubeSource(int maxResults){
+
+	public YouTubeSource(int maxResults) {
 		this.maxResults = maxResults;
 		this.orderBy = defaultOrderBy;
 		this.exactMatch = defaultExactMatch;
-		
+
 	}
-	
-	public YouTubeSource(String orderBy){
+
+	public YouTubeSource(String orderBy) {
 		this.maxResults = defaultMaxResults;
 		this.orderBy = orderBy;
 		this.exactMatch = defaultExactMatch;
 	}
-	
-	public YouTubeSource(boolean exactMatch){
+
+	public YouTubeSource(boolean exactMatch) {
 		this.maxResults = defaultMaxResults;
 		this.orderBy = defaultOrderBy;
 		this.exactMatch = exactMatch;
@@ -213,34 +212,32 @@ public class YouTubeSource {
 		if (exactMatch) {
 			searchTerms = "%22" + searchTerms + "%22"; // exact search
 		}
-		
+
 		return searchTerms;
 	}
 
-	/*public ArrayList<String> getMediaList() {
-		ArrayList<String> mediaList = new ArrayList<String>();
-		File folder = null;
+	/*
+	 * public ArrayList<String> getMediaList() { ArrayList<String> mediaList =
+	 * new ArrayList<String>(); File folder = null;
+	 * 
+	 * for (String mediaFileName : folder.list()) {
+	 * mediaList.add(mediaFileName); } return null; }
+	 */
 
-		for (String mediaFileName : folder.list()) {
-			mediaList.add(mediaFileName);
-		}
-		return null;
-	}*/
-	
-	
 	public ArrayList<MediaDescriptor> searchMedia(String search) {
 		feedSearch(search);
 		return createMediaDescriptor();
 	}
-	
-	private ArrayList<MediaDescriptor> createMediaDescriptor(){
+
+	private ArrayList<MediaDescriptor> createMediaDescriptor() {
 		ArrayList<VideoMetaData> videoMetaData = resultsObject.getItems();
 		ArrayList<MediaDescriptor> mediaDesc = new ArrayList<MediaDescriptor>();
 		VideoMetaData data = null;
-		
-		while(!videoMetaData.isEmpty()){
+
+		while (!videoMetaData.isEmpty()) {
 			data = videoMetaData.remove(0);
-			mediaDesc.add(new MediaDescriptor(0,data.getTitle(),"","","",data.getUrl()));
+			mediaDesc.add(new MediaDescriptor(0, data.getTitle(), "", "", "",
+					data.getUrl(), true, 0));
 		}
 		return mediaDesc;
 	}

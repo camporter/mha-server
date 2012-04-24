@@ -16,6 +16,8 @@ import myhomeaudio.server.database.object.DatabaseNode;
 import myhomeaudio.server.database.object.DatabaseStream;
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.node.Node;
+import myhomeaudio.server.source.FolderSource;
+import myhomeaudio.server.source.Source;
 import myhomeaudio.server.stream.Stream;
 import myhomeaudio.server.stream.StreamAction;
 import myhomeaudio.server.stream.StreamState;
@@ -32,6 +34,7 @@ public class StreamManager implements StatusCode {
 
 	private ArrayList<DatabaseStream> streamList;
 	private Database db;
+	private ArrayList<Source> sourceList;
 
 	protected StreamManager() {
 		System.out.println("*** Starting StreamManager...");
@@ -41,6 +44,12 @@ public class StreamManager implements StatusCode {
 		if (!checkStreamsTable() || !updateStreamsFromDB()) {
 			System.exit(1); // Exit is there's a problem with the database.
 		}
+		initializeSources();
+	}
+
+	private void initializeSources() {
+		ArrayList<Source> sourceList = new ArrayList<Source>();
+		sourceList.add(new FolderSource("."));
 	}
 
 	public static synchronized StreamManager getInstance() {

@@ -51,7 +51,6 @@ public class FolderSource implements Source {
 	}
 
 	private void getFiles(File directory) {
-		System.out.println("Folder: " + directory);
 		File[] files = directory.listFiles();
 		if (files != null) {
 			for (int i = 0; i < files.length; i++) {
@@ -75,10 +74,7 @@ public class FolderSource implements Source {
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
-					} else {
-						System.out.println("Too large!");
 					}
-
 				}
 			}
 		}
@@ -165,10 +161,6 @@ public class FolderSource implements Source {
 						tag.getArtist(), tag.getAlbum(),
 						tag.getGenreDescription(), mediaLocation, false,
 						mp3.getLengthInSeconds());
-				System.out.println("Title: " + tag.getTitle() + ", Artist: "
-						+ tag.getArtist() + ", Genre: "
-						+ tag.getGenreDescription() + ", Length: "
-						+ mp3.getLengthInSeconds());
 
 			} else if (mp3.hasId3v1Tag()) {
 				System.out.println("\t has id3v1!");
@@ -178,10 +170,6 @@ public class FolderSource implements Source {
 						tag.getArtist(), tag.getAlbum(),
 						tag.getGenreDescription(), mediaLocation, false,
 						mp3.getLengthInSeconds());
-				System.out.println("Title: " + tag.getTitle() + ", Artist: "
-						+ tag.getArtist() + ", Genre: "
-						+ tag.getGenreDescription() + ", Length: "
-						+ mp3.getLengthInSeconds());
 			}
 		} catch (UnsupportedTagException e) {
 			// e.printStackTrace();

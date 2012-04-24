@@ -65,7 +65,7 @@ public class Helper implements HelperInterface, HttpRequestHandler, HTTPMimeType
 		StringTokenizer tokenizedUri = new StringTokenizer(request.getRequestLine().getUri(), "/");
 
 		while (tokenizedUri.hasMoreTokens()) {
-			uriSegments.add(tokenizedUri.nextToken());
+			uriSegments.add(tokenizedUri.nextToken().toLowerCase());
 		}
 
 		StringEntity body = new StringEntity(this.getOutput(uriSegments, requestData));

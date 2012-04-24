@@ -120,16 +120,16 @@ public class ClientHelper extends Helper implements HelperInterface, StatusCode 
 						this.httpStatus = HttpStatus.SC_OK;
 					}
 				}
-			} else if (uriSegments.get(1).equals("initialConfig")) {
-				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("entries")) {
+			} else if (uriSegments.get(1).equals("initialconfig")) {
+				if (jsonRequest.containsKey("session") && jsonRequest.containsKey("signatures")) {
 					if (cm.isValidClient((String) jsonRequest.get("session"))) {
 
 						NodeManager nm = NodeManager.getInstance();
 
 						ArrayList<NodeSignalBoundary> nodeSignatures = new ArrayList<NodeSignalBoundary>();
 
-						JSONArray actualNodes = (JSONArray) jsonRequest.get("actualNodes");
-						Iterator<JSONObject> i = actualNodes.iterator();
+						JSONArray signaturesArray = (JSONArray) jsonRequest.get("signatures");
+						Iterator<JSONObject> i = signaturesArray.iterator();
 
 						// For each node, get the signal ranges of all other
 						// nodes
@@ -155,12 +155,11 @@ public class ClientHelper extends Helper implements HelperInterface, StatusCode 
 
 							nodeSignatures.add(nodeSignalBoundary);
 						}
-
+						
+						// Save the new configuration
 						cm.changeClientInitialization((String) jsonRequest.get("session"),
 								nodeSignatures);
-						// tn.addNodeConfiguration(new
-						// ClientInitialization(dbc.getMacAddress(),
-						// nodeSignatures));
+						
 						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;
 					}
