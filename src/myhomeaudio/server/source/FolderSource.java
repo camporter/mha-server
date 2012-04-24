@@ -163,7 +163,7 @@ public class FolderSource implements Source {
 				ID3v2 tag = mp3.getId3v2Tag();
 				descriptor = new MediaDescriptor(-1, tag.getTitle(),
 						tag.getArtist(), tag.getAlbum(),
-						tag.getGenreDescription(), new byte[0]/*getMediaData(mediaLocation)*/,
+						tag.getGenreDescription(), mediaLocation, false,
 						mp3.getLengthInSeconds());
 				System.out.println("Title: " + tag.getTitle() + ", Artist: "
 						+ tag.getArtist() + ", Genre: "
@@ -176,7 +176,7 @@ public class FolderSource implements Source {
 				ID3v1 tag = mp3.getId3v1Tag();
 				descriptor = new MediaDescriptor(-1, tag.getTitle(),
 						tag.getArtist(), tag.getAlbum(),
-						tag.getGenreDescription(), new byte[0]/*getMediaData(mediaLocation)*/,
+						tag.getGenreDescription(), mediaLocation, false,
 						mp3.getLengthInSeconds());
 				System.out.println("Title: " + tag.getTitle() + ", Artist: "
 						+ tag.getArtist() + ", Genre: "

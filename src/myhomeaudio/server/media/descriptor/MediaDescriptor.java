@@ -1,5 +1,7 @@
 package myhomeaudio.server.media.descriptor;
 
+import java.io.File;
+
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
@@ -19,30 +21,18 @@ public class MediaDescriptor implements JSONAware {
 	private final String album;
 	private final String genre;
 	private final String location;
-	private final byte[] byteData;
+	private final boolean isInternetLocation;
 	private final long durationInSeconds;
 
 	public MediaDescriptor(int id, String title, String artist, String album,
-			String genre, String location) {
+			String genre, String location, boolean isInternetLocation, long durationInSeconds) {
 		this.id = id;
 		this.title = title;
 		this.artist = artist;
 		this.album = album;
 		this.genre = genre;
 		this.location = location;
-		this.byteData = null;
-		this.durationInSeconds = -1;
-	}
-
-	public MediaDescriptor(int id, String title, String artist, String album,
-			String genre, byte[] byteData, long durationInSeconds) {
-		this.id = id;
-		this.title = title;
-		this.artist = artist;
-		this.album = album;
-		this.genre = genre;
-		this.byteData = byteData;
-		this.location = null;
+		this.isInternetLocation = isInternetLocation;
 		this.durationInSeconds = durationInSeconds;
 	}
 
@@ -53,7 +43,7 @@ public class MediaDescriptor implements JSONAware {
 		this.album = null;
 		this.genre = null;
 		this.location = null;
-		this.byteData = null;
+		this.isInternetLocation = false;
 		this.durationInSeconds = -1;
 	}
 
@@ -64,7 +54,7 @@ public class MediaDescriptor implements JSONAware {
 		this.album = descriptor.album();
 		this.genre = descriptor.genre();
 		this.location = descriptor.location();
-		this.byteData = descriptor.byteData();
+		this.isInternetLocation = descriptor.isInternetLocation();
 		this.durationInSeconds = descriptor.getDuration();
 	}
 
@@ -91,21 +81,13 @@ public class MediaDescriptor implements JSONAware {
 	public String location() {
 		return location;
 	}
-
-	public byte[] byteData() {
-		return byteData;
+	
+	public boolean isInternetLocation() {
+		return isInternetLocation;
 	}
 	
 	public long getDuration() {
 		return durationInSeconds;
-	}
-
-	public boolean isLocationDescriptor() {
-		return (location != null) && (!location.trim().equals(""));
-	}
-
-	public boolean isByteDescriptor() {
-		return (byteData != null);
 	}
 
 	/*
