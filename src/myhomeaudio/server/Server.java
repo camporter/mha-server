@@ -40,10 +40,10 @@ public class Server {
 
 		// Create an instance of the NodeManager object, which keeps track of
 		// nodes
-		NodeManager.getInstance();
-		ClientManager.getInstance();
-		UserManager.getInstance();
-		StreamManager.getInstance();
+		NodeManager nm = NodeManager.getInstance();
+		ClientManager cm = ClientManager.getInstance();
+		UserManager um = UserManager.getInstance();
+		StreamManager sm = StreamManager.getInstance();
 
 		// SongFiles songs = SongFiles.getInstance();
 		// songs.populateSongList();
@@ -84,6 +84,7 @@ public class Server {
 				System.err.println("Exception: Server Exiting");
 				System.exit(0);
 			}
+			System.out.println(sm.getListJSON().toString());
 		}
 	}
 

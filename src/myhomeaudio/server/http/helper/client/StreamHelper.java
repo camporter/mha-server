@@ -71,16 +71,20 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 			} else if (method.equals("assign")) {
 
 				// Assign nodes to a stream
-				Integer streamId = (Integer) jsonRequest.get("stream");
+				Integer streamId = ((Long) jsonRequest.get("stream"))
+						.intValue();
 				JSONArray nodeListArray = (JSONArray) jsonRequest
 						.get("assignedNodes");
 
 				if (streamId != null) {
 					// Make sure stream id was set
 					ArrayList<Integer> nodeList = new ArrayList<Integer>();
-					if (nodeList != null) {
+					if (nodeListArray != null) {
 						// make sure the node list was set
-						nodeList.addAll(nodeListArray);
+						for (Iterator<Long> i = nodeListArray.iterator(); i
+								.hasNext();) {
+							nodeList.add(((Long) i.next()).intValue());
+						}
 
 						body.put("status", sm.setNodes(streamId, nodeList));
 					}
@@ -103,11 +107,11 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 			} else if (method.equals("play")) {
 
 				// Play a new media on a specific stream
-				
+
 			} else if (method.equals("media")) {
-				
+
 				// Get the media for a specific stream
-				
+
 			} else {
 
 				// Method not recognized
