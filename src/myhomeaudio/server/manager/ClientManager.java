@@ -337,16 +337,17 @@ public class ClientManager implements StatusCode {
 			ArrayList<DeviceObject> devices) {
 		DatabaseClient databaseClient = getClientBySession(sessionId);
 
-		Node node = Triangulation.findLocation(databaseClient.getNodeSignatures(), devices);
-		if(node != null && databaseClient.getClosestNode() != null){
-			if(!node.equals(databaseClient.getClosestNode())){
-				//client location changed - update client location and streaming
-			}
-		}else if(node != null){
-			//client discovered - update
-		}else if(databaseClient.getClosestNode() != null){
-			//client lost - update
+		Node closestNode = Triangulation.findLocation(databaseClient.getNodeSignatures(), devices);
+		if (closestNode == null) {
+			// Do nothing, the client is lost
 		}
+		else if(databaseClient.getClosestNode() == null) {
+			// Update, the client does not have a closest node yet
+			
+		} else if (!closestNode.equals(databaseClient.getClosestNode())) {
+			// Update, the closest node is different from the previous closest node
+		}
+		
 		return updateClientToDB(databaseClient);
 	}
 
