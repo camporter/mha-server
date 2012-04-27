@@ -14,12 +14,12 @@ import myhomeaudio.server.mp3.Mp3File;
 import myhomeaudio.server.mp3.UnsupportedTagException;
 
 /**
- * A media source that provides various media files from a specified folder.
+ * A source that provides various media files from the specified folder (and any subfolders).
  * 
  * @author Cameron
  * 
  */
-public class FolderSource implements Source {
+public class FolderSource extends SourceBase implements Source {
 
 	protected String folderLocation;
 	protected File folder;
@@ -36,7 +36,9 @@ public class FolderSource implements Source {
 	 * @throws NullPointerException
 	 *             folderLocation cannot be null.
 	 */
-	public FolderSource(String folderLocation) throws NullPointerException {
+	public FolderSource(int id, String name, String folderLocation) throws NullPointerException {
+		super(id, name);
+		
 		if (folderLocation == null) {
 			throw new NullPointerException("Folder location cannot be null.");
 		} else {

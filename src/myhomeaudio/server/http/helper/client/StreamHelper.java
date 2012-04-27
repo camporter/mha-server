@@ -18,6 +18,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+/**
+ * Handles any HTTP requests from clients pertaining to Streams that can be
+ * interacted with.
+ * 
+ * @author Cameron
+ * 
+ */
 public class StreamHelper extends Helper implements HelperInterface, StatusCode {
 
 	@Override
@@ -44,7 +51,7 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 			if (method.equals("list")) {
 
 				// List the streams on the server
-				body.put("streams", sm.getListJSON());
+				body.put("streams", sm.getStreamListJSON());
 				body.put("status", STATUS_OK);
 				this.httpStatus = HttpStatus.SC_OK;
 

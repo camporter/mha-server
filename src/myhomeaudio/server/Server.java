@@ -84,7 +84,7 @@ public class Server {
 				System.err.println("Exception: Server Exiting");
 				System.exit(0);
 			}
-			System.out.println(sm.getListJSON().toString());
+			System.out.println(sm.getStreamListJSON().toString());
 		}
 	}
 

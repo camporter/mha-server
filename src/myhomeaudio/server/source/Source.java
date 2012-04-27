@@ -7,6 +7,8 @@ import myhomeaudio.server.media.descriptor.MediaDescriptor;
 
 public interface Source {
 	
+	public int getId();
+	public String getName();
 	public ArrayList<MediaDescriptor> getMediaList();
 	public MediaDescriptor getMedia(MediaDescriptor descriptor);
 	
