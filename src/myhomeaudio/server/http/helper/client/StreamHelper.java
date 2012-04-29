@@ -68,7 +68,7 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 			} else if (method.equals("remove")) {
 
 				// Remove a stream from the server
-				Integer streamId = (Integer) jsonRequest.get("stream");
+				Integer streamId = ((Long) jsonRequest.get("stream")).intValue();
 
 				if (streamId != null) {
 					body.put("status", sm.removeStream(streamId));
@@ -102,8 +102,8 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 
 				// Perform a media action on the stream (pause, resume,
 				// previous, next)
-				Integer streamId = (Integer) jsonRequest.get("stream");
-				Integer action = (Integer) jsonRequest.get("action");
+				Integer streamId = ((Long) jsonRequest.get("stream")).intValue();
+				Integer action = ((Long) jsonRequest.get("action")).intValue();
 
 				if (streamId != null && action != null) {
 					// Both the stream id an action exist

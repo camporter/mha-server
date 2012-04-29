@@ -45,10 +45,22 @@ public class SourceHelper extends Helper implements HelperInterface, StatusCode 
 				// List the sources on the server
 				JSONArray sourceListArray = sm.getSourceListJSON();
 				body.put("sources", sourceListArray);
-
+				body.put("status", STATUS_OK);
+				this.httpStatus = HttpStatus.SC_OK;
 			} else if (method.equals("media")) {
 				// Get all the media for a specific source
-
+				Integer sourceId = ((Long) jsonRequest.get("source")).intValue();
+				
+				if (sourceId != null) {
+					// The source id is a proper integer
+					JSONArray mediaArray = sm.getSourceMediaJSON(sourceId);
+					if (mediaArray != null) {
+						// The media for the source was found
+						body.put("media", mediaArray);
+						body.put("status", STATUS_OK);
+						this.httpStatus = HttpStatus.SC_OK;
+					}
+				}
 			}
 		}
 

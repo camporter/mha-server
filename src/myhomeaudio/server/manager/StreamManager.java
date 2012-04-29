@@ -49,7 +49,7 @@ public class StreamManager implements StatusCode {
 	}
 
 	private void initializeSources() {
-		ArrayList<Source> sourceList = new ArrayList<Source>();
+		sourceList = new ArrayList<Source>();
 		sourceList.add(new FolderSource(0, "Folder Source", "."));
 	}
 
@@ -246,11 +246,21 @@ public class StreamManager implements StatusCode {
 		}
 		return null;
 	}
+	
+	private Source getSourceById(int sourceId) {
+		for (Iterator<Source> i = this.sourceList.iterator(); i.hasNext();) {
+			Source nextSource = i.next();
+			if (nextSource.getId() == sourceId) {
+				return nextSource;
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Gets the list of available Streams as a JSON array.
 	 * 
-	 * @return JSON String representing an Stream array.
+	 * @return JSON array representing the list of streams.
 	 */
 	public JSONArray getStreamListJSON() {
 		JSONArray result = new JSONArray();
@@ -277,6 +287,27 @@ public class StreamManager implements StatusCode {
 			result.add(obj);
 		}
 		return result;
+	}
+	
+	/**
+	 * Get the list of media that the given source provides.
+	 * 
+	 * @param sourceId The id of the source to get media for.
+	 * @return THe list of media as a JSON array
+	 */
+	public JSONArray getSourceMediaJSON(int sourceId) {
+		JSONArray result = new JSONArray();
+		Source source = getSourceById(sourceId);
+		
+		if (source != null) {
+			ArrayList<MediaDescriptor> mediaList = source.getMediaList();
+			if (mediaList != null) {
+				result.addAll(mediaList);
+				return result;
+			}
+		}
+		return null;
+		
 	}
 
 	/**

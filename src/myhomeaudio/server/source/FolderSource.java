@@ -86,12 +86,7 @@ public class FolderSource extends SourceBase implements Source {
 
 	public ArrayList<MediaDescriptor> getMediaList() {
 
-		ArrayList<MediaDescriptor> mediaList = new ArrayList<MediaDescriptor>();
-
-		for (String mediaFileName : folder.list()) {
-			// mediaList.add(mediaFileName);
-		}
-		return null;
+		return new ArrayList<MediaDescriptor>(mediaList);
 	}
 
 	/**
