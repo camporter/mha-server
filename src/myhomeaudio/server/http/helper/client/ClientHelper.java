@@ -134,9 +134,12 @@ public class ClientHelper extends Helper implements HelperInterface, StatusCode 
 						// For each node, get the signal ranges of all other
 						// nodes
 						while (i.hasNext()) {
-							DatabaseNode node = nm.getNodeById((Integer) i.next().get("id"));
+							JSONObject object = i.next();
+							
+							//TODO node seems to be inactive
+							DatabaseNode node = nm.getNodeById(Integer.valueOf(((Long)object.get("id")).intValue()));
 
-							JSONArray foundNodes = (JSONArray) (i.next().get("foundNodes"));
+							JSONArray foundNodes = (JSONArray) (object.get("foundNodes"));
 
 							NodeSignalBoundary nodeSignalBoundary = new NodeSignalBoundary(
 									node.getId());
@@ -147,10 +150,7 @@ public class ClientHelper extends Helper implements HelperInterface, StatusCode 
 							// signal values
 							while (j.hasNext()) {
 								JSONObject jObject = j.next();
-								nodeSignalBoundary
-										.addNodeRange(new NodeSignalRange((Integer) jObject
-												.get("id"), ((Long) jObject.get("min")).intValue(),
-												((Long) jObject.get("max")).intValue()));
+								nodeSignalBoundary.addNodeRange(new NodeSignalRange(((Long)jObject.get("id")).intValue(), ((Long) jObject.get("min")).intValue(),((Long) jObject.get("max")).intValue()));
 							}
 
 							nodeSignatures.add(nodeSignalBoundary);
