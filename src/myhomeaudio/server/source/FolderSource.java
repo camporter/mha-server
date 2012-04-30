@@ -23,7 +23,9 @@ public class FolderSource extends SourceBase implements Source {
 
 	protected String folderLocation;
 	protected File folder;
-
+	
+	protected int currentId = 0;
+	
 	private String nextLocation;
 
 	protected ArrayList<MediaDescriptor> mediaList;
@@ -154,7 +156,7 @@ public class FolderSource extends SourceBase implements Source {
 			if (mp3.hasId3v2Tag()) {
 				// An ID3v2 tag was found, use it
 				ID3v2 tag = mp3.getId3v2Tag();
-				descriptor = new MediaDescriptor(-1, tag.getTitle(),
+				descriptor = new MediaDescriptor(currentId, tag.getTitle(),
 						tag.getArtist(), tag.getAlbum(),
 						tag.getGenreDescription(), mediaLocation, false,
 						mp3.getLengthInSeconds());
@@ -163,7 +165,7 @@ public class FolderSource extends SourceBase implements Source {
 				System.out.println("\t has id3v1!");
 				// An ID3v1 tag was found, use it
 				ID3v1 tag = mp3.getId3v1Tag();
-				descriptor = new MediaDescriptor(-1, tag.getTitle(),
+				descriptor = new MediaDescriptor(currentId, tag.getTitle(),
 						tag.getArtist(), tag.getAlbum(),
 						tag.getGenreDescription(), mediaLocation, false,
 						mp3.getLengthInSeconds());
@@ -177,7 +179,8 @@ public class FolderSource extends SourceBase implements Source {
 		}
 
 		// TODO: parse the file as other media types here.
-
+		
+		currentId++;
 		return descriptor;
 	}
 
