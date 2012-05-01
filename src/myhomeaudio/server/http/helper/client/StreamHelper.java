@@ -18,6 +18,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+/**
+ * Handles any HTTP requests from clients pertaining to Streams that can be
+ * interacted with.
+ * 
+ * @author Cameron
+ * 
+ */
 public class StreamHelper extends Helper implements HelperInterface, StatusCode {
 
 	@Override
@@ -44,7 +51,7 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 			if (method.equals("list")) {
 
 				// List the streams on the server
-				body.put("streams", sm.getListJSON());
+				body.put("streams", sm.getStreamListJSON());
 				body.put("status", STATUS_OK);
 				this.httpStatus = HttpStatus.SC_OK;
 
@@ -61,7 +68,7 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 			} else if (method.equals("remove")) {
 
 				// Remove a stream from the server
-				Integer streamId = (Integer) jsonRequest.get("stream");
+				Integer streamId = ((Long) jsonRequest.get("stream")).intValue();
 
 				if (streamId != null) {
 					body.put("status", sm.removeStream(streamId));
@@ -95,8 +102,8 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 
 				// Perform a media action on the stream (pause, resume,
 				// previous, next)
-				Integer streamId = (Integer) jsonRequest.get("stream");
-				Integer action = (Integer) jsonRequest.get("action");
+				Integer streamId = ((Long) jsonRequest.get("stream")).intValue();
+				Integer action = ((Long) jsonRequest.get("action")).intValue();
 
 				if (streamId != null && action != null) {
 					// Both the stream id an action exist

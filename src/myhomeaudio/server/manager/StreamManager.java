@@ -15,6 +15,7 @@ import myhomeaudio.server.database.Database;
 import myhomeaudio.server.database.object.DatabaseNode;
 import myhomeaudio.server.database.object.DatabaseStream;
 import myhomeaudio.server.http.StatusCode;
+import myhomeaudio.server.media.descriptor.MediaDescriptor;
 import myhomeaudio.server.node.Node;
 import myhomeaudio.server.source.FolderSource;
 import myhomeaudio.server.source.Source;
@@ -48,8 +49,8 @@ public class StreamManager implements StatusCode {
 	}
 
 	private void initializeSources() {
-		ArrayList<Source> sourceList = new ArrayList<Source>();
-		sourceList.add(new FolderSource("."));
+		sourceList = new ArrayList<Source>();
+		sourceList.add(new FolderSource(0, "Folder Source", "."));
 	}
 
 	public static synchronized StreamManager getInstance() {
@@ -135,7 +136,8 @@ public class StreamManager implements StatusCode {
 					newId = resultSet.getInt("id");
 
 					// Add the new Stream to the streamList with their new id
-					this.streamList.add(new DatabaseStream(newId, stream, null));
+					this.streamList
+							.add(new DatabaseStream(newId, stream, null));
 
 					result = STATUS_OK;
 				} catch (SQLException e) {
@@ -244,19 +246,25 @@ public class StreamManager implements StatusCode {
 		}
 		return null;
 	}
+	
+	private Source getSourceById(int sourceId) {
+		for (Iterator<Source> i = this.sourceList.iterator(); i.hasNext();) {
+			Source nextSource = i.next();
+			if (nextSource.getId() == sourceId) {
+				return nextSource;
+			}
+		}
+		return null;
+	}
 
 	/**
-	 * Gets the list of Stream objects as a string.
+	 * Gets the list of available Streams as a JSON array.
 	 * 
-	 * @return JSON String representing an Stream array.
+	 * @return JSON array representing the list of streams.
 	 */
-	public JSONArray getListJSON() {
+	public JSONArray getStreamListJSON() {
 		JSONArray result = new JSONArray();
 
-		// TODO: retest this way!
-		// result.addAll(streamList);
-
-		// Other way to do it...
 		Iterator<DatabaseStream> i = streamList.iterator();
 		while (i.hasNext()) {
 			result.add(i.next());
@@ -265,19 +273,59 @@ public class StreamManager implements StatusCode {
 	}
 	
 	/**
+	 * Get the list of available sources as a JOSN array.
+	 * @return
+	 */
+	public JSONArray getSourceListJSON() {
+		JSONArray result = new JSONArray();
+		
+		for(Iterator<Source> i = sourceList.iterator(); i.hasNext();) {
+			JSONObject obj = new JSONObject();
+			Source nextSource = i.next();
+			obj.put("id", nextSource.getId());
+			obj.put("name", nextSource.getName());
+			result.add(obj);
+		}
+		return result;
+	}
+	
+	/**
+	 * Get the list of media that the given source provides.
+	 * 
+	 * @param sourceId The id of the source to get media for.
+	 * @return THe list of media as a JSON array
+	 */
+	public JSONArray getSourceMediaJSON(int sourceId) {
+		JSONArray result = new JSONArray();
+		Source source = getSourceById(sourceId);
+		
+		if (source != null) {
+			ArrayList<MediaDescriptor> mediaList = source.getMediaList();
+			if (mediaList != null) {
+				result.addAll(mediaList);
+				return result;
+			}
+		}
+		return null;
+		
+	}
+
+	/**
 	 * Performs an action on a stream (such as resume, pause, previous, next).
 	 * 
-	 * @param streamId The id of the stream to perform the action on.
-	 * @param action The action as defined in StreamAction.
+	 * @param streamId
+	 *            The id of the stream to perform the action on.
+	 * @param action
+	 *            The action as defined in StreamAction.
 	 * @return
 	 */
 	public synchronized int doAction(Integer streamId, Integer action) {
 		int result = STATUS_FAILED;
-		
+
 		DatabaseStream dbStream = getStreamById(streamId);
-		
+
 		// TODO: need to tell the ModeManager to actually do these actions
-		switch(action) {
+		switch (action) {
 		case StreamAction.RESUME:
 			dbStream.setCurrentState(StreamState.PLAYING);
 			break;
@@ -291,8 +339,14 @@ public class StreamManager implements StatusCode {
 			// TODO: Change the current media
 			break;
 		}
-		
+
 		return result;
+	}
+
+	public synchronized int streamPlay(Integer streamId, Integer sourceId,
+			MediaDescriptor media) {
+		return -1;
+
 	}
 
 }

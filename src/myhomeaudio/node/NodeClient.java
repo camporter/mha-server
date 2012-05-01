@@ -50,38 +50,42 @@ public class NodeClient {
 
 	public static void main(String[] args) {
 		System.out.println("Starting...");
-		
+
 		Configuration config = Configuration.getInstance();
 		if (!config.readConfig()) {
 			System.err.println("Unable to read a config file!");
 			System.exit(1);
 		}
-		
-		// Do the server discovery 
+
+		// Do the server discovery
 		ServerDiscovery sd = new ServerDiscovery();
 		if (!sd.doDiscovery()) {
 			System.err.println("Unable to discover server.");
-			//System.exit(1);
+			System.exit(1);
 		}
-		
-		//host = sd.getAddress().getHostAddress();
+
+		// host = sd.getAddress().getHostAddress();
 		serverPort = sd.getNodePort();
-		
+
 		System.out.println("Server Discovered on Port: " + serverPort);
-		
+
 		try {
 			ServerSocket nodeSocket = new ServerSocket(NodeClient.nodePort);
 
 			HttpParams params = new SyncBasicHttpParams();
 			params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000);
-			params.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024);
-			params.setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
+			params.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE,
+					8 * 1024);
+			params.setBooleanParameter(
+					CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
 			params.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true);
-			params.setParameter(CoreProtocolPNames.ORIGIN_SERVER, "HttpComponents/1.1");
+			params.setParameter(CoreProtocolPNames.ORIGIN_SERVER,
+					"HttpComponents/1.1");
 
-			HttpProcessor httpProc = new ImmutableHttpProcessor(new HttpResponseInterceptor[] {
-					new ResponseDate(), new ResponseServer(), new ResponseContent(),
-					new ResponseConnControl(), });
+			HttpProcessor httpProc = new ImmutableHttpProcessor(
+					new HttpResponseInterceptor[] { new ResponseDate(),
+							new ResponseServer(), new ResponseContent(),
+							new ResponseConnControl(), });
 
 			HttpRequestHandlerRegistry registry = new HttpRequestHandlerRegistry();
 			registry.register("play", new PlayRequestHandler());
@@ -89,13 +93,14 @@ public class NodeClient {
 			registry.register("info", new InfoHelper());
 
 			HttpService httpService = new HttpService(httpProc,
-					new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory(),
-					registry, params);
+					new DefaultConnectionReuseStrategy(),
+					new DefaultHttpResponseFactory(), registry, params);
 			while (true) {
 				Socket serverSocket = nodeSocket.accept();
-				
+
 				DefaultHttpServerConnection connection = new DefaultHttpServerConnection();
-				System.out.println("Incoming connection from " + serverSocket.getInetAddress());
+				System.out.println("Incoming connection from "
+						+ serverSocket.getInetAddress());
 				connection.bind(serverSocket, params);
 
 				HttpContext context = new BasicHttpContext(null);
@@ -119,18 +124,22 @@ public class NodeClient {
 
 	static class PlayRequestHandler implements HttpRequestHandler {
 
-		public void handle(final HttpRequest request, final HttpResponse response,
-				final HttpContext context) throws HttpException, IOException {
-			String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
+		public void handle(final HttpRequest request,
+				final HttpResponse response, final HttpContext context)
+				throws HttpException, IOException {
+			String method = request.getRequestLine().getMethod()
+					.toUpperCase(Locale.ENGLISH);
 			if (!method.equals("GET") && !method.equals("POST")) {
 				// Method is not GET or POST
-				throw new MethodNotSupportedException(method + " method not supported.");
+				throw new MethodNotSupportedException(method
+						+ " method not supported.");
 			}
 			System.out.println("Playing song...");
 			String target = request.getRequestLine().getUri();
 			if (request instanceof HttpEntityEnclosingRequest) {
 				// Request has data, so we save it
-				HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
+				HttpEntity entity = ((HttpEntityEnclosingRequest) request)
+						.getEntity();
 				byte[] entityContent = EntityUtils.toByteArray(entity);
 
 				FileOutputStream outFile = new FileOutputStream("song.mp3");
@@ -147,12 +156,15 @@ public class NodeClient {
 
 	static class PauseRequestHandler implements HttpRequestHandler {
 
-		public void handle(final HttpRequest request, final HttpResponse response,
-				final HttpContext context) throws HttpException, IOException {
-			String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
+		public void handle(final HttpRequest request,
+				final HttpResponse response, final HttpContext context)
+				throws HttpException, IOException {
+			String method = request.getRequestLine().getMethod()
+					.toUpperCase(Locale.ENGLISH);
 			if (!method.equals("GET")) {
 				// Method is not a GET
-				throw new MethodNotSupportedException(method + " method not supported.");
+				throw new MethodNotSupportedException(method
+						+ " method not supported.");
 			}
 
 			System.out.println("Pausing song...");

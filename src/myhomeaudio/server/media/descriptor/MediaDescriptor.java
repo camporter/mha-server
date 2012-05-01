@@ -105,6 +105,7 @@ public class MediaDescriptor implements JSONAware {
 	@Override
 	public String toJSONString() {		
 		JSONObject obj = new JSONObject();
+		obj.put("id", id);
 		obj.put("title", title);
 		obj.put("artist", artist);
 		obj.put("album", album);

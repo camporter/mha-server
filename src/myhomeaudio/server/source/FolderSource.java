@@ -14,16 +14,18 @@ import myhomeaudio.server.mp3.Mp3File;
 import myhomeaudio.server.mp3.UnsupportedTagException;
 
 /**
- * A media source that provides various media files from a specified folder.
+ * A source that provides various media files from the specified folder (and any subfolders).
  * 
  * @author Cameron
  * 
  */
-public class FolderSource implements Source {
+public class FolderSource extends SourceBase implements Source {
 
 	protected String folderLocation;
 	protected File folder;
-
+	
+	protected int currentId = 0;
+	
 	private String nextLocation;
 
 	protected ArrayList<MediaDescriptor> mediaList;
@@ -36,7 +38,9 @@ public class FolderSource implements Source {
 	 * @throws NullPointerException
 	 *             folderLocation cannot be null.
 	 */
-	public FolderSource(String folderLocation) throws NullPointerException {
+	public FolderSource(int id, String name, String folderLocation) throws NullPointerException {
+		super(id, name);
+		
 		if (folderLocation == null) {
 			throw new NullPointerException("Folder location cannot be null.");
 		} else {
@@ -84,12 +88,7 @@ public class FolderSource implements Source {
 
 	public ArrayList<MediaDescriptor> getMediaList() {
 
-		ArrayList<MediaDescriptor> mediaList = new ArrayList<MediaDescriptor>();
-
-		for (String mediaFileName : folder.list()) {
-			// mediaList.add(mediaFileName);
-		}
-		return null;
+		return new ArrayList<MediaDescriptor>(mediaList);
 	}
 
 	/**
@@ -157,7 +156,7 @@ public class FolderSource implements Source {
 			if (mp3.hasId3v2Tag()) {
 				// An ID3v2 tag was found, use it
 				ID3v2 tag = mp3.getId3v2Tag();
-				descriptor = new MediaDescriptor(-1, tag.getTitle(),
+				descriptor = new MediaDescriptor(currentId, tag.getTitle(),
 						tag.getArtist(), tag.getAlbum(),
 						tag.getGenreDescription(), mediaLocation, false,
 						mp3.getLengthInSeconds());
@@ -166,7 +165,7 @@ public class FolderSource implements Source {
 				System.out.println("\t has id3v1!");
 				// An ID3v1 tag was found, use it
 				ID3v1 tag = mp3.getId3v1Tag();
-				descriptor = new MediaDescriptor(-1, tag.getTitle(),
+				descriptor = new MediaDescriptor(currentId, tag.getTitle(),
 						tag.getArtist(), tag.getAlbum(),
 						tag.getGenreDescription(), mediaLocation, false,
 						mp3.getLengthInSeconds());
@@ -180,7 +179,8 @@ public class FolderSource implements Source {
 		}
 
 		// TODO: parse the file as other media types here.
-
+		
+		currentId++;
 		return descriptor;
 	}
 
