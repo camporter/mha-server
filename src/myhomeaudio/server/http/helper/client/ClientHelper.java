@@ -178,12 +178,14 @@ public class ClientHelper extends Helper implements HelperInterface, StatusCode 
 						}
 
 						// Save the new configuration
-						cm.changeClientInitialization(
+						if(cm.changeClientInitialization(
 								(String) jsonRequest.get("session"),
-								nodeSignatures);
+								nodeSignatures)){
+							body.put("status", STATUS_OK);
+							this.httpStatus = HttpStatus.SC_OK;
+						}
 
-						body.put("status", STATUS_OK);
-						this.httpStatus = HttpStatus.SC_OK;
+						
 					}
 				}
 			}

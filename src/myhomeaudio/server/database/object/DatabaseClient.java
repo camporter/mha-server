@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.json.simple.JSONObject;
 
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.locations.layout.NodeSignalBoundary;
@@ -32,6 +33,7 @@ public class DatabaseClient extends DatabaseObject<Client> {
 		this.sessionId = dbClient.getSessionId();
 		this.closestNode = dbClient.getClosestNode();
 		this.loggedUserId = dbClient.getLoggedInUserId();
+		this.nodeSignatures = dbClient.getNodeSignatures();
 	}
 
 	public DatabaseClient(int id, String macAddress, String ipAddress, String bluetoothName,
@@ -135,5 +137,13 @@ public class DatabaseClient extends DatabaseObject<Client> {
 			}
 		}
 		return false;
+	}
+	
+	public JSONObject getJSON(){
+		JSONObject object = new JSONObject();
+		object.put("id", loggedUserId);
+		object.put("closedNode", closestNode != null ? closestNode.getName() : null);
+		object.put("isConfigured",nodeSignatures != null);
+		return object;
 	}
 }

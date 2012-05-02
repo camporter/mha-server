@@ -8,6 +8,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.Database;
 import myhomeaudio.server.database.object.DatabaseClient;
@@ -80,11 +83,14 @@ public class ClientManager implements StatusCode {
 		Connection conn = this.db.getConnection();
 		try {
 			Statement statement = conn.createStatement();
-			
-			// Create each DatabaseClient object using records for the clients table
-			ResultSet clientResults = statement.executeQuery("SELECT * FROM clients;");
+
+			// Create each DatabaseClient object using records for the clients
+			// table
+			ResultSet clientResults = statement
+					.executeQuery("SELECT * FROM clients;");
 			while (clientResults.next()) {
-				DatabaseClient dbClient = new DatabaseClient(clientResults.getInt("id"),
+				DatabaseClient dbClient = new DatabaseClient(
+						clientResults.getInt("id"),
 						clientResults.getString("macaddress"),
 						clientResults.getString("ipaddress"),
 						clientResults.getString("bluetoothname"),
@@ -96,10 +102,10 @@ public class ClientManager implements StatusCode {
 			e.printStackTrace();
 		}
 		this.db.unlock();
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * Adds a client to the server.
 	 * 
@@ -123,8 +129,9 @@ public class ClientManager implements StatusCode {
 			pstatement.executeUpdate();
 
 			// We want the id of the new client, so get it back
-			PreparedStatement statement = conn.prepareStatement("SELECT id FROM clients "
-					+ "WHERE macaddress = ? AND ipaddress = ? AND bluetoothname = ? LIMIT 1;");
+			PreparedStatement statement = conn
+					.prepareStatement("SELECT id FROM clients "
+							+ "WHERE macaddress = ? AND ipaddress = ? AND bluetoothname = ? LIMIT 1;");
 			statement.setString(1, client.getMacAddress());
 			statement.setString(2, client.getIpAddress());
 			statement.setString(3, client.getBluetoothName());
@@ -160,14 +167,15 @@ public class ClientManager implements StatusCode {
 			Connection conn = this.db.getConnection();
 			try {
 				// Remove the client from the database
-				PreparedStatement pstatement = conn.prepareStatement("DELETE FROM clients "
-						+ "WHERE id = ?");
+				PreparedStatement pstatement = conn
+						.prepareStatement("DELETE FROM clients "
+								+ "WHERE id = ?");
 				pstatement.setInt(1, clientId);
 				pstatement.executeUpdate();
-				
+
 				// Remove the client from the user list
 				clientList.remove(dbClient);
-				
+
 				result = STATUS_OK;
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -186,7 +194,8 @@ public class ClientManager implements StatusCode {
 	 *         any existing client.
 	 */
 	private synchronized DatabaseClient getClient(int id) {
-		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
+		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i
+				.hasNext();) {
 			DatabaseClient nextClient = i.next();
 			if (nextClient.getId() == id) {
 				return nextClient;
@@ -197,16 +206,17 @@ public class ClientManager implements StatusCode {
 
 	private synchronized DatabaseClient getClientBySession(String sessionId) {
 		if (sessionId != null) {
-			for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
+			for (Iterator<DatabaseClient> i = this.clientList.iterator(); i
+					.hasNext();) {
 				DatabaseClient nextClient = i.next();
-				if (nextClient.getSessionId() != null && nextClient.getSessionId().equals(sessionId)) {
+				if (nextClient.getSessionId() != null
+						&& nextClient.getSessionId().equals(sessionId)) {
 					return nextClient;
 				}
 			}
 		}
 		return null;
 	}
-	
 
 	/**
 	 * Gets the DatabaseClient object associated with the given session id.
@@ -225,8 +235,10 @@ public class ClientManager implements StatusCode {
 		}
 		return null;
 	}
+
 	public DatabaseClient getClient(Client client) {
-		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i.hasNext();) {
+		for (Iterator<DatabaseClient> i = this.clientList.iterator(); i
+				.hasNext();) {
 			DatabaseClient nextClient = i.next();
 			if (nextClient.equals(client)) {
 				return nextClient;
@@ -240,17 +252,20 @@ public class ClientManager implements StatusCode {
 			return true;
 		return false;
 	}
-	
+
 	/**
 	 * Logs a user into a client.
 	 * 
-	 * @param clientId The id for the client to log into.
-	 * @param userId The id for the user logging in.
-	 * @return The session id for the client, or null if the clientId was invalid.
+	 * @param clientId
+	 *            The id for the client to log into.
+	 * @param userId
+	 *            The id for the user logging in.
+	 * @return The session id for the client, or null if the clientId was
+	 *         invalid.
 	 */
 	public String loginClient(int clientId, int userId) {
 		DatabaseClient dbClient = getClient(clientId);
-		
+
 		if (dbClient != null) {
 			String sessionId = dbClient.login(userId);
 			updateClientToDB(dbClient);
@@ -258,20 +273,22 @@ public class ClientManager implements StatusCode {
 		} else {
 			return null;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Logs a user into a client.
 	 * 
-	 * @param client The Client to log into.
-	 * @param userId The id for the user logging in.
+	 * @param client
+	 *            The Client to log into.
+	 * @param userId
+	 *            The id for the user logging in.
 	 * @return The session id for the client, or null if the client was invalid.
 	 */
 	public String loginClient(Client client, int userId) {
 		if (client != null) {
 			DatabaseClient dbClient = getClient(client);
-			
+
 			if (dbClient == null) {
 				// Client doesn't exist yet, go ahead and add it
 				if (addClient(client) == STATUS_OK) {
@@ -284,12 +301,14 @@ public class ClientManager implements StatusCode {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Logs out a session for a client
 	 * 
-	 * @param sessionId The id for the session to end.
-	 * @return The id for the user that was logged out, or -1 if the sessionId was invalid.
+	 * @param sessionId
+	 *            The id for the session to end.
+	 * @return The id for the user that was logged out, or -1 if the sessionId
+	 *         was invalid.
 	 */
 	public int logoutClient(String sessionId) {
 		DatabaseClient dbClient = getClient(sessionId);
@@ -301,7 +320,7 @@ public class ClientManager implements StatusCode {
 			return -1;
 		}
 	}
-	
+
 	/**
 	 * Changes the client initialization configuration, which includes the node
 	 * signatures for each node.
@@ -337,17 +356,25 @@ public class ClientManager implements StatusCode {
 			ArrayList<DeviceObject> devices) {
 		DatabaseClient databaseClient = getClientBySession(sessionId);
 
-		Node closestNode = Triangulation.findLocation(databaseClient.getNodeSignatures(), devices);
+		Node closestNode = Triangulation.findLocation(
+				databaseClient.getNodeSignatures(), devices);
 		if (closestNode == null) {
 			// Do nothing, the client is lost
-		}
-		else if(databaseClient.getClosestNode() == null) {
+			System.out.println("ClientID: " + databaseClient.getId() + " lost");
+		} else if (databaseClient.getClosestNode() == null) {
 			// Update, the client does not have a closest node yet
-			
+			System.out.println("ClientID: " + databaseClient.getId()
+					+ " found at " + closestNode.getName());
+
 		} else if (!closestNode.equals(databaseClient.getClosestNode())) {
-			// Update, the closest node is different from the previous closest node
+			// Update, the closest node is different from the previous closest
+			// node
+			System.out.println("ClientID: " + databaseClient.getId()
+					+ " moved from "
+					+ databaseClient.getClosestNode().getName() + " to "
+					+ closestNode.getName());
 		}
-		
+
 		return updateClientToDB(databaseClient);
 	}
 
@@ -364,9 +391,11 @@ public class ClientManager implements StatusCode {
 		this.db.lock();
 		Connection conn = this.db.getConnection();
 		try {
-			PreparedStatement pstatement = conn.prepareStatement("UPDATE clients SET "
-					+ "macaddress = ?, " + "ipaddress = ?, " + "bluetoothname = ?, "
-					+ "userid = ? " + "WHERE id = ?;");
+			PreparedStatement pstatement = conn
+					.prepareStatement("UPDATE clients SET "
+							+ "macaddress = ?, " + "ipaddress = ?, "
+							+ "bluetoothname = ?, " + "userid = ? "
+							+ "WHERE id = ?;");
 			pstatement.setString(1, dbClient.getMacAddress());
 			pstatement.setString(2, dbClient.getIpAddress());
 			pstatement.setString(3, dbClient.getBluetoothName());
@@ -380,5 +409,14 @@ public class ClientManager implements StatusCode {
 		}
 		this.db.unlock();
 		return result;
+	}
+	
+	public JSONArray getClientList(){
+		JSONArray array = new JSONArray();
+		
+		for(DatabaseClient client : clientList){
+			array.add(client.getJSON());
+		}
+		return array;
 	}
 }
