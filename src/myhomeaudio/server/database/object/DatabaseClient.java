@@ -100,6 +100,9 @@ public class DatabaseClient extends DatabaseObject<Client> {
 	}
 
 	public ArrayList<NodeSignalBoundary> getNodeSignatures() {
+		if(nodeSignatures == null){
+			return null;
+		}
 		return new ArrayList<NodeSignalBoundary>(nodeSignatures);
 	}
 

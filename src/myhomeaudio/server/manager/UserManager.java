@@ -8,6 +8,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.json.simple.JSONArray;
+
 import myhomeaudio.server.database.Database;
 import myhomeaudio.server.database.object.DatabaseUser;
 import myhomeaudio.server.http.StatusCode;
@@ -230,6 +232,14 @@ public class UserManager implements StatusCode {
 			}
 		}
 		return result;
+	}
+	
+	public JSONArray getUsersList(){
+		JSONArray array = new JSONArray();
+		for(DatabaseUser user : userList){
+			array.add(user.toJSONObject());
+		}
+		return array;
 	}
 
 	/**

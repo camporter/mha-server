@@ -1,5 +1,7 @@
 package myhomeaudio.server.database.object;
 
+import org.json.simple.JSONObject;
+
 import myhomeaudio.server.user.User;
 
 /**
@@ -43,5 +45,13 @@ public class DatabaseUser extends DatabaseObject<User> {
 	
 	public String getPassword() {
 		return this.object.getPassword();
+	}
+	
+	public JSONObject toJSONObject(){
+		JSONObject object = new JSONObject();
+		object.put("id", this.getId());
+		object.put("name", this.object.getUsername());
+		object.put("loggedIn", this.loggedIn);
+		return object;
 	}
 }
