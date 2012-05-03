@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 
 import myhomeaudio.server.discovery.DiscoveryDescription;
 import myhomeaudio.server.discovery.DiscoveryResponder;
+import myhomeaudio.server.discovery.DiscoveryUtil;
 import myhomeaudio.server.handler.ClientHandler;
 import myhomeaudio.server.handler.NodeHandler;
 import myhomeaudio.server.manager.ClientManager;
@@ -94,16 +95,12 @@ public class Server {
 	private static void startDiscoveryService() {
 		System.out.println("** Starting discovery services...");
 		DiscoveryDescription descriptor;
-		try {
-			descriptor = new DiscoveryDescription(
-					"myhomeaudio", InetAddress.getLocalHost().getHostAddress(), CLIENT_PORT, NODE_PORT);
-			discoveryResponder = new DiscoveryResponder("myhomeaudio", descriptor);
-			discoveryResponder.addShutdownHandler();
-			discoveryResponder.startResponder();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		InetAddress serverAddress = DiscoveryUtil.getServerAddress();
+		descriptor = new DiscoveryDescription(
+				"myhomeaudio", serverAddress.getHostAddress(), CLIENT_PORT, NODE_PORT);
+		discoveryResponder = new DiscoveryResponder("myhomeaudio", descriptor);
+		discoveryResponder.addShutdownHandler();
+		discoveryResponder.startResponder();
 	}
 
 	/*public static void startStreamThread() {

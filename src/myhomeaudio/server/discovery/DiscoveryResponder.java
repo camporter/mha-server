@@ -190,6 +190,8 @@ public final class DiscoveryResponder implements Runnable {
 							.getBroadcast();
 					if (broadcastAddress == null)
 						continue;
+					if (broadcastAddress.isAnyLocalAddress())
+						continue;
 					return broadcastAddress;
 				}
 			}
