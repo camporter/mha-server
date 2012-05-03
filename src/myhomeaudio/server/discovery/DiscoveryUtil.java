@@ -1,5 +1,7 @@
 package myhomeaudio.server.discovery;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
@@ -23,6 +25,8 @@ public class DiscoveryUtil {
 					if (broadcastAddress == null)
 						continue;
 					if (broadcastAddress.isAnyLocalAddress())
+						continue;
+					if (broadcastAddress instanceof Inet6Address)
 						continue;
 					return broadcastAddress;
 				}

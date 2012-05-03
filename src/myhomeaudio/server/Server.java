@@ -1,8 +1,6 @@
 package myhomeaudio.server;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 import myhomeaudio.server.discovery.DiscoveryDescription;
 import myhomeaudio.server.discovery.DiscoveryResponder;
 import myhomeaudio.server.discovery.DiscoveryUtil;
