@@ -115,8 +115,8 @@ public class ClientHelper extends Helper implements HelperInterface, StatusCode 
 						JSONObject jsonDevice = i.next();
 
 						DeviceObject device = new DeviceObject(
-								(Integer) jsonDevice.get("id"),
-								(Integer) jsonDevice.get("rssi"));
+								((Long)jsonDevice.get("id")).intValue(),
+								((Long)jsonDevice.get("rssi")).intValue());
 
 						devices.add(device);
 					}
