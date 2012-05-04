@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import myhomeaudio.server.discovery.DiscoverySearch;
 import myhomeaudio.server.http.helper.node.InfoHelper;
+import myhomeaudio.server.http.helper.node.PauseHelper;
 import myhomeaudio.server.http.helper.node.PlayHelper;
 
 import org.apache.http.ConnectionClosedException;
@@ -90,7 +91,7 @@ public class NodeClient {
 
 			HttpRequestHandlerRegistry registry = new HttpRequestHandlerRegistry();
 			registry.register("play", new PlayHelper());
-			registry.register("pause", new PauseRequestHandler());
+			registry.register("pause", new PauseHelper());
 			registry.register("info", new InfoHelper());
 
 			HttpService httpService = new HttpService(httpProc,
@@ -120,42 +121,6 @@ public class NodeClient {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-	}
-
-	static class PlayRequestHandler implements HttpRequestHandler {
-
-		public void handle(final HttpRequest request,
-				final HttpResponse response, final HttpContext context)
-				throws HttpException, IOException {
-			String method = request.getRequestLine().getMethod()
-					.toUpperCase(Locale.ENGLISH);
-			if (!method.equals("GET") && !method.equals("POST")) {
-				// Method is not GET or POST
-				throw new MethodNotSupportedException(method
-						+ " method not supported.");
-			}
-			System.out.println("Playing song...");
-			String target = request.getRequestLine().getUri();
-			if (request instanceof HttpEntityEnclosingRequest) {
-				// Request has data, so we save it
-				HttpEntity entity = ((HttpEntityEnclosingRequest) request)
-						.getEntity();
-				byte[] entityContent = EntityUtils.toByteArray(entity);
-
-				FileOutputStream outFile = new FileOutputStream("song.mp3");
-				outFile.write(entityContent);
-				outFile.close();
-				String command2 = "killall mplayer &";
-				Process child2 = Runtime.getRuntime().exec(command2);
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-				}
-				String command = "mplayer song.mp3 &";
-				Process child = Runtime.getRuntime().exec(command);
-
-			}
 		}
 	}
 

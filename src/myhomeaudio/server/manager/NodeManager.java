@@ -247,6 +247,14 @@ public class NodeManager implements NodeCommands, StatusCode {
 		worker.setInfoCommand(ipAddress, data);
 		worker.start();
 	}
+	
+	public void sendPauseCommand(String ipAddress, String string) {
+		NodeWorker worker = new NodeWorker();
+		
+		worker.setPauseCommand(ipAddress);
+		worker.start();
+		
+	}
 
 	/*
 	 * /** Returns the current number of nodes under NodeManager management
@@ -386,4 +394,5 @@ public class NodeManager implements NodeCommands, StatusCode {
 		nodeArray.addAll(nodeList);
 		return nodeArray;
 	}
+
 }

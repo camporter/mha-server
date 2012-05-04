@@ -65,6 +65,11 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 		this.ipAddress = ipAddress;
 		this.byteData = data;
 	}
+	
+	public void setPauseCommand(String ipAddress) {
+		this.command = NODE_PAUSE;
+		this.ipAddress = ipAddress;
+	}
 
 	synchronized public void run() {
 
@@ -144,13 +149,14 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 
 			case NODE_PAUSE:
 				System.out.println("Pausing song on node...");
-				getRequest = new BasicHttpRequest("GET", "pause");
-				getRequest.setParams(httpParams);
+				postRequest = new BasicHttpEntityEnclosingRequest("POST",
+						"pause");
+				postRequest.setParams(httpParams);
 
 				try {
-					httpExecutor.preProcess(getRequest, httpProcessor,
+					httpExecutor.preProcess(postRequest, httpProcessor,
 							httpContext);
-					response = httpExecutor.execute(getRequest, connection,
+					response = httpExecutor.execute(postRequest, connection,
 							httpContext);
 					response.setParams(httpParams);
 					httpExecutor.postProcess(response, httpProcessor,

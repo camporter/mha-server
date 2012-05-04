@@ -368,5 +368,20 @@ public class StreamManager implements StatusCode {
 		return 0;
 
 	}
+	
+	public synchronized int streamPause(Integer streamId, String sessionId) {
+		NodeManager nm = NodeManager.getInstance();
+		ClientManager cm = ClientManager.getInstance();
+
+		DatabaseClient client = cm.getClient(sessionId);
+
+		Node node = client.getClosestNode();
+
+		if (node != null) {
+			nm.sendPauseCommand(node.getIpAddress(), "");
+		}
+		return 0;
+
+	}
 
 }

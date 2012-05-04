@@ -12,6 +12,7 @@ import myhomeaudio.server.http.helper.HelperInterface;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.StreamManager;
 import myhomeaudio.server.stream.Stream;
+import myhomeaudio.server.stream.StreamAction;
 
 import org.apache.http.HttpStatus;
 import org.json.simple.JSONArray;
@@ -108,8 +109,12 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 				Integer action = ((Long) jsonRequest.get("action")).intValue();
 
 				if (streamId != null && action != null) {
+					if (action == StreamAction.PAUSE) {
+						sm.streamPause(streamId, sessionId);
+						body.put("status", StatusCode.STATUS_OK);
+					}
 					// Both the stream id an action exist
-					body.put("status", sm.doAction(streamId, action));
+					//body.put("status", sm.doAction(streamId, action));
 				}
 				this.httpStatus = HttpStatus.SC_OK;
 
