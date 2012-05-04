@@ -17,7 +17,7 @@ import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.locations.Triangulation;
 import myhomeaudio.server.locations.layout.DeviceObject;
-import myhomeaudio.server.locations.layout.NodeSignalBoundary;
+import myhomeaudio.server.locations.layout.NodeSignature;
 import myhomeaudio.server.node.Node;
 
 /**
@@ -334,7 +334,7 @@ public class ClientManager implements StatusCode {
 	 * @return Whether the operation completed successfully.
 	 */
 	public boolean changeClientInitialization(String sessionId,
-			ArrayList<NodeSignalBoundary> nodeSignatures) {
+			ArrayList<NodeSignature> nodeSignatures) {
 		DatabaseClient databaseClient = getClientBySession(sessionId);
 		databaseClient.setNodeSignatures(nodeSignatures);
 
@@ -356,7 +356,8 @@ public class ClientManager implements StatusCode {
 			ArrayList<DeviceObject> devices) {
 		DatabaseClient databaseClient = getClientBySession(sessionId);
 
-		Node closestNode = Triangulation.findLocation(
+		Triangulation tri = new Triangulation();
+		Node closestNode = tri.findLocation(
 				databaseClient.getNodeSignatures(), devices);
 		if (closestNode == null) {
 			// Do nothing, the client is lost
@@ -365,7 +366,7 @@ public class ClientManager implements StatusCode {
 			// Update, the client does not have a closest node yet
 			System.out.println("ClientID: " + databaseClient.getId()
 					+ " found at " + closestNode.getName());
-
+			databaseClient.setClosestNode(closestNode);
 		} else if (!closestNode.equals(databaseClient.getClosestNode())) {
 			// Update, the closest node is different from the previous closest
 			// node
@@ -373,6 +374,7 @@ public class ClientManager implements StatusCode {
 					+ " moved from "
 					+ databaseClient.getClosestNode().getName() + " to "
 					+ closestNode.getName());
+			databaseClient.setClosestNode(closestNode);
 		}
 
 		return updateClientToDB(databaseClient);

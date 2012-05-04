@@ -31,7 +31,15 @@ public class NodeSignalRange implements JSONAware{
 	public int getNodeId(){
 		return id;
 	}
+	
+	public int min() {
+		return min;
+	}
 
+	public int max() {
+		return max;
+	}
+	
 	@Override
 	public String toJSONString() {
 		JSONObject object = new JSONObject();

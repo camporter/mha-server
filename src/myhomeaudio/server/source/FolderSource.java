@@ -51,7 +51,9 @@ public class FolderSource extends SourceBase implements Source {
 		mediaList = new ArrayList<MediaDescriptor>();
 
 		// Find all of the media we can
+		System.out.println("Starting to find FolderSource files");
 		getFiles(this.folder);
+		System.out.println("Finished finding files");
 	}
 
 	private void getFiles(File directory) {

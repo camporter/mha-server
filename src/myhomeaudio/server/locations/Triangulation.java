@@ -10,7 +10,7 @@ import myhomeaudio.server.client.Client;
 import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.database.object.DatabaseNode;
 import myhomeaudio.server.locations.layout.DeviceObject;
-import myhomeaudio.server.locations.layout.NodeSignalBoundary;
+import myhomeaudio.server.locations.layout.NodeSignature;
 import myhomeaudio.server.manager.NodeManager;
 import myhomeaudio.server.node.Node;
 
@@ -22,7 +22,17 @@ import myhomeaudio.server.node.Node;
  * 
  */
 public class Triangulation {
-
+	
+	protected class Score {
+		public NodeSignature signature;
+		public int matches;
+		
+		public Score(NodeSignature signature, int matches) {
+			this.signature = signature;
+			this.matches = matches;
+		}
+	}
+	
 	/**
 	 * Finds the node whose device signals match a client's initial
 	 * configuration signature
@@ -33,34 +43,50 @@ public class Triangulation {
 	 *            Array of device reading values
 	 * @return Node whose readings match a signature, or null
 	 */
-	public static Node findLocation(
-			ArrayList<NodeSignalBoundary> nodeSignatures,
+	public Node findLocation(
+			ArrayList<NodeSignature> nodeSignatures,
 			ArrayList<DeviceObject> devices) {
 
 		if (nodeSignatures != null) {
-			NodeManager nm = NodeManager.getInstance();
-			Iterator<DeviceObject> iterableDevices;
-			Iterator<NodeSignalBoundary> iterableSignatures = nodeSignatures
-					.iterator();
-			DeviceObject device;
-			NodeSignalBoundary signature;
-			boolean match;
-
-			while (iterableSignatures.hasNext()) {
-				signature = iterableSignatures.next();
-				iterableDevices = devices.iterator();
-				match = true;
-				while (iterableDevices.hasNext()) {
-					device = iterableDevices.next();
-					if (!signature.getNodeRange(device.id).checkRange(
-							device.rssi)) {
-						match = false;
-					}
-				}
-				if (match) {
-					return nm.getNodeById(signature.getNodeId()).getNode();
+		
+		NodeManager nm = NodeManager.getInstance();
+		
+		ArrayList<Score> signatureScores = new ArrayList<Score>();
+		
+		Iterator<NodeSignature> iterableSignatures = nodeSignatures.iterator();
+		DeviceObject device;
+		
+		
+		while(iterableSignatures.hasNext()){
+			NodeSignature signature = iterableSignatures.next();
+			Iterator<DeviceObject> iterableDevices = devices.iterator();
+			
+			Score score = new Score(signature, 0);
+			
+			while(iterableDevices.hasNext()){
+				device = iterableDevices.next();
+				if(signature.getNodeRange(device.id).checkRange(device.rssi)){
+					score.matches++;
 				}
 			}
+			signatureScores.add(score);
+		}
+		
+		Score chosenScore = null;
+		
+		for (Iterator<Score> i = signatureScores.iterator(); i.hasNext();) {
+			Score nextScore = i.next();
+			
+			if (chosenScore == null) {
+				chosenScore = nextScore;
+			}
+			else if (chosenScore.matches < nextScore.matches) {
+				chosenScore = nextScore;
+			}
+			
+		}
+		
+		return nm.getNodeById(chosenScore.signature.getNodeId()).getNode();
 		}
 		return null;
 	}
