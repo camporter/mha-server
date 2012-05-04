@@ -145,7 +145,7 @@ public class DatabaseClient extends DatabaseObject<Client> {
 	public JSONObject getJSON(){
 		JSONObject object = new JSONObject();
 		object.put("id", loggedUserId);
-		object.put("session", sessionId.subSequence(0, 7));
+		object.put("session", sessionId != null ? sessionId.subSequence(0, 7) : null);
 		object.put("closedNode", closestNode != null ? closestNode.getName() : null);
 		object.put("isConfigured",nodeSignatures != null);
 		return object;
