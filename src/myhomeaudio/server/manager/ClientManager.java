@@ -410,13 +410,21 @@ public class ClientManager implements StatusCode {
 		this.db.unlock();
 		return result;
 	}
-	
-	public JSONArray getClientList(){
-		JSONArray array = new JSONArray();
-		
-		for(DatabaseClient client : clientList){
-			array.add(client.getJSON());
+
+	public void getClientList() {
+		// JSONArray array = new JSONArray();
+
+		for (DatabaseClient client : clientList) {
+			// array.add(client.getJSON());
+			System.out.println("Client " + client.getId());
+			ArrayList<NodeSignalBoundary> nsb = client.getNodeSignatures();
+			if (nsb != null) {
+				for (Iterator<NodeSignalBoundary> i = nsb.iterator(); i
+						.hasNext();) {
+					System.out.println("- " + i.next().toJSONString());
+				}
+			}
 		}
-		return array;
 	}
+
 }

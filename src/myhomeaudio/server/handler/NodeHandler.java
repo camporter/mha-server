@@ -60,7 +60,12 @@ public class NodeHandler extends Thread {
 
 					NodeManager nm = NodeManager.getInstance();
 					Node newNode = new Node("", nodeSocket.getInetAddress().getHostAddress(), "");
-
+					
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+					}
+					
 					if (nm.addNode(newNode) == StatusCode.STATUS_OK) {
 						// Request some info from the node
 						nm.sendNodeCommand(NodeCommands.NODE_INFO, nodeSocket.getInetAddress()

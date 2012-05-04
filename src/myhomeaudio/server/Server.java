@@ -85,7 +85,8 @@ public class Server {
 			}
 			System.out.println("Stream:"+ sm.getStreamListJSON().toString());
 			System.out.println("Node:"+nm.getJSONArray().toJSONString());
-			System.out.println("Client:"+cm.getClientList().toJSONString());
+			cm.getClientList();
+			//System.out.println("Client:"+cm.getClientList().toJSONString());
 			System.out.println("User:"+um.getUsersList().toJSONString());
 		}
 	}
