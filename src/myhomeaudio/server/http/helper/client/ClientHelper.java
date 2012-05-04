@@ -12,7 +12,7 @@ import myhomeaudio.server.http.StatusCode;
 import myhomeaudio.server.http.helper.Helper;
 import myhomeaudio.server.http.helper.HelperInterface;
 import myhomeaudio.server.locations.layout.DeviceObject;
-import myhomeaudio.server.locations.layout.NodeSignalBoundary;
+import myhomeaudio.server.locations.layout.NodeSignature;
 import myhomeaudio.server.locations.layout.NodeSignalRange;
 import myhomeaudio.server.manager.ClientManager;
 import myhomeaudio.server.manager.NodeManager;
@@ -136,7 +136,7 @@ public class ClientHelper extends Helper implements HelperInterface, StatusCode 
 
 						NodeManager nm = NodeManager.getInstance();
 
-						ArrayList<NodeSignalBoundary> nodeSignatures = new ArrayList<NodeSignalBoundary>();
+						ArrayList<NodeSignature> nodeSignatures = new ArrayList<NodeSignature>();
 
 						JSONArray signaturesArray = (JSONArray) jsonRequest
 								.get("signatures");
@@ -155,7 +155,7 @@ public class ClientHelper extends Helper implements HelperInterface, StatusCode 
 							JSONArray foundNodes = (JSONArray) (nextSignature
 									.get("foundNodes"));
 
-							NodeSignalBoundary nodeSignalBoundary = new NodeSignalBoundary(
+							NodeSignature nodeSignature = new NodeSignature(
 									node.getId());
 
 							// For each found node, get their id and max/min
@@ -164,7 +164,7 @@ public class ClientHelper extends Helper implements HelperInterface, StatusCode 
 									.hasNext();) {
 								JSONObject nextFoundNode = j.next();
 								
-								nodeSignalBoundary
+								nodeSignature
 										.addNodeRange(new NodeSignalRange(
 												((Long) nextFoundNode.get("id"))
 														.intValue(),
@@ -174,7 +174,7 @@ public class ClientHelper extends Helper implements HelperInterface, StatusCode 
 														.get("max")).intValue()));
 							}
 
-							nodeSignatures.add(nodeSignalBoundary);
+							nodeSignatures.add(nodeSignature);
 						}
 
 						// Save the new configuration

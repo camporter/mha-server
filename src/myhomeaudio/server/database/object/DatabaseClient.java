@@ -8,7 +8,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.json.simple.JSONObject;
 
 import myhomeaudio.server.client.Client;
-import myhomeaudio.server.locations.layout.NodeSignalBoundary;
+import myhomeaudio.server.locations.layout.NodeSignature;
 import myhomeaudio.server.node.Node;
 
 public class DatabaseClient extends DatabaseObject<Client> {
@@ -18,7 +18,7 @@ public class DatabaseClient extends DatabaseObject<Client> {
 
 	private int loggedUserId;
 
-	private ArrayList<NodeSignalBoundary> nodeSignatures;
+	private ArrayList<NodeSignature> nodeSignatures;
 
 	public DatabaseClient(int id, Client client) {
 		super(id, new Client(client));
@@ -94,20 +94,24 @@ public class DatabaseClient extends DatabaseObject<Client> {
 	public Node getClosestNode() {
 		return closestNode;
 	}
+	
+	public void setClosestNode(Node closestNode){
+		this.closestNode = closestNode;
+	}
 
 	public void updateLocation(Node node) {
 		closestNode = new Node(node);
 	}
 
-	public ArrayList<NodeSignalBoundary> getNodeSignatures() {
+	public ArrayList<NodeSignature> getNodeSignatures() {
 		if(nodeSignatures == null){
 			return null;
 		}
-		return new ArrayList<NodeSignalBoundary>(nodeSignatures);
+		return new ArrayList<NodeSignature>(nodeSignatures);
 	}
 
-	public void setNodeSignatures(ArrayList<NodeSignalBoundary> nodeSignatures) {
-		this.nodeSignatures = new ArrayList<NodeSignalBoundary>(nodeSignatures);
+	public void setNodeSignatures(ArrayList<NodeSignature> nodeSignatures) {
+		this.nodeSignatures = new ArrayList<NodeSignature>(nodeSignatures);
 	}
 
 	/**

@@ -15,17 +15,17 @@ import myhomeaudio.server.node.Node;
  * 
  *
  */
-public class NodeSignalBoundary implements JSONAware {
+public class NodeSignature implements JSONAware {
 
 	private final int id; // node within room
 	private ArrayList<NodeSignalRange> foundNodes;
 
-	public NodeSignalBoundary(int i) {
+	public NodeSignature(int i) {
 		this.foundNodes = new ArrayList<NodeSignalRange>();
 		this.id = i;
 	}
 
-	public NodeSignalBoundary(int id, ArrayList<NodeSignalRange> nsr) {
+	public NodeSignature(int id, ArrayList<NodeSignalRange> nsr) {
 		this.foundNodes = nsr;
 		this.id = id;
 	}
@@ -67,7 +67,7 @@ public class NodeSignalBoundary implements JSONAware {
 	}
 
 	/**
-	 * Return current NodeSignalBoundary node id
+	 * Return current NodeSignature node id
 	 * @return int Node id
 	 */
 	public int getNodeId() {
