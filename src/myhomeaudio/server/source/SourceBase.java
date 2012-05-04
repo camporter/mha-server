@@ -38,4 +38,10 @@ public class SourceBase implements Source {
 		return null;
 	}
 
+	@Override
+	public byte[] getData(int descriptorId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -104,6 +104,7 @@ public class ClientHelper extends Helper implements HelperInterface, StatusCode 
 
 					JSONArray locations = (JSONArray) jsonRequest
 							.get("locations");
+					Integer streamId = ((Long) jsonRequest.get("stream")).intValue();
 					Iterator<JSONObject> i = locations.iterator();
 
 					ArrayList<DeviceObject> devices = new ArrayList<DeviceObject>(
@@ -124,7 +125,7 @@ public class ClientHelper extends Helper implements HelperInterface, StatusCode 
 					// Pass off the session and DeviceObject list to the
 					// ClientManager
 					if (cm.updateClientLocation(
-							(String) jsonRequest.get("session"), devices)) {
+							(String) jsonRequest.get("session"), devices, streamId)) {
 						body.put("status", STATUS_OK);
 						this.httpStatus = HttpStatus.SC_OK;
 					}

@@ -11,5 +11,6 @@ public interface Source {
 	public String getName();
 	public ArrayList<MediaDescriptor> getMediaList();
 	public MediaDescriptor getMedia(MediaDescriptor descriptor);
+	public byte[] getData(int descriptorId);
 	
 }

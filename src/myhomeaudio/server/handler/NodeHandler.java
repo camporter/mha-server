@@ -68,7 +68,7 @@ public class NodeHandler extends Thread {
 					
 					if (nm.addNode(newNode) == StatusCode.STATUS_OK) {
 						// Request some info from the node
-						nm.sendNodeCommand(NodeCommands.NODE_INFO, nodeSocket.getInetAddress()
+						nm.sendInfoCommand(nodeSocket.getInetAddress()
 								.getHostAddress(), "");
 					}
 

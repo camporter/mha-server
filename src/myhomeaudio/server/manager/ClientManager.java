@@ -353,9 +353,9 @@ public class ClientManager implements StatusCode {
 	 * @return Whether the operation completed successfully.
 	 */
 	public synchronized boolean updateClientLocation(String sessionId,
-			ArrayList<DeviceObject> devices) {
+			ArrayList<DeviceObject> devices, int streamId) {
 		DatabaseClient databaseClient = getClientBySession(sessionId);
-
+		StreamManager sm = StreamManager.getInstance();
 		Triangulation tri = new Triangulation();
 		Node closestNode = tri.findLocation(
 				databaseClient.getNodeSignatures(), devices);
@@ -376,6 +376,8 @@ public class ClientManager implements StatusCode {
 					+ closestNode.getName());
 			databaseClient.setClosestNode(closestNode);
 		}
+		
+		System.out.println(". Stream: " +sm.getStream(streamId));
 
 		return updateClientToDB(databaseClient);
 	}

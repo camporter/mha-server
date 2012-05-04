@@ -87,6 +87,9 @@ public class DatabaseStream extends DatabaseObject<Stream> implements JSONAware 
 
 	public MediaDescriptor getCurrentMedia() {
 		// TODO Auto-generated method stub
+		if (currentMedia == null) {
+			return null;
+		}
 		return new MediaDescriptor(currentMedia);
 	}
 	

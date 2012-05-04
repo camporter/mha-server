@@ -233,23 +233,19 @@ public class NodeManager implements NodeCommands, StatusCode {
 		return null;
 	}
 
-	/**
-	 * Sends commands from the server to the node
-	 * 
-	 * @param command
-	 *            The command the server wants to send to the node
-	 * @param ipAddress
-	 *            The IP address of the node to send the command to
-	 * @param data
-	 *            Necessary data the node would need to execute the command
-	 */
-	public synchronized void sendNodeCommand(int command, String ipAddress,
-			String data) {
+	
+	public synchronized void sendPlayCommand(String ipAddress, byte[] data) {
 		NodeWorker worker = new NodeWorker();
 
-		worker.setRequestData(command, ipAddress, data);
+		worker.setPlayCommand(ipAddress, data);
 		worker.start();
+	}
+	
+	public synchronized void sendInfoCommand(String ipAddress, String data) {
+		NodeWorker worker = new NodeWorker();
 
+		worker.setInfoCommand(ipAddress, data);
+		worker.start();
 	}
 
 	/*

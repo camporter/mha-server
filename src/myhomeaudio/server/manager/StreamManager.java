@@ -12,6 +12,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import myhomeaudio.server.database.Database;
+import myhomeaudio.server.database.object.DatabaseClient;
 import myhomeaudio.server.database.object.DatabaseNode;
 import myhomeaudio.server.database.object.DatabaseStream;
 import myhomeaudio.server.http.StatusCode;
@@ -235,6 +236,10 @@ public class StreamManager implements StatusCode {
 		}
 		return null;
 	}
+	
+	public DatabaseStream getStream(int id) {
+		return new DatabaseStream(getStreamById(id));
+	}
 
 	private DatabaseStream getStreamById(int streamId) {
 		for (Iterator<DatabaseStream> i = this.streamList.iterator(); i
@@ -344,8 +349,20 @@ public class StreamManager implements StatusCode {
 	}
 
 	public synchronized int streamPlay(Integer streamId, Integer sourceId,
-			MediaDescriptor media) {
-		return -1;
+			Integer descriptorId, String sessionId) {
+		NodeManager nm = NodeManager.getInstance();
+		ClientManager cm = ClientManager.getInstance();
+		
+		DatabaseClient client = cm.getClient(sessionId);
+		Source source = this.getSourceById(sourceId);
+
+		byte[] data = source.getData(descriptorId);
+		
+		Node node = client.getClosestNode();
+		
+		
+		nm.sendPlayCommand(node.getIpAddress(), data);
+		return 0;
 
 	}
 

@@ -42,11 +42,13 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 		JSONObject jsonRequest = (JSONObject) JSONValue.parse(data);
 
 		String method = uriSegments.get(1);
-
+		
+		String sessionId = (String) jsonRequest.get("session");
+		
 		// All of the Stream methods must have a session key
 		// Make sure the session key exists and is valid
 		if (jsonRequest.containsKey("session")
-				&& cm.isValidClient((String) jsonRequest.get("session"))) {
+				&& cm.isValidClient(sessionId)) {
 
 			if (method.equals("list")) {
 
@@ -112,8 +114,12 @@ public class StreamHelper extends Helper implements HelperInterface, StatusCode 
 				this.httpStatus = HttpStatus.SC_OK;
 
 			} else if (method.equals("play")) {
-
-				// Play a new media on a specific stream
+				
+				Integer streamId = ((Long) jsonRequest.get("stream")).intValue();
+				Integer sourceId = ((Long) jsonRequest.get("source")).intValue();
+				Integer descriptorId = ((Long) jsonRequest.get("media")).intValue();
+				
+				sm.streamPlay(streamId, sourceId, descriptorId, sessionId);
 
 			} else if (method.equals("media")) {
 

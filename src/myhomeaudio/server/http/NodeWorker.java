@@ -48,27 +48,22 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 	int command = -1;
 	String ipAddress;
 	String data;
+	byte[] byteData;
 
 	public NodeWorker() {
 
 	}
-
-	/**
-	 * Initializes NodeWorker to handle request to node
-	 * 
-	 * @param command
-	 *            Command for server to execute to node
-	 * @param ipAddress
-	 *            Address of node
-	 * @param data
-	 *            Data to be sent to the node
-	 */
-	synchronized public void setRequestData(int command, String ipAddress,
-			String data) {
-		this.command = command;
+	
+	public void setInfoCommand(String ipAddress, String data) {
+		this.command = NODE_INFO;
 		this.ipAddress = ipAddress;
 		this.data = data;
-		notify();
+	}
+	
+	public void setPlayCommand(String ipAddress, byte[] data) {
+		this.command = NODE_PLAY;
+		this.ipAddress = ipAddress;
+		this.byteData = data;
 	}
 
 	synchronized public void run() {

@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import myhomeaudio.server.media.descriptor.MediaDescriptor;
 import myhomeaudio.server.mp3.ID3v1;
@@ -93,6 +94,16 @@ public class FolderSource extends SourceBase implements Source {
 		return new ArrayList<MediaDescriptor>(mediaList);
 	}
 
+	public byte[] getData(int descriptorId) {
+		for (Iterator<MediaDescriptor> i = mediaList.iterator(); i.hasNext();) {
+			MediaDescriptor nextMedia = i.next();
+			if (nextMedia.id() == descriptorId) {
+				return getMediaData(nextMedia.location());
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Loads media file data into a byte array
 	 * 
