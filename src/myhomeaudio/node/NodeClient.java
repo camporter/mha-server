@@ -147,6 +147,10 @@ public class NodeClient {
 				outFile.close();
 				String command2 = "killall mplayer";
 				Process child2 = Runtime.getRuntime().exec(command2);
+				try {
+					Thread.sleep(250);
+				} catch (InterruptedException e) {
+				}
 				String command = "mplayer song.mp3";
 				Process child = Runtime.getRuntime().exec(command);
 

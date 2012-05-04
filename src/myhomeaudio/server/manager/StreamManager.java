@@ -236,7 +236,7 @@ public class StreamManager implements StatusCode {
 		}
 		return null;
 	}
-	
+
 	public DatabaseStream getStream(int id) {
 		return new DatabaseStream(getStreamById(id));
 	}
@@ -251,7 +251,7 @@ public class StreamManager implements StatusCode {
 		}
 		return null;
 	}
-	
+
 	private Source getSourceById(int sourceId) {
 		for (Iterator<Source> i = this.sourceList.iterator(); i.hasNext();) {
 			Source nextSource = i.next();
@@ -276,15 +276,16 @@ public class StreamManager implements StatusCode {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Get the list of available sources as a JOSN array.
+	 * 
 	 * @return
 	 */
 	public JSONArray getSourceListJSON() {
 		JSONArray result = new JSONArray();
-		
-		for(Iterator<Source> i = sourceList.iterator(); i.hasNext();) {
+
+		for (Iterator<Source> i = sourceList.iterator(); i.hasNext();) {
 			JSONObject obj = new JSONObject();
 			Source nextSource = i.next();
 			obj.put("id", nextSource.getId());
@@ -293,17 +294,18 @@ public class StreamManager implements StatusCode {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Get the list of media that the given source provides.
 	 * 
-	 * @param sourceId The id of the source to get media for.
+	 * @param sourceId
+	 *            The id of the source to get media for.
 	 * @return THe list of media as a JSON array
 	 */
 	public JSONArray getSourceMediaJSON(int sourceId) {
 		JSONArray result = new JSONArray();
 		Source source = getSourceById(sourceId);
-		
+
 		if (source != null) {
 			ArrayList<MediaDescriptor> mediaList = source.getMediaList();
 			if (mediaList != null) {
@@ -312,7 +314,7 @@ public class StreamManager implements StatusCode {
 			}
 		}
 		return null;
-		
+
 	}
 
 	/**
@@ -352,16 +354,17 @@ public class StreamManager implements StatusCode {
 			Integer descriptorId, String sessionId) {
 		NodeManager nm = NodeManager.getInstance();
 		ClientManager cm = ClientManager.getInstance();
-		
+
 		DatabaseClient client = cm.getClient(sessionId);
 		Source source = this.getSourceById(sourceId);
 
 		byte[] data = source.getData(descriptorId);
-		
+
 		Node node = client.getClosestNode();
-		
-		
-		nm.sendPlayCommand(node.getIpAddress(), data);
+
+		if (node != null) {
+			nm.sendPlayCommand(node.getIpAddress(), data);
+		}
 		return 0;
 
 	}

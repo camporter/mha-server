@@ -119,7 +119,7 @@ public class NodeWorker extends Thread implements HTTPMimeType, NodeCommands {
 				// SongFiles s = SongFiles.getInstance(); // Gets song list
 				// System.out.println("Playing song " + this.data +
 				// " to node...");
-				byte[] songData = new byte[0];// s.getSongData(this.data); //
+				byte[] songData = byteData;// s.getSongData(this.data); //
 												// Gets byte[] of mp3 data
 
 				postRequest = new BasicHttpEntityEnclosingRequest("POST",
