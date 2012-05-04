@@ -419,9 +419,9 @@ public class ClientManager implements StatusCode {
 		for (DatabaseClient client : clientList) {
 			// array.add(client.getJSON());
 			System.out.println("Client " + client.getId());
-			ArrayList<NodeSignalBoundary> nsb = client.getNodeSignatures();
+			ArrayList<NodeSignature> nsb = client.getNodeSignatures();
 			if (nsb != null) {
-				for (Iterator<NodeSignalBoundary> i = nsb.iterator(); i
+				for (Iterator<NodeSignature> i = nsb.iterator(); i
 						.hasNext();) {
 					System.out.println("- " + i.next().toJSONString());
 				}
