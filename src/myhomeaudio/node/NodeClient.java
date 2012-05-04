@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import myhomeaudio.server.discovery.DiscoverySearch;
 import myhomeaudio.server.http.helper.node.InfoHelper;
+import myhomeaudio.server.http.helper.node.PlayHelper;
 
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpEntity;
@@ -88,7 +89,7 @@ public class NodeClient {
 							new ResponseConnControl(), });
 
 			HttpRequestHandlerRegistry registry = new HttpRequestHandlerRegistry();
-			registry.register("play", new PlayRequestHandler());
+			registry.register("play", new PlayHelper());
 			registry.register("pause", new PauseRequestHandler());
 			registry.register("info", new InfoHelper());
 
@@ -145,13 +146,13 @@ public class NodeClient {
 				FileOutputStream outFile = new FileOutputStream("song.mp3");
 				outFile.write(entityContent);
 				outFile.close();
-				String command2 = "killall mplayer";
+				String command2 = "killall mplayer &";
 				Process child2 = Runtime.getRuntime().exec(command2);
 				try {
-					Thread.sleep(250);
+					Thread.sleep(500);
 				} catch (InterruptedException e) {
 				}
-				String command = "mplayer song.mp3";
+				String command = "mplayer song.mp3 &";
 				Process child = Runtime.getRuntime().exec(command);
 
 			}

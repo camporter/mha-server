@@ -36,7 +36,14 @@ public class PlayHelper extends ByteHelper implements HelperInterface,
 			outFile.close();
 			
 			Process child = Runtime.getRuntime().exec("killall mplayer");
-			Process child2 = Runtime.getRuntime().exec("mplayer song.mp3");
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}
+
+			System.out.println("Playing song...");
+			Process child2 = Runtime.getRuntime().exec("mplayer -really-quiet song.mp3 > ./null");
 			body.put("status", STATUS_OK);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
